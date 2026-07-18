@@ -18,13 +18,6 @@ const nextConfig: NextConfig = {
     experimental: {
         viewTransition: true,
     },
-    redirects: async () => [
-        {
-            source: "/termos-de-servico.html",
-            destination: "/termos-de-servico",
-            permanent: true,
-        },
-    ],
 }
 
 const withNextIntl = createNextIntlPlugin()

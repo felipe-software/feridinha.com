@@ -240,7 +240,7 @@ export default function UploadBox() {
                         <p>
                             {t.rich("uploadAgreement", {
                                 terms: (chunks) => (
-                                    <a href="/termos-de-servico" target="_blank">
+                                    <a href="/termos-de-servico.html" target="_blank">
                                         {chunks}
                                     </a>
                                 ),

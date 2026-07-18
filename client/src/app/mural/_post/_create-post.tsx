@@ -150,7 +150,7 @@ export const CreatePostForm = ({ communityId }: { communityId: string }) => {
                 <p className="text-white">
                     {t.rich("createPostAgreement", {
                         terms: (chunks) => (
-                            <a href="/termos-de-servico" target="_blank" className="text-dracula-cyan">
+                            <a href="/termos-de-servico.html" target="_blank" className="text-dracula-cyan">
                                 {chunks}
                             </a>
                         ),
