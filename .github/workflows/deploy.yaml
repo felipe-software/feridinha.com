@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Cache cloudflared
-        uses: actions/cache@v3
+        uses: actions/cache@v6
         with:
           path: ~/.cloudflared
           key: cloudflared-${{ env.CLOUDFLARED_VERSION }}-${{ runner.os }}
