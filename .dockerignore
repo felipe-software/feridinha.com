@@ -1,0 +1,9 @@
+client/node_modules
+client/.next
+client/dist
+
+api/node_modules
+api/logs
+
+.git
+.github

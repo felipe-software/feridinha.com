@@ -1,0 +1,42 @@
+.container {
+
+}
+
+@media (max-width: 750px) {
+    .container {
+        margin: 3rem 1.5rem 8rem 1.5rem;
+        padding: 2rem 1rem;
+    }
+}
+
+.container .content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    min-height: fit-content;
+    min-width: calc(100% - 10rem);
+    gap: 1.5rem;
+}
+
+.container .content * {
+    z-index: 3;
+}
+
+.container .content .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.container .content .picture {
+    /* position: absolute; */
+    height: 300px;
+    transform: scaleX(-1);
+    right: 2.5rem;
+    z-index: 0;
+}
+
+.container .content a {
+    color: #f8f8f8;
+}
+

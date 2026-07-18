@@ -1,0 +1,329 @@
+.card {
+    position: absolute;
+    height: 10rem;
+    width: 7rem;
+    transition: ease 0.5s;
+    border-radius: 1rem;
+    background-color: rgba(61, 63, 81, 0.15);
+    backdrop-filter: blur(15px);
+    overflow: hidden;
+    padding: 1rem;
+    box-sizing: border-box;
+    justify-content: flex-start;
+    gap: 1rem;
+    cursor: auto;
+    z-index: 99999;
+    pointer-events: all;
+}
+
+.card .card-icon {
+    font-family: "Material Symbols Rounded";
+    font-size: 4rem;
+    margin: 0.5rem;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 48;
+    transition: ease 0.5s !important;
+    position: relative;
+    transition: opacity 0.3s ease;
+    color: #f8f8f8;
+    user-select: none;
+}
+
+.card .card-icon-after {
+    font-family: "Material Symbols Rounded";
+    font-size: 4rem;
+    position: absolute !important;
+    margin-left: 1.5rem;
+    left: 0;
+    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
+    opacity: 0%;
+    transition: opacity 0.3s ease;
+    color: var(--foreground);
+    user-select: none;
+}
+
+.card h2 {
+    color: #f8f8f2;
+    /* font-family: "Work Sans", sans-serif; */
+    font-weight: 500;
+    width: 13rem;
+    font-size: 1.5rem;
+    min-width: 13rem;
+    word-wrap: break-word;
+    transform: translateY(4rem);
+    transition: ease 1s !important;
+    margin: unset;
+    opacity: 0%;
+    
+}
+
+.card-person-add {
+    left: 5rem;
+    top: -12rem;
+    animation: card-float-1 6s cubic-bezier(0.46, 0.03, 0.52, 0.96) 0s infinite normal forwards;
+}
+
+.card-person-add:hover,
+.card-person-add.active {
+    height: 13.5rem;
+}
+
+.card-person-add .card-icon-after {
+    color: #8be9fd;
+}
+
+.card-dns {
+    right: -3rem;
+    top: -5rem;
+    animation: card-float-2 5s cubic-bezier(0.46, 0.03, 0.52, 0.96) 0s infinite normal forwards;
+}
+
+.card-dns:hover,
+.card-dns.active {
+    height: 15.5rem;
+}
+
+.card-dns .card-icon-after {
+    color: #ffb86c;
+}
+
+.card-data-object {
+    bottom: -5rem;
+    left: -3rem;
+    animation: card-float-3 6s cubic-bezier(0.46, 0.03, 0.52, 0.96) 0s infinite normal forwards;
+}
+
+.card-data-object:hover,
+.card-data-object.active {
+    height: 13.5rem;
+}
+
+.card-data-object .card-icon-after {
+    color: #50fa7b;
+}
+
+.card-auto-awesome {
+    right: 2rem;
+    bottom: -5rem;
+    animation: card-float-4 5s cubic-bezier(0.46, 0.03, 0.52, 0.96) 0s infinite normal forwards;
+}
+
+.card-auto-awesome:hover,
+.card-auto-awesome.active {
+    height: 13.5rem;
+}
+
+.card-auto-awesome .card-icon-after {
+    color: #ff79c6;
+}
+
+.card:hover,
+.card.active {
+    position: absolute;
+    width: 15rem;
+}
+
+.card:hover span.card-icon-after,
+.card.active span.card-icon-after {
+    opacity: 100%;
+}
+
+.card:hover span.card-icon,
+.card.active span.card-icon {
+    opacity: 0;
+}
+
+.card:hover > h2,
+.card.active > h2 {
+    transform: translateY(0rem);
+    transition: cubic-bezier(0, 0.78, 0.05, 0.97) all 1s !important;
+    opacity: 100%;
+}
+
+@keyframes card-float-1 {
+    0% {
+        transform: translateY(3rem) scale(1);
+    }
+    50% {
+        transform: translateY(0rem) scale(1.05);
+    }
+    100% {
+        transform: translateY(3rem) scale(1);
+    }
+}
+
+@keyframes card-float-2 {
+    0% {
+        transform: translateY(1rem) scale(1.05);
+    }
+    50% {
+        transform: translateY(3rem) scale(1);
+    }
+    100% {
+        transform: translateY(1em) scale(1.05);
+    }
+}
+
+@keyframes card-float-3 {
+    0% {
+        transform: translateY(2rem) scale(1);
+    }
+    50% {
+        transform: translateY(-1rem) scale(0.95);
+    }
+    100% {
+        transform: translateY(2rem) scale(1);
+    }
+}
+
+@keyframes card-float-4 {
+    0% {
+        transform: translateY(4rem) scale(1);
+    }
+    50% {
+        transform: translateY(1rem) scale(1.05);
+    }
+    100% {
+        transform: translateY(4rem) scale(1);
+    }
+}
+
+@media (max-width: 830px) {
+    .card {
+        backdrop-filter: none;
+        transform: none !important;
+    }
+
+    .card-person-add {
+        left: 0rem;
+        top: -14.5rem;
+        height: 13.5rem;
+        width: 15rem;
+        animation: none !important;
+    }
+    .card-person-add h2 {
+        transform: translateY(0rem);
+        transition: cubic-bezier(0, 0.78, 0.05, 0.97) all 1s !important;
+        opacity: 100%;
+    }
+    .card-person-add span {
+        opacity: 0;
+    }
+    .card-person-add span.card-icon-after {
+        opacity: 100%;
+        color: #8be9fd;
+    }
+
+    .card-dns {
+        right: 0rem;
+        top: -16.5rem;
+        animation: none;
+        height: 15.5rem;
+        width: 15rem;
+        animation: none !important;
+        color: #ffb86c;
+    }
+    .card-dns h2 {
+        transform: translateY(0rem);
+        opacity: 100%;
+    }
+    .card-dns span {
+        opacity: 0;
+    }
+    .card-dns span.card-icon-after {
+        opacity: 100%;
+    }
+
+    .card-data-object {
+        bottom: -14.5rem;
+        left: 0rem;
+        animation: none !important;
+        height: 13.5rem;
+        width: 15rem;
+        color: #50fa7b;
+    }
+    .card-data-object h2 {
+        transform: translateY(0rem);
+        opacity: 100%;
+    }
+    .card-data-object span {
+        opacity: 0;
+    }
+    .card-data-object span.card-icon-after {
+        opacity: 100%;
+    }
+
+    .card-auto-awesome {
+        right: 0rem;
+        bottom: -14.5rem;
+        animation: none !important;
+        height: 13.5rem;
+        color: #ff79c6;
+        width: 15rem;
+    }
+    .card-auto-awesome h2 {
+        transform: translateY(0rem);
+        opacity: 100%;
+    }
+    .card-auto-awesome span {
+        opacity: 0;
+    }
+    .card-auto-awesome span.card-icon-after {
+        opacity: 100%;
+    }
+}
+
+@media (max-width: 624px) {
+    .card:hover {
+        width: 100% !important;
+    }
+    .card h2 {
+        font-size: 1.2rem;
+    }
+    .card-person-add {
+        left: 50%;
+        transform: translateX(-50%) !important;
+        top: -10.5rem;
+        height: fit-content !important;
+        width: 100%;
+        max-width: 50ch;
+    }
+    .card-person-add h2 {
+        width: 100%;
+    }
+
+    .card-dns {
+        right: 50%;
+        transform: translateX(50%) !important;
+        top: -21rem;
+        height: fit-content !important;
+        width: 100%;
+        max-width: 50ch;
+    }
+    .card-dns h2 {
+        width: 100%;
+    }
+
+    .card-data-object {
+        left: 50%;
+        transform: translateX(-50%) !important;
+        bottom: -10.5rem;
+        height: fit-content !important;
+        width: 100%;
+        max-width: 50ch;
+    }
+    .card-data-object h2 {
+        width: 100%;
+    }
+
+    .card-auto-awesome {
+        right: 50%;
+        transform: translateX(50%) !important;
+        bottom: -21rem;
+        height: fit-content !important;
+        width: 100%;
+        max-width: 50ch;
+    }
+    .card-auto-awesome h2 {
+        width: 100%;
+    }
+}

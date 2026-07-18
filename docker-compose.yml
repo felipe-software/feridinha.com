@@ -1,0 +1,81 @@
+services:
+  feridinha-api:
+    build: ./api
+    pull_policy: never
+    env_file:
+      - path: ./api/.env
+        required: false
+      - path: ./.env
+        required: false
+    container_name: feridinha-api
+    ports:
+      - ${PORT-3000}:${PORT-3000}
+    networks:
+      - feridinha-network
+    depends_on:
+      feridinha-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  feridinha-db:
+    container_name: feridinha-db
+    restart: unless-stopped
+    image: postgres:latest
+    ports:
+      - 33255:5432
+    env_file: 
+      - path: ./api/.env
+        required: false
+      - path: ./.env
+        required: false
+    environment:
+      POSTGRES_HOST: feridinha-db
+      POSTGRES_DB: feridinha-dot-com
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - feridinha-network
+    volumes:
+      - feridinha-db-data:/var/lib/postgresql
+    healthcheck:
+      test: "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+      retries: 15
+      timeout: 1s
+      interval: 1s
+      start_period: 5s
+
+  feridinha-client:
+    build:
+      context: .
+      dockerfile: ./client/Dockerfile
+    pull_policy: never
+    env_file: 
+      - path: ./client/.env
+        required: false
+      - path: ./.env
+        required: false
+    container_name: feridinha-client
+    ports:
+      - ${CLIENT_PORT:-3001}:${PORT:-3000}
+    networks:
+      - external-network
+    restart: unless-stopped
+  feridinha-valkey:
+    image: valkey/valkey:latest
+    container_name: feridinha-valkey
+    restart: unless-stopped
+    ports:
+      - 6379:6379
+    networks:
+      - feridinha-network
+      - external-network
+
+networks:
+  feridinha-network:
+    name: feridinha-network
+  external-network:
+    name: external-network
+    driver: bridge
+
+volumes:
+  feridinha-db-data:

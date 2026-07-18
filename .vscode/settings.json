@@ -1,0 +1,6 @@
+{
+    "github-actions.workflows.pinned.workflows": [
+        ".github/workflows/deploy.yaml"
+    ],
+    "prisma.pinToPrisma6": true
+}

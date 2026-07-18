@@ -1,0 +1,30 @@
+{
+    "compilerOptions": {
+        "lib": ["ESNext"],
+        "module": "esnext",
+        "target": "esnext",
+        "moduleResolution": "bundler",
+        "moduleDetection": "force",
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
+        "composite": true,
+        "strict": true,
+        "alwaysStrict": true,
+        "strictNullChecks": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "jsx": "react-jsx",
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowJs": false,
+        "noImplicitAny": true,
+        
+        "types": [
+            "bun-types" // add Bun global
+        ],
+        "paths": {
+            "@/*": ["./src/*"],
+            "api-types": ["./api-types/api-types.d.ts"]
+        }
+    }
+}

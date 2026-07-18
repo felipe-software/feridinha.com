@@ -1,0 +1,21 @@
+name: Run project test
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install Docker Compose
+        uses: docker/setup-compose-action@v1
+      - uses: actions/checkout@v4.2.2
+
+      - name: Install Bun.sh
+        uses: oven-sh/setup-bun@v2
+
+      - name: Run API tests
+        run: |
+          cd api
+          bun i
+          bun run test

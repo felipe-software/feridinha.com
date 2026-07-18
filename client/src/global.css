@@ -1,0 +1,394 @@
+@layer theme, base, components, utilities;
+
+@import "tailwindcss/theme.css" layer(theme);
+/* @import "tailwindcss/preflight.css" layer(base); */
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@font-face {
+    font-family: "Material Symbols Rounded";
+    src: url("/my_icons.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+}
+
+:root {
+    --border-radius-l: 1rem;
+    --border-radius-m: calc(var(--border-radius-l) / 2);
+    --border-radius-s: calc(var(--border-radius-m) / 1.5);
+    --border-radius-ss: calc(var(--border-radius-s) / 1.25);
+    --hover-transition: cubic-bezier(0, 1.18, 0.4, 0.93);
+    --foreground: #f8f8f8;
+    --pink-gradient: #ff80bf;
+    --purple-gradient: #9580ff;
+    --base-dark-transparent: rgb(17, 18, 24, 0.95);
+    --base-dark: rgb(17, 18, 24);
+    --base: rgb(24, 25, 34);
+    --navbar-height: 80px;
+
+    --dracula-red: #ff5555;
+    --dracula-cyan: #8be9fd;
+    --dracula-green: #50fa7b;
+    --dracula-yellow: #f1fa8c;
+    --dracula-purple: #bd93f9;
+    --dracula-pink: #ff79c6;
+    --dracula-orange: #080602;
+    --dracula-gray: #44475a;
+    --dracula-base: #282a36;
+    --dracula-orange: #FFB86C;
+    --nav-highlight: rgb(189, 147, 249);
+    --global-font-size: 16px;
+}
+
+@theme {
+    --color-dracula-red: #ff5555;
+    --color-dracula-cyan: #8be9fd;
+    --color-dracula-green: #50fa7b;
+    --color-dracula-yellow: #f1fa8c;
+    --color-dracula-orange: #FFB86C;
+    --color-dracula-purple: #bd93f9;
+    --color-dracula-pink: #ff79c6;
+    --color-dracula-orange: #080602;
+    --color-dracula-gray: #44475a;
+    --color-dracula-base: #282a36;
+    --color-base-dark-transparent: rgb(17, 18, 24, 0.95);
+    --color-base-dark: rgb(17, 18, 24);
+    --color-base: rgb(24, 25, 34);
+    --color-pink-gradient: #ff80bf;
+    --color-purple-gradient: #9580ff;
+}
+
+html {
+    font-size: var(--global-font-size);
+    scrollbar-gutter: stable;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background-color: var(--base);
+    overscroll-behavior-x: none;
+}
+
+body {
+    min-height: 100vh;
+    font-family: inherit;
+}
+
+button,
+input,
+textarea,
+select {
+    font-family: inherit;
+}
+
+input::placeholder,
+textarea::placeholder {
+    font-family: inherit;
+}
+
+/* Your selection box styling stays the same */
+.selection-area {
+    background: rgba(149, 128, 255, 0.3);
+    outline: 2px solid #9580ff;
+    border-radius: 0.1em;
+    z-index: 50;
+}
+
+#root {
+}
+
+@media (max-width: 1500px) {
+    :root {
+        --global-font-size: 14px;
+    }
+}
+
+@media (max-width: 1280px) {
+    :root {
+        --global-font-size: 12px;
+    }
+}
+
+button.reset-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+.material-icon {
+    user-select: none;
+    font-family: "Material Symbols Rounded";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 2rem;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: "liga";
+    font-feature-settings: "liga";
+    -webkit-font-smoothing: antialiased;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.material-symbols-rounded {
+    font-family: "Material Symbols Rounded";
+    font-display: block !important;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: "liga";
+    font-feature-settings: "liga";
+    -moz-font-feature-settings: "liga";
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+}
+
+::-moz-selection {
+    background: rgba(98, 114, 164, 0.8);
+    color: var(--foreground);
+}
+
+::selection {
+    background: rgba(98, 114, 164, 0.8);
+    color: var(--foreground);
+}
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 0px;
+    z-index: 999;
+}
+
+button.reset {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.spin-animation {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: rgb(17, 18, 24, 0.95);
+    border-radius: var(--border-radius-ss);
+    z-index: 999;
+    border-radius: 0;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #25262e;
+    border-radius: var(--border-radius-m);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #25262e;
+}
+
+.pretty-text {
+    background: linear-gradient(
+            79.23deg,
+            rgb(255, 128, 191) -2.25%,
+            rgb(149, 128, 255)
+        )
+        padding-box text;
+    -webkit-text-fill-color: transparent;
+}
+
+.pretty-text-animated {
+    background: linear-gradient(
+        90deg,
+        rgb(255, 128, 191) 0%,
+        rgb(149, 131, 255) 50%,
+        rgb(255, 148, 201) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: gradient 10s linear infinite reverse;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% center;
+    }
+    100% {
+        background-position: -200% center;
+    }
+}
+
+@keyframes AnimatedBackground {
+    0% {
+        background-position: 15% 0%;
+    }
+    50% {
+        background-position: 86% 100%;
+    }
+    100% {
+        background-position: 15% 0%;
+    }
+}
+
+.toast-notification {
+    background-color: var(--base);
+    box-shadow: 0px 0px 2px 1px rgba(255, 255, 255, 0.082);
+}
+
+svg.notification-icon {
+    width: 2rem;
+    height: 2rem;
+    stroke-width: 2.1;
+}
+
+* {
+    --toastify-color-progress-info: var(--dracula-cyan) !important;
+    --toastify-color-progress-error: var(--dracula-red) !important;
+    --toastify-color-progress-success: var(--dracula-green) !important;
+    --toastify-color-progress-warning: var(--dracula-yellow) !important;
+}
+
+svg.notification-info {
+    color: var(--dracula-cyan);
+}
+
+svg.notification-error {
+    color: var(--dracula-red);
+}
+
+svg.notification-success {
+    color: var(--dracula-green);
+}
+
+svg.notification-warning {
+    color: var(--dracula-yellow);
+}
+
+.Toastify__close-button {
+    color: var(--dracula-gray);
+}
+
+.tippy-content {
+    padding: 0.25rem !important;
+}
+
+.erm-mansory-container-selection {
+    /* background-color: red; */
+    z-index: 1000;
+}
+
+/* View Transitions */
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slide-from-right {
+    from {
+        transform: translateX(30px);
+    }
+}
+
+@keyframes slide-to-left {
+    to {
+        transform: translateX(-30px);
+    }
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0px);
+    }
+}
+
+@keyframes page-exit {
+    from {
+        opacity: 1;
+
+        transform: translateY(0px);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(0px);
+        visibility: hidden;
+    }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation: none;
+}
+
+
+
+::view-transition-old(page-content) {
+    /* display: none; */
+}
+
+/* Anima apenas o conteúdo principal */
+::view-transition-old(page-content) {
+    animation: page-exit 210ms;
+    animation-fill-mode: forwards;
+}
+::view-transition-new(page-content) {
+    animation: page-enter 210ms;
+}
+
+::view-transition {
+    pointer-events: none;
+}
+
+html.is-transitioning,
+html.is-transitioning body {
+    overflow: hidden;
+}

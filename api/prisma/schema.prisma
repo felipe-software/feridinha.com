@@ -1,0 +1,197 @@
+generator client {
+    provider      = "prisma-client-js"
+    binaryTargets = ["native"]
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum DeleteCodeVersion {
+    LEGACY
+    NEW
+}
+
+model Upload {
+    name      String  @id @unique
+    size      Int
+    mimeType  String
+    userAgent String?
+    user      User?   @relation(fields: [userId], references: [id])
+    userId    String?
+
+    Album   Album?  @relation(fields: [albumId], references: [id])
+    albumId String?
+
+    deleteCode        String            @unique
+    deleteCodeVersion DeleteCodeVersion
+    deletedAt         DateTime?
+
+    accessDates DateTime[] @default([])
+    createdAt   DateTime   @default(now())
+}
+
+model ApiKey {
+    id     String @id @unique @default(uuid())
+    secret String @unique
+
+    name   String
+    user   User    @relation(fields: [userId], references: [id])
+    userId String
+    tag    String?
+
+    lastUsedAt DateTime?
+    createdAt  DateTime  @default(now())
+}
+
+model Album {
+    id        String    @id @unique
+    name      String
+    user      User      @relation(fields: [userId], references: [id])
+    userId    String
+    deletedAt DateTime?
+
+    uploads Upload[]
+    views   DateTime[] @default([])
+    viewCount Int      @default(0)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+    ADMIN
+    USER
+    ANONYMOUS
+}
+
+model User {
+    id           String   @id @unique @default(uuid())
+    twitchId     String   @unique
+    name         String
+    profileImage String
+    role         UserRole @default(USER)
+    color        String   @default("#ffffff")
+
+    albums       Album[]
+    uploads      Upload[]
+    uploadCount  Int           @default(0)
+    apiKeys      ApiKey[]
+    achievements Achievement[]
+
+    sessions String[] @default([])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    review Review?
+
+    muralPosts    MuralPost[]     @relation("postCreator")
+    approvedPosts MuralPost[]     @relation("postModerator")
+    muralVotes    MuralPostVote[]
+
+    moderatedCommunities MuralCommunity[] @relation("moderators")
+    memberCommunities    MuralCommunity[] @relation("members")
+    createdCommunities   MuralCommunity[] @relation("creator")
+}
+
+model Achievement {
+    id                String   @id @unique
+    name              String
+    description       String
+    hiddenDescription String?
+    usersIds          String[]
+    users             User[]
+    secretUrl         String?
+    publicUrl         String?
+}
+
+model Review {
+    id         String   @id @unique @default(uuid())
+    content    String
+    suggestion String?
+    userId     String   @unique
+    user       User     @relation(fields: [userId], references: [id])
+    createdAt  DateTime @default(now())
+
+    hasBeenApproved   Boolean   @default(false)
+    approvedAt        DateTime?
+    notApprovedReason String?
+}
+
+model MuralCommunity {
+    id          String  @id @unique
+    name        String  @unique
+    description String?
+
+    moderatorIds String[]
+    moderators   User[]   @relation("moderators")
+
+    memberIds String[]
+    members   User[]   @relation("members")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    posts MuralPost[]
+
+    createdById String?
+    createdBy   User?   @relation("creator", fields: [createdById], references: [id])
+}
+
+enum MuralPostOrigin {
+    REDDIT
+    INSTAGRAM
+    TWITTER
+    TIKTOK
+    FERIDINHA
+}
+
+enum MuralPostType {
+    VIDEO
+    IMAGE
+}
+
+model MuralPost {
+    id               String          @id @unique @default(uuid())
+    bareContent      String
+    processedContent String?
+    contentType      MuralPostType
+    contentOrigin    MuralPostOrigin
+
+    title       String?
+    description String?
+
+    communityId String
+    community   MuralCommunity @relation(fields: [communityId], references: [id])
+
+    upvotes Int @default(0)
+
+    votes MuralPostVote[]
+
+    userId String
+    user   User   @relation(name: "postCreator", fields: [userId], references: [id])
+
+    createdAt         DateTime  @default(now())
+    updatedAt         DateTime  @updatedAt
+    aprovedAt         DateTime?
+    approvedById      String?
+    approvedBy        User?     @relation(name: "postModerator", fields: [approvedById], references: [id])
+    notApprovedReason String?
+}
+
+model MuralPostVote {
+    id     String @id @unique @default(uuid())
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    postId String
+    post   MuralPost @relation(fields: [postId], references: [id])
+
+    vote String
+
+    createdAt DateTime @default(now())
+
+    @@unique([userId, postId])
+}

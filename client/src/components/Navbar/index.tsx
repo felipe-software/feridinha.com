@@ -1,0 +1,201 @@
+"use client"
+
+import { AppLocale } from "@/i18n/config"
+import { getStoredLocale, setStoredLocale } from "@/i18n/client"
+import LoginButton from "@/components/LoginButton"
+import { LogoText } from "@/components/LogoText"
+import { BrainMadeIcon } from "@/components/Navbar/BrainMadeIcon"
+import { LocaleSelector } from "@/components/Navbar/LocaleSelector"
+import Nav from "@/components/Navbar/styles"
+import { OpenSourceBadge } from "@/components/OpenSourceBadge"
+import Tooltip from "@/components/Tooltip"
+import useUserData from "@/hooks/useUserData"
+import { UserData } from "@/hooks/useUserDataStore"
+import { AnimatePresence, motion } from "motion/react"
+import { useLocale, useTranslations } from "next-intl"
+// import Link from "next/link"
+import { Link } from "next-view-transitions"
+import { usePathname, useRouter } from "next/navigation"
+import { memo, useEffect, useState } from "react"
+import styled from "styled-components"
+
+const LinkBase = ({
+    path,
+    children,
+    aProps,
+}: {
+    path: string
+    children: string
+    aProps?: React.AnchorHTMLAttributes<HTMLAnchorElement>
+}) => {
+    const router = useRouter()
+    const pathname = usePathname()
+    const isActive = pathname === path || pathname.startsWith(path + "/")
+
+    return (
+        <Link
+            onMouseEnter={() => {
+                router.prefetch(path)
+            }}
+            prefetch={true}
+            href={path}
+            className={isActive ? "active" : ""}
+            {...aProps}
+        >
+            {children}
+            {isActive && (
+                <motion.span className={"underline_active"} layoutId="underline_active" transition={{}}></motion.span>
+            )}
+        </Link>
+    )
+}
+
+function NavLinks({
+    userData,
+    isLoading,
+    isMuralAvailable,
+}: {
+    userData?: UserData
+    isLoading?: boolean
+    isMuralAvailable?: boolean
+}) {
+    const t = useTranslations("Nav")
+
+    return (
+        <>
+            {isMuralAvailable && <LinkBase path="/mural">{t("mural")}</LinkBase>}
+            <LinkBase path="/">{t("upload")}</LinkBase>
+            <LinkBase path="/tutorial">{t("tutorial")}</LinkBase>
+            <LinkBase path="/faq">{t("faq")}</LinkBase>
+            <a href="https://sync.feridinha.com" target="_blank">
+                Sync
+            </a>
+
+            {!userData && !isLoading && <LoginButton />}
+            {(isLoading || userData) && <LinkBase path="/dashboard">{t("dashboard")}</LinkBase>}
+        </>
+    )
+}
+
+const BrainMadeWrapper = styled.a`
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+
+    img {
+        transition: all 0.3s ease;
+    }
+
+    &:hover {
+        background-color: #ffffff;
+
+        img,
+        svg {
+            filter: invert(1);
+        }
+    }
+`
+
+function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
+    const [isMenuActive, setMenuActive] = useState(false)
+    const [isMobile, setIsMobile] = useState(false)
+    const pathname = usePathname()
+    const router = useRouter()
+    const locale = useLocale() as AppLocale
+    const t = useTranslations("Nav")
+
+    const user = useUserData()
+
+    const handleMenu = () => {
+        setMenuActive(!isMenuActive)
+    }
+
+    useEffect(() => {
+        const media = window.matchMedia("(max-width: 1100px)")
+        const onChange = () => {
+            setIsMobile(media.matches)
+        }
+        onChange()
+        media.addEventListener("change", onChange)
+        return () => {
+            media.removeEventListener("change", onChange)
+        }
+    }, [pathname])
+
+    useEffect(() => {
+        setMenuActive(false)
+    }, [pathname])
+
+    const handleLocaleChange = (targetLocale: AppLocale) => {
+        setStoredLocale(targetLocale)
+        document.documentElement.lang = targetLocale
+        router.refresh()
+    }
+
+    return (
+        <Nav>
+            <div className="locale-selector">
+                <LocaleSelector locale={locale || getStoredLocale()} onChange={handleLocaleChange} />
+            </div>
+            <Link href="/" className="logo">
+                <LogoText
+                    style={{ zIndex: 7, position: "relative" }}
+                    autoAnimate={true}
+                    autoAnimateTiming={10000}
+                    autoAnimateDelay={0}
+                >
+                    Feridinha.com™
+                </LogoText>
+            </Link>
+            <div className="description-container">
+                <OpenSourceBadge />
+                <Tooltip content={t("brainMade")} arrow={false} maxWidth={400}>
+                    <BrainMadeWrapper
+                        className="brain-made"
+                        style={{ display: "flex" }}
+                        href="https://brainmade.org/"
+                        target="blank"
+                    >
+                        <BrainMadeIcon />
+                        {/* <img
+                            src="/brain-made.svg"
+                            style={{ height: "1.5rem" }}
+                            height={24}
+                            alt="Brain made project"
+                        ></img> */}
+                    </BrainMadeWrapper>
+                </Tooltip>
+            </div>
+            {isMobile && (
+                <button className={"burgerMenu"} onClick={handleMenu}>
+                    <span className="notranslate material-symbols-rounded">menu</span>
+                </button>
+            )}
+            {!isMobile && (
+                <div className={"links"}>
+                    <NavLinks userData={user.data} isLoading={user.isLoading} isMuralAvailable={isMuralAvailable} />
+                </div>
+            )}
+            <AnimatePresence initial={false} mode="wait" onExitComplete={() => null}>
+                {/* {!isMobile && (
+                    <div className={"links"}>
+                        <NavLinks
+                            userData={user.data}
+                            isLoading={user.isLoading}
+                        />
+                    </div>
+                )} */}
+                {isMobile && isMenuActive && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key={2}>
+                        <div className={"menu"}>
+                            <NavLinks userData={user.data} isMuralAvailable={isMuralAvailable} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </Nav>
+    )
+}
+const NavBar = memo(NavBar_)
+export default NavBar
+export type { NavBar_ as NavBarProps }

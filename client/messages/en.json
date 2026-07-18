@@ -1,0 +1,350 @@
+{
+  "Metadata": {
+    "title": "Feridinha.com",
+    "description": "Upload files for free on Feridinha.",
+    "keywords": "file upload, file sharing, file hosting, free file upload, share files online, cloud storage, image upload, twitch upload, chatterino upload, sharex upload, feridinha",
+    "openGraphTitle": "Feridinha - Free File Upload",
+    "openGraphDescription": "Upload files for free. Fast, secure and free service."
+  },
+  "Common": {
+    "loading": "Loading...",
+    "back": "Back",
+    "visit": "Visit",
+    "viewAlbum": "View album",
+    "dashboard": "Dashboard",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "close": "Close",
+    "create": "Create",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "terms": "terms of service"
+  },
+  "Nav": {
+    "mural": "Wall",
+    "upload": "Upload",
+    "tutorial": "Integrations",
+    "faq": "FAQ",
+    "dashboard": "Dashboard",
+    "brainMade": "This project was created by a human being like you"
+  },
+  "Auth": {
+    "login": "Sign in",
+    "loginWithTwitch": "Sign in with Twitch",
+    "loginAgreement": "By signing in, you agree to our <terms>terms of service</terms>",
+    "loginButton": "LOGIN",
+    "mustLogin": "You must sign in to access this page",
+    "sessionEnded": "Your session was ended. Please sign in again",
+    "sessionExpired": "Your session expired. Please sign in again",
+    "sessionLoadError": "An unexpected error occurred while loading your session"
+  },
+  "Errors": {
+    "sessionExpired": "Your session expired",
+    "createPost": "Failed to create post",
+    "upvote": "Failed to register vote",
+    "addModerator": "Failed to add moderator",
+    "removeModerator": "Failed to remove moderator",
+    "invalidDeleteCode": "Invalid deletion code"
+  },
+  "Landing": {
+    "heroTitle": "The only upload service made for the rest of us.",
+    "featureAccount": "Create an account to upload files up to 100MB",
+    "featureUptime": "We deliver 99.99999999% yearly uptime on our servers",
+    "featureApi": "Create API keys and use our services anywhere you want!",
+    "featureAchievements": "Unlock achievements and show them on your profile!",
+    "cards": {
+      "fast": {
+        "title": "Fast",
+        "description": "Hosted in Brazil, our servers offer <highlight>low latency</highlight> and high transfer rates"
+      },
+      "private": {
+        "title": "Private",
+        "description": "We remove all <highlight>metadata</highlight> from your files, including GPS and manufacturer tags"
+      },
+      "robust": {
+        "title": "Robust",
+        "description": "Online for {years} years, <highlight>extremely stable</highlight> and always listening to user <highlight>feedback</highlight>"
+      },
+      "reliable": {
+        "title": "Reliable",
+        "description": "Handling <highlight>4M+</highlight> requests per month. <highlight>25k+</highlight> unique monthly visitors. With <highlight>200k+</highlight> stored files"
+      }
+    },
+    "banner": {
+      "title": "What are you waiting for to <break></break> start using Feridinha?",
+      "ctaLogged": "Open dashboard",
+      "ctaGuest": "Create an account",
+      "tutorial": "How to use it"
+    }
+  },
+  "UploadBox": {
+    "yourAlbum": "Your album ({count})",
+    "yourUploads": "Your uploads ({count})",
+    "createAlbumTooltip": "Create an album from these uploads",
+    "groupIntoAlbum": "Group into an album",
+    "alreadyGrouped": "Already grouped",
+    "viewAlbum": "View album",
+    "fileNumber": "File #{count}",
+    "optimizedUpload": "This file was kept in memory to speed up the upload. Processing time: {time}",
+    "copyLink": "Copy link",
+    "deleteFile": "Delete file",
+    "anonymousLimitUpsell": "Create an account to increase your limit!",
+    "createAccountForAlbum": "Create an account to group your uploads into albums",
+    "albumCreated": "Album created successfully",
+    "updatingAlbum": "Updating your album...",
+    "albumUpdated": "Album updated successfully",
+    "dropFileHere": "Drop a file here or",
+    "clickToChoose": "click to choose",
+    "toUpload": "to upload.",
+    "continueUploading": "You can keep uploading",
+    "continueUploadingToUpdateAlbum": "You can keep uploading to update the album",
+    "uploadAgreement": "By uploading, you agree to our <terms>terms of service</terms>",
+    "maxFileSize": "Each file can be at most {limit}.",
+    "increaseLimitUpsell": "Create an account to increase your limit to 100MB.",
+    "limitOf": "Limit: {limit}"
+  },
+  "Tutorial": {
+    "integrationKeyGuestWarning": "You need to create an account to use integration keys. Anonymous uploads are still supported.",
+    "integrationKeyCreateError": "Failed to create integration token",
+    "title": "Integration with <highlight>third-party</highlight> apps",
+    "thirdPartyTooltip": "Yeah, but BTTV is a third-party service and I can't integrate with it directly.",
+    "chatterino": "Chatterino",
+    "sharex": "ShareX",
+    "dankchat": "Dankchat",
+    "others": "Others",
+    "dankchatUseBase": "Use the Chatterino settings as a base.",
+    "dankchatVideo": "Video showing how to configure Dankchat",
+    "chatsenUnsupported": "Chatsen does not support custom uploads at the moment (May 6, 2025).",
+    "lightshotUnsupported": "Lightshot does not support custom uploaders. Use the automatic file copy feature and paste it in Chatterino.",
+    "autoTokenNotice": "Your integration token will be created automatically. Just click the \"token\" field or download the ShareX file.",
+    "guestNotice": "Create an account to keep your upload history and get a 100MB limit.",
+    "creatingIntegrationToken": "We are creating an integration token",
+    "anonymousUser": "anonymous",
+    "loggedInAs": "signed in as {name}",
+    "copyHint": "Click to copy",
+    "integrationTokenTooltip": "This is your integration token\nClick to copy",
+    "sharexIntro": "To use it with ShareX, just download the file below and open it with ShareX.",
+    "sharexTokenNotice": "This file will contain your integration token if you are signed in.",
+    "sharexDownload": "Click here to download the ShareX configuration file",
+    "sharexLoading": "Generating your ShareX file",
+    "tableItem": "Item",
+    "tableValue": "Value",
+    "tutorialVideo": "Tutorial video",
+    "configurePath": "Put these values in: Chatterino -> Settings -> External Tools -> Image Uploader",
+    "requestUrl": "Request URL",
+    "formField": "Form field",
+    "extraHeaders": "Extra headers",
+    "imageLink": "Image link",
+    "deletionLink": "Deletion link"
+  },
+  "Reviews": {
+    "sectionTitle": "Reviews",
+    "writeReview": "Write a review",
+    "pending": "Your review is pending approval",
+    "pendingInfo": "Your review is still being evaluated by the developer",
+    "rejected": "Your review was rejected!",
+    "clickForDetails": "Click to see the details.",
+    "rejectionReason": "Rejection reason",
+    "notProvided": "Not provided",
+    "approved": "Your review was approved",
+    "approvedInfo": "Your review was approved! Thanks for the feedback.",
+    "userSince": "User since {date}, {count} uploads in total.",
+    "noneFound": "No reviews found",
+    "loading": "Loading reviews",
+    "userImageAlt": "User image"
+  },
+  "CreateReview": {
+    "minLength": "Must contain at least 3 characters",
+    "maxLength": "Must contain at most 300 characters",
+    "error": "An error occurred while creating your review",
+    "title": "Write a project review",
+    "reviewPlaceholder": "Write your review... (public)",
+    "suggestionPlaceholder": "Suggestions and improvements (private) (optional)",
+    "submit": "Send",
+    "notice": "Your review will be evaluated before it is published."
+  },
+  "Delete": {
+    "success": "File deleted successfully",
+    "invalidCode": "Invalid deletion code",
+    "title": "Delete file permanently",
+    "button": "Delete",
+    "description": "When deleting an image, it will be removed from your history and replaced by a"
+  },
+  "Mural": {
+    "invalidTitle": "Title is too long (<120)",
+    "invalidDescription": "Description is too long",
+    "moderatorQueryMin": "Type at least 3 characters",
+    "createPostTitle": "Create new post",
+    "titlePlaceholder": "Title",
+    "contentPlaceholder": "Content: Feridinha, Twitter, Reddit, Instagram or YouTube link",
+    "descriptionPlaceholder": "Description (optional)",
+    "createPostAgreement": "By creating a post, you agree to our <terms>terms of service</terms>",
+    "createPostButton": "Create post",
+    "communityPosts": "{count} posts",
+    "communityUsers": "{count} users",
+    "communityMods": "{count} mods",
+    "visit": "Visit",
+    "createdAgo": "Created {time}",
+    "youAreModerator": "you are a moderator",
+    "manageCommunity": "Manage community",
+    "myPosts": "My posts",
+    "showingOnlyUserPosts": "Showing only posts from @{user}",
+    "filterApproved": "Approved",
+    "filterPending": "Pending",
+    "filterRejected": "Rejected",
+    "sortPopular": "Popular",
+    "sortRecent": "Recent",
+    "approvePost": "Approve post",
+    "rejectPost": "Reject post",
+    "approvedBy": "Approved by {user}",
+    "approvalApproved": "Approved",
+    "approvalPending": "Pending",
+    "approvalRejected": "Rejected",
+    "agoSuffix": "ago",
+    "managingCommunity": "Managing community: {id}",
+    "moderators": "Moderators ({count})",
+    "addModerator": "Add moderator",
+    "noModerators": "No moderators yet.",
+    "searchingUsers": "Searching...",
+    "noUsersFound": "No users found",
+    "addNewModerator": "Add new moderator",
+    "moderatorQueryPlaceholder": "User name (min. 3 characters)",
+    "addingUserAsModerator": "Adding user <user></user> as moderator",
+    "nameColumn": "Name",
+    "actionColumn": "Action"
+    ,"postCreated": "Post created successfully"
+    ,"moderatorAdded": "Moderator added successfully"
+    ,"moderatorRemoved": "Moderator removed successfully"
+    ,"loadingPosts": "Loading..."
+    ,"noPostsFound": "No posts found"
+    ,"loadingMore": "Loading more..."
+  },
+  "Dashboard": {
+    "loading": "Loading",
+    "achievements": "Achievements",
+    "achievementsLocked": "You haven't unlocked this achievement yet",
+    "yourUploads": "Your uploads ({count})",
+    "yourAlbums": "Your albums ({count})",
+    "albumsWip": "This section is still being finished =)",
+    "viewMyAlbums": "View my albums",
+    "viewMyUploads": "View my uploads",
+    "viewGrid": "View as grid",
+    "viewTable": "View as table",
+    "pageOf": "Page {current} of {total}",
+    "showPerPage": "Show {count} per page",
+    "fileDeleted": "File deleted successfully",
+    "startingDelete": "Starting deletion... ({count} files)",
+    "deletingFileProgress": "Deleting file {filename} ({current}/{total})",
+    "batchDeleteSuccess": "{count} files were deleted successfully",
+    "albumCreated": "Album created successfully",
+    "selectionHint": "Hold and drag to select files",
+    "selectionEmpty": "Select at least 1 file",
+    "selectionHelp": "Hold and drag your mouse to select multiple files",
+    "selectFile": "Click to select this file",
+    "selectedCount": "{count} selected",
+    "deleteSelected": "Delete selected",
+    "groupSelected": "Group selected",
+    "deselectAll": "Deselect all",
+    "createKey": "Create new API key",
+    "createKeyTitle": "Create key",
+    "apiKeyNamePlaceholder": "Key name",
+    "apiKeyNameMin": "The key name must be at least 3 characters long",
+    "apiKeyNameMax": "The key name must be at most 30 characters long",
+    "secretValue": "Secret value:",
+    "deleteKey": "Delete key",
+    "clipboardCopying": "Copying to clipboard",
+    "clipboardUnavailable": "Could not copy to clipboard",
+    "apiKeysTitle": "API keys",
+    "apiKeyAutoCreatedTooltip": "This key was created automatically by the \"How to use it\" page",
+    "noApiKeys": "You don't have any integration keys yet, <link>learn how to use them here</link>",
+    "nameColumn": "Name",
+    "sizeColumn": "Size",
+    "dateColumn": "Date"
+  },
+  "Album": {
+    "previewUnavailable": "Preview unavailable. Open the link above.",
+    "previewUnavailableInline": "Preview unavailable.",
+    "openLink": "Open the link.",
+    "openLinkAbove": "Open the link above.",
+    "createdBy": "Created by <author>@{name}</author> {time}. {count, plural, one {# file in total.} other {# files in total.}} {views, plural, one {# view.} other {# views.}}"
+  },
+  "Faq": {
+    "title": "<highlight>Questions</highlight> about the project",
+    "donations": "Donations",
+    "email": "Email",
+    "storyTitle": "Why is the site called Feridinha?",
+    "storyBody1": "The <site>Feridinha.com</site> website was created by developer <author>@Feridinha</author> in 2021, which is why it has that name.",
+    "storyBody2": "The initial goal was to provide a stable upload website, since Imgur and Inuuls kept going offline at the time. Over time, the community of streamer <ghiletofar>@ghiletofar</ghiletofar> supported the project, and it consequently spread to other Brazilian communities.",
+    "storyBody3": "Over the years, <sync>FeridinhaSync</sync> emerged, reaching even more communities. Every project under the <brand>Feridinha™</brand> name was created without any financial interest and <strong>will always be free for everyone.</strong>",
+    "storyBody4": "However, if you would like to support it <strong>directly</strong>, you can <donate>make a donation via PIX here</donate>",
+    "contactTitle": "How can I get in touch?",
+    "contactBody": "You can message me on Discord (<discord>@Feridinha</discord>), Twitter (<twitter>@FeridinhaDev</twitter>) (<email>faq@feridinha.com</email>)",
+    "supportTitle": "How can I support the project?",
+    "supportBody": "If you would like to support the project <strong>directly</strong>, <donate>you can make a donation via PIX here</donate>",
+    "deletedTitle": "I deleted a file. Why hasn't it disappeared yet?",
+    "deletedBody1": "When you upload a file, a cache is created automatically. This cache can take from 2 minutes to 2 hours to update, depending on the site's traffic.",
+    "deletedBody2": "With the new version of the site, this cache is cleared automatically, although it may still persist for a few minutes.",
+    "deletedBody3": "If you uploaded a personal file and need it deleted <urgent>URGENTLY</urgent>, message me on Discord: <discord>@Feridinha</discord>",
+    "reportTitle": "How do I report a file that violates the Terms of Use?",
+    "reportBody": "If you have found a file that does not comply with the site's Terms of Use (TOS), email me at <email>tos@feridinha.com</email> or contact me directly through <discord>Discord</discord>."
+  },
+  "Terms": {
+    "title": "Terms of Service and Privacy Policy",
+    "intro": "These Terms of Service govern the use of Feridinha.com and explain our privacy commitments.",
+    "accept": "By using the service, you agree to the terms below.",
+    "tosTitle": "Terms of Service",
+    "privacyTitle": "Privacy Policy",
+    "lastUpdated": "Last updated: April 13, 2025",
+    "sections": {
+      "ugc": {
+        "title": "User-generated content",
+        "body": "You are responsible for the content you upload. Feridinha only hosts this material and does not automatically endorse published content."
+      },
+      "opinions": {
+        "title": "Author opinions",
+        "body": "Submitted content reflects only the opinion of the author."
+      },
+      "prohibited": {
+        "title": "Prohibited content",
+        "body": "Uploading malware, viruses, doxxing, illegal pornography, copyright-infringing material, unauthorized exposure of private data or any other illegal or harmful content is prohibited."
+      },
+      "reports": {
+        "title": "Reports",
+        "body": "To report violations, send an email to <email>tos@feridinha.com</email> or use the public contacts listed on the <faq>FAQ</faq> page."
+      },
+      "review": {
+        "title": "Content review",
+        "body": "Content is only manually reviewed when reported. We may remove or block material that violates these terms."
+      },
+      "commercial": {
+        "title": "Commercial use",
+        "body": "Commercial use by third parties requires prior approval."
+      },
+      "termination": {
+        "title": "Termination",
+        "body": "We may terminate or restrict access to the service at any time in cases of abuse, rule violations or operational need."
+      },
+      "collection": {
+        "title": "Data collection",
+        "body": "We collect minimal operational data, including IP and User-Agent."
+      },
+      "usage": {
+        "title": "Use of data",
+        "body": "This data is used for security, abuse prevention and identification of parties responsible for content that violates the terms."
+      },
+      "sharing": {
+        "title": "Data sharing",
+        "body": "We do not share your data with third parties except when necessary to comply with legal obligations."
+      },
+      "security": {
+        "title": "Security",
+        "body": "We adopt reasonable measures to protect data against unauthorized access."
+      },
+      "rights": {
+        "title": "User rights",
+        "body": "You may request information about your data and request deletion when applicable."
+      }
+    }
+  }
+}

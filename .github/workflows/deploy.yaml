@@ -1,0 +1,86 @@
+name: Deploy Production IRIS
+
+on:
+  push:
+    branches: [next]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARED_VERSION: "2024.1.5"
+
+    steps:
+      - name: Cache cloudflared
+        uses: actions/cache@v3
+        with:
+          path: ~/.cloudflared
+          key: cloudflared-${{ env.CLOUDFLARED_VERSION }}-${{ runner.os }}
+
+      - name: Install cloudflared
+        run: |
+          mkdir -p ~/.cloudflared
+          if [ -f ~/.cloudflared/cloudflared ]; then
+            echo restored
+          else
+            wget -q https://github.com/cloudflare/cloudflared/releases/download/${CLOUDFLARED_VERSION}/cloudflared-linux-amd64.deb -O cloudflared.deb
+            dpkg-deb -x cloudflared.deb tmp
+            BINARY=$(find tmp -type f -name cloudflared)
+            mv "$BINARY" ~/.cloudflared/cloudflared
+            rm -rf tmp cloudflared.deb
+          fi
+          sudo mv ~/.cloudflared/cloudflared /usr/local/bin/cloudflared
+
+      - name: Setup SSH Config
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Configure SSH with cloudflared
+        run: |
+          cat >> ~/.ssh/config << EOF
+          Host ${{ secrets.SSH_HOSTNAME }}
+            ProxyCommand cloudflared access ssh --hostname %h
+            User ${{ secrets.SSH_USER }}
+            StrictHostKeyChecking no
+          EOF
+
+      - name: Deploy
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOSTNAME }} '
+            source ~/.zshrc
+            export PATH=$PATH:$HOME/.nvm:$HOME/.bun/bin
+            export NVM_DIR=~/.nvm
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            bun --version
+            cd feridinha.com
+            eval "$(ssh-agent -s)"
+            ssh-add /home/${{ secrets.SSH_USER }}/.ssh/id_rsa_feridinha
+            git fetch origin next
+            git reset --hard origin/next
+
+            (
+              cd api
+              bun install
+              bunx prisma generate
+              bunx prisma migrate deploy
+              pm2 restart "api-feridinha V2" --update-env
+            ) &
+
+            (
+              cd client
+              bun install
+              bun run build
+              # pm2 restart "client-feridinha V2" --update-env
+            ) &
+
+            wait
+            pm2 list
+          '
+
+      - name: Cleanup SSH Key
+        if: always()
+        run: |
+          rm -f ~/.ssh/id_rsa
