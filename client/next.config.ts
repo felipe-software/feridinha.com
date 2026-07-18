@@ -1,5 +1,6 @@
 import type { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
+import { POSTHOG_PROXY_PATH } from "./src/config/posthog"
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
@@ -21,6 +22,23 @@ const nextConfig: NextConfig = {
     experimental: {
         viewTransition: true,
     },
+    async rewrites() {
+        return [
+            {
+                source: `${POSTHOG_PROXY_PATH}/static/:path*`,
+                destination: "https://us-assets.i.posthog.com/static/:path*",
+            },
+            {
+                source: `${POSTHOG_PROXY_PATH}/array/:path*`,
+                destination: "https://us-assets.i.posthog.com/array/:path*",
+            },
+            {
+                source: `${POSTHOG_PROXY_PATH}/:path*`,
+                destination: "https://us.i.posthog.com/:path*",
+            },
+        ]
+    },
+    skipTrailingSlashRedirect: true,
 }
 
 const withNextIntl = createNextIntlPlugin()

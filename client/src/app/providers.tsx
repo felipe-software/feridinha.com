@@ -11,6 +11,7 @@ import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { LuCheck, LuInfo, LuLoaderCircle, LuTriangleAlert, LuX } from "react-icons/lu"
 import * as Sentry from "@sentry/nextjs"
+import { POSTHOG_PROXY_PATH } from "@/config/posthog"
 
 Sentry.init({
     dsn: "https://9b5ad6af7594366d35e639d20d21dea3@o4504569588809728.ingest.us.sentry.io/4509291703238656",
@@ -41,7 +42,8 @@ export function Providers({ children, isMuralAvailable }: { children: React.Reac
         <PostHogProvider
             apiKey={process.env.NEXT_PUBLIC_POSTHOG_KEY || ""}
             options={{
-                api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "",
+                api_host: POSTHOG_PROXY_PATH,
+                ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.posthog.com",
             }}
         >
             <QueryClientProvider client={client}>
