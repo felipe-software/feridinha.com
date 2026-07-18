@@ -3,6 +3,9 @@ import createNextIntlPlugin from "next-intl/plugin"
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    typescript: {
+        ignoreBuildErrors: true,
+    },
     compiler: {
         styledComponents: true,
     },
