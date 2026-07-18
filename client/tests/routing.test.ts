@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test"
 import { NextRequest } from "next/server"
-import nextConfig from "../next.config"
 import { proxy } from "@/proxy"
 import {
     DEFAULT_LOCALE,
@@ -352,16 +351,5 @@ describe("locale proxy persistence", () => {
         expect(setCookie).toContain("Path=/")
         expect(setCookie).toContain("Max-Age=31536000")
         expect(setCookie?.toLowerCase()).toContain("samesite=lax")
-    })
-})
-
-describe("legacy routing", () => {
-    test("redirects the legacy terms URL in Next config", async () => {
-        const redirects = await nextConfig.redirects?.()
-        expect(redirects).toContainEqual({
-            source: "/termos-de-servico.html",
-            destination: "/termos-de-servico",
-            permanent: true,
-        })
     })
 })

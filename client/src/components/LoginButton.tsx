@@ -70,7 +70,7 @@ export const LoginModal = () => {
             <p>
                 {t.rich("loginAgreement", {
                     terms: (chunks) => (
-                        <a href="/termos-de-servico" target="_blank">
+                        <a href="/termos-de-servico.html" target="_blank">
                             {chunks}
                         </a>
                     ),
