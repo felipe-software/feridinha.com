@@ -51,10 +51,6 @@ export function Providers({ children, isMuralAvailable }: { children: React.Reac
                     script.src = obfuscatePostHogAssetUrl(script.src)
                     return script
                 },
-                prepare_external_dependency_stylesheet: (stylesheet) => {
-                    stylesheet.href = obfuscatePostHogAssetUrl(stylesheet.href)
-                    return stylesheet
-                },
             }}
         >
             <QueryClientProvider client={client}>
