@@ -3,6 +3,7 @@ import { baseURL } from "./setup";
 import database from "@/services/database";
 import { createTestUser, deleteTestUser, createTestUpload, TestUser } from "./helpers";
 import { Upload } from "@prisma/client";
+import { waitForOwnedUploads } from "@/controllers/album";
 
 let testUser: TestUser;
 let testUser2: TestUser;
@@ -74,16 +75,12 @@ describe("Album Routes", () => {
             expect(res.status).toBe(422);
         });
 
-        test("arquivo inexistente → 403", async () => {
-            const res = await fetch(`${baseURL}/album/create`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: testUser.token,
-                },
-                body: JSON.stringify({ files: ["arquivo-que-nao-existe.png"] }),
+        test("arquivo inexistente esgota o polling", async () => {
+            const result = await waitForOwnedUploads(["arquivo-que-nao-existe.png"], testUser.id, {
+                timeoutMs: 10,
+                pollIntervalMs: 1,
             });
-            expect(res.status).toBe(403);
+            expect(result.status).toBe("timeout");
         });
 
         test("arquivo de outro usuário → 403", async () => {
@@ -108,6 +105,29 @@ describe("Album Routes", () => {
                 body: JSON.stringify({ files: [upload1.name, uploadUser2.name] }),
             });
             expect(res.status).toBe(403);
+        });
+
+        test("aguarda arquivo pendente no banco antes de criar → 200", async () => {
+            const pendingName = `pending-album-upload-${Date.now()}.png`;
+            const persistence = (async () => {
+                await Bun.sleep(50);
+                return createTestUpload(testUser.id, pendingName);
+            })();
+
+            const res = await fetch(`${baseURL}/album/create`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: testUser.token,
+                },
+                body: JSON.stringify({ files: [pendingName] }),
+            });
+            await persistence;
+
+            expect(res.status).toBe(200);
+            const json = (await res.json()) as { data: { id: string; uploads: Array<{ name: string }> } };
+            expect(json.data.uploads[0].name).toBe(pendingName);
+            await database.album.delete({ where: { id: json.data.id } });
         });
 
         test("criação válida com 1 arquivo → 200", async () => {

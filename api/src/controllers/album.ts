@@ -1,9 +1,46 @@
 import database from "@/services/database";
-import { tryP } from "@/utils/promises";
+import { sleep, tryP } from "@/utils/promises";
 import uploadUtils from "@/utils/upload";
 import { RequestHandler } from "express";
 import { z } from "zod";
-import { Prisma } from "@prisma/client";
+import { Prisma, Upload } from "@prisma/client";
+
+const UPLOAD_POLL_TIMEOUT_MS = 30_000;
+const UPLOAD_POLL_INTERVAL_MS = 250;
+
+type UploadOwnershipResult =
+    | { status: "owned"; uploads: Upload[] }
+    | { status: "forbidden" | "timeout" };
+
+export const waitForOwnedUploads = async (
+    files: string[],
+    userId: string,
+    options: { timeoutMs?: number; pollIntervalMs?: number } = {},
+): Promise<UploadOwnershipResult> => {
+    const uniqueFiles = [...new Set(files)];
+    if (uniqueFiles.length !== files.length) return { status: "forbidden" };
+
+    const timeoutMs = options.timeoutMs ?? UPLOAD_POLL_TIMEOUT_MS;
+    const pollIntervalMs = options.pollIntervalMs ?? UPLOAD_POLL_INTERVAL_MS;
+    const deadline = Date.now() + timeoutMs;
+
+    while (true) {
+        const uploads = await database.upload.findMany({ where: { name: { in: uniqueFiles } } });
+
+        if (uploads.some((upload) => upload.userId !== userId)) {
+            return { status: "forbidden" };
+        }
+
+        if (uploads.length === uniqueFiles.length) {
+            return { status: "owned", uploads };
+        }
+
+        const remainingMs = deadline - Date.now();
+        if (remainingMs <= 0) return { status: "timeout" };
+
+        await sleep(Math.min(pollIntervalMs, remainingMs));
+    }
+};
 
 const createAlbumSchema = z.object({
     files: z.array(z.string()).min(1).max(25),
@@ -13,11 +50,13 @@ const createAlbum: RequestHandler = async (req, res) => {
     const body = req.body as z.infer<typeof createAlbumSchema>;
     const user = req.session!.user!;
 
-    const ownedUploads = await database.upload.findMany({ where: { name: { in: body.files }, userId: user.id } });
+    const ownership = await waitForOwnedUploads(body.files, user.id);
 
-    if (ownedUploads.length !== body.files.length) {
+    if (ownership.status !== "owned") {
         return res.status(403).error(req.t("album.forbiddenFilesOwner"));
     }
+
+    const ownedUploads = ownership.uploads;
 
     const albumId = await uploadUtils.generateAlbumName();
 
