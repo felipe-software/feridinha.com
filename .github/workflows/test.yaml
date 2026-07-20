@@ -14,7 +14,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install Docker Compose
-        uses: docker/setup-compose-action@v1
+        uses: docker/setup-compose-action@v2
 
       - name: Install API dependencies
         working-directory: api
