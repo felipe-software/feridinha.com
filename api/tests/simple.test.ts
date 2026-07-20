@@ -9,4 +9,5 @@ import "./s3.test";
 import "./mural.test";
 import "./externalPostParser.test";
 import "./externalPostResolver.test";
+import "./externalUpload.test";
 import "./community.test";

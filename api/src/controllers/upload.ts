@@ -6,17 +6,24 @@ import achievements from "@/handlers/achievements";
 import { cacheService } from "@/services/cache";
 import cloudflare from "@/services/cloudflare";
 import database from "@/services/database";
+import { externalPostParser } from "@/services/external-post/parser";
+import { externalPostResolver } from "@/services/external-post/resolver";
+import { SafeFetchError } from "@/services/external-post/safeFetchExternal";
+import { externalPostUploader } from "@/services/external-post/uploader";
 import posthog from "@/services/posthog";
 import { s3Service } from "@/services/s3";
 import fileUtils from "@/utils/file";
 import { tryP } from "@/utils/promises";
+import tmpUtils from "@/utils/tmp";
 import uploadUtils, { UploadErrorType, UploadNameResult } from "@/utils/upload";
+import { uploadLinkSchema } from "@/validations/upload";
 import { DeleteCodeVersion, Upload, UserRole } from "@prisma/client";
 import crypto from "crypto";
 import { Request, RequestHandler } from "express";
 import formidable, { Fields, File, Files } from "formidable";
 import mimetype from "mime-types";
 import path from "path";
+import { z } from "zod";
 
 export const translateUploadError = (req: Request, code?: string, fallbackMessage?: string, userLimitMb?: number) => {
     switch (code) {
@@ -37,13 +44,15 @@ export const saveUserUploadAndAchievements =
     ({
         user,
         uploadName,
-        file,
+        uploadSize,
+        mimeType,
         userAgent,
         deleteCode,
     }: {
         user?: Required<Request["session"]["user"]>;
         uploadName: UploadNameResult;
-        file: File;
+        uploadSize: number;
+        mimeType?: string;
         userAgent?: string;
         deleteCode: string;
     }) =>
@@ -56,14 +65,14 @@ export const saveUserUploadAndAchievements =
         if (user) {
             await achievements.handleUpdate(
                 user,
-                { context: "upload", uploadSize: file.size },
+                { context: "upload", uploadSize },
                 { uploadCount: { increment: 1 } },
             );
         }
         const data = {
             name: uploadName.filename,
-            size: file.size,
-            mimeType: mimetype.lookup(uploadName.filename)!,
+            size: uploadSize,
+            mimeType: mimeType ?? (mimetype.lookup(uploadName.filename) || "application/octet-stream"),
             userId: user?.id,
             userAgent,
         } as Upload;
@@ -75,7 +84,9 @@ export const saveUserUploadAndAchievements =
 
         if (dbError) {
             logger.error({ msg: "Falha ao salvar upload no database", error: dbError });
+            return false;
         }
+        return true;
     };
 
 const parseForm = (req: any, streamUUID: string, userLimit: number): Promise<Files> =>
@@ -182,7 +193,7 @@ const handleUpload: RequestHandler = async (req, res) => {
         Promise.resolve().then(async () => {
             await saveUserUploadAndAchievements({
                 deleteCode,
-                file: file!,
+                uploadSize: file!.size,
                 uploadName,
                 userAgent,
                 user: req.session.user,
@@ -204,6 +215,152 @@ const handleUpload: RequestHandler = async (req, res) => {
         for (let tmpFile of cleanupFiles) {
             const [err, result] = await tryP(fileUtils.deleteFile(tmpFile));
             logger.info(`Arquivo temporário ${tmpFile} deletado ${result}`);
+        }
+    }
+};
+
+type LinkUploadStage = "resolve" | "parse" | "download" | "metadata" | "s3" | "database";
+
+const handleLinkUpload: RequestHandler = async (req, res) => {
+    const { link } = req.body as z.infer<typeof uploadLinkSchema>;
+    const platform = externalPostResolver.detectPlatform(link);
+    const userRole = req.session?.user?.role ?? UserRole.ANONYMOUS;
+    const userLimit = constants.upload.fileLimitPerRole[userRole];
+    const userId = req.session?.user?.id ?? "anonymous";
+    const userAgent = req.headers["user-agent"];
+    const startedAt = performance.now();
+    let tempPath: string | undefined;
+    let uploadedFilename: string | undefined;
+
+    const captureError = (stage: LinkUploadStage, error: unknown) => {
+        logger.error({ msg: "Falha ao importar link externo", stage, platform, link, error });
+        posthog.capture(userId, "upload_error", {
+            upload_source: "social_link",
+            platform,
+            error_stage: stage,
+            error_code: error instanceof SafeFetchError ? error.code : "unknown",
+        });
+    };
+
+    if (!platform) {
+        posthog.capture(userId, "upload_error", {
+            upload_source: "social_link",
+            error_stage: "resolve",
+            error_code: "link_platform_unknown",
+        });
+        return res.status(400).error(req.t("upload.linkPlatformUnknown"), "link_platform_unknown");
+    }
+
+    try {
+        let html: string;
+        try {
+            html = await externalPostResolver.resolveHtml(link);
+        } catch (error) {
+            captureError("resolve", error);
+            return res.status(502).error(req.t("upload.externalLinkFetchFailed"), "external_link_fetch_failed");
+        }
+
+        let parsed: Awaited<ReturnType<typeof externalPostParser.parse>>;
+        try {
+            parsed = await externalPostParser.parse(platform, html);
+            if (!parsed) throw new Error("External post parser returned no media");
+        } catch (error) {
+            captureError("parse", error);
+            return res.status(422).error(req.t("upload.externalLinkParseFailed"), "external_link_parse_failed");
+        }
+
+        let media: Awaited<ReturnType<typeof externalPostUploader.downloadExternalMedia>>;
+        try {
+            media = await externalPostUploader.downloadExternalMedia(parsed, platform, userLimit);
+        } catch (error) {
+            captureError("download", error);
+            if (error instanceof SafeFetchError && error.code === "body_too_large") {
+                return res
+                    .status(413)
+                    .error(
+                        req.t("upload.maxFileSizeReached", { mb: userLimit / 1024 / 1024 }),
+                        "max_file_size_reached",
+                    );
+            }
+            if (error instanceof Error && error.message === "Unsupported external content type") {
+                return res
+                    .status(415)
+                    .error(req.t("upload.externalContentTypeUnsupported"), "external_content_type_unsupported");
+            }
+            return res.status(502).error(req.t("upload.externalLinkFetchFailed"), "external_link_fetch_failed");
+        }
+
+        const uploadName = await uploadUtils.generateUploadName(`social.${media.extension}`);
+        const deleteCode = await cryptography.encryptLegacyDeletionCode(uploadName.filename);
+        if (!deleteCode) {
+            return res.status(500).error(req.t("upload.processedUploadError"), "processed_upload_error");
+        }
+
+        tempPath = tmpUtils.getUploadTmpPath(`external_upload_${crypto.randomUUID()}.${media.extension}`);
+        const written = await fileUtils.writeFileFromBuffer(media.body, tempPath);
+        if (!written) {
+            captureError("metadata", new Error("Could not write external media to temporary storage"));
+            return res.status(500).error(req.t("upload.processedUploadError"), "processed_upload_error");
+        }
+
+        try {
+            await uploadUtils.stripMetadata(tempPath);
+        } catch (error) {
+            captureError("metadata", error);
+            return res.status(500).error(req.t("upload.processedUploadError"), "processed_upload_error");
+        }
+
+        try {
+            const uploaded = await s3Service.uploadFile({ from: tempPath, to: uploadName.filename, isAbsolute: true });
+            if (!uploaded) throw new Error("S3 upload returned false");
+            uploadedFilename = uploadName.filename;
+        } catch (error) {
+            captureError("s3", error);
+            return res.status(500).error(req.t("upload.processedUploadError"), "processed_upload_error");
+        }
+
+        try {
+            const saved = await saveUserUploadAndAchievements({
+                deleteCode,
+                uploadSize: media.size,
+                mimeType: media.contentType,
+                uploadName,
+                userAgent,
+                user: req.session.user,
+            })();
+            if (!saved) throw new Error("Could not persist external upload");
+        } catch (error) {
+            captureError("database", error);
+            await s3Service.deleteFile({ from: uploadName.filename }).catch(() => {});
+            uploadedFilename = undefined;
+            return res.status(500).error(req.t("upload.processedUploadError"), "processed_upload_error");
+        }
+
+        const time = performance.now() - startedAt;
+        posthog.capture(userId, "upload_success", {
+            upload_source: "social_link",
+            platform,
+            file_size: media.size,
+            file_extension: `.${media.extension}`,
+            processing_time_ms: time,
+        });
+
+        return res.send({
+            success: true,
+            message: `${env.IMAGE_PREFIX_URL}${uploadName.filename}`,
+            delete: `${env.CLIENT_URL}/delete/${deleteCode}`,
+            filename: uploadName.filename,
+            code: "new_upload_created",
+            mimeType: media.contentType,
+            size: media.size,
+            sourcePlatform: platform,
+            optimized: false,
+            time,
+        });
+    } finally {
+        if (tempPath) await fileUtils.deleteFile(tempPath, { surpressError: true });
+        if (uploadedFilename) {
+            logger.info({ msg: "Upload externo finalizado", upload: uploadedFilename, platform, user: userId });
         }
     }
 };
@@ -241,4 +398,4 @@ const deleteUpload: RequestHandler = async (req, res) => {
     return res.success(req.t("upload.fileDeleted"), target);
 };
 
-export default { handleUpload, deleteUpload };
+export default { handleUpload, handleLinkUpload, deleteUpload };

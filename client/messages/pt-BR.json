@@ -102,7 +102,17 @@
     "uploadAgreement": "Ao realizar um upload, você concorda com nossos <terms>termos de uso</terms>",
     "maxFileSize": "Cada arquivo pode ter no máximo {limit}.",
     "increaseLimitUpsell": "Crie uma conta para aumentar seu limite para 100MB.",
-    "limitOf": "Limite de {limit}"
+    "limitOf": "Limite de {limit}",
+    "socialLinkLabel": "Importe direto de uma rede social",
+    "socialLinkPlaceholder": "Cole um link do TikTok, Instagram, Reddit ou X",
+    "socialLinkInputLabel": "Link de uma publicação em rede social",
+    "importLink": "Importar",
+    "newBadge": "Novo",
+    "socialLinkTooltipLabel": "Saiba mais sobre importação por link",
+    "socialLinkTooltip": "Novidade: cole um link do TikTok, Instagram, Reddit ou X/Twitter. O Feridinha baixa a mídia e cria um link de upload para você.",
+    "invalidSocialLink": "Cole uma URL válida para importar.",
+    "importingSocialLink": "Importando mídia do link…",
+    "socialLinkNetworkError": "Não foi possível importar esse link. Tente novamente."
   },
   "Tutorial": {
     "integrationKeyGuestWarning": "Você precisa criar uma conta para usar chaves de integração. Uploads anônimos ainda são suportados.",

@@ -62,6 +62,17 @@ const Container = styled(motion.div)`
         &.error {
             background-color: #ff5555;
         }
+
+        &.indeterminate {
+            width: 35%;
+            animation: social-upload-progress 1.2s ease-in-out infinite;
+        }
+    }
+
+    @keyframes social-upload-progress {
+        0% { transform: translateX(0); }
+        50% { transform: translateX(185%); }
+        100% { transform: translateX(0); }
     }
 
     p.size {
@@ -98,7 +109,8 @@ export const ResultItem = ({
     index: number
 }) => {
     const t = useTranslations("UploadBox")
-    const filename = upload.file?.name || t("fileNumber", { count: index + 1 })
+    const filename = upload.file?.name || upload.label || t("fileNumber", { count: index + 1 })
+    const uploadedSize = upload.response?.success ? upload.response.size : undefined
 
     const handleCopy = () => {
         if (!upload.response || !upload.response.success) return
@@ -163,9 +175,9 @@ export const ResultItem = ({
                             ).replace(/\s+/g, "")}
                         </p>
                     )}
-                    {upload.file?.size && (
+                    {(upload.file?.size || uploadedSize) && (
                         <p className="size">
-                            {formatFileSize(upload.file.size)}
+                            {formatFileSize(upload.file?.size || uploadedSize!)}
                         </p>
                     )}
 
@@ -217,10 +229,15 @@ export const ResultItem = ({
                     )}
                 </div>
                 <motion.div
-                    className={"progress " + upload.status}
+                    className={`progress ${upload.status} ${upload.indeterminate && upload.status === "loading" ? "indeterminate" : ""}`}
                     initial={{ width: "0.5%" }}
                     animate={{
-                        width: `${(upload.progress?.progress || 0.05) * 100}%`,
+                        width:
+                            upload.status !== "loading"
+                                ? "100%"
+                                : upload.indeterminate
+                                  ? "35%"
+                                  : `${(upload.progress?.progress || 0.05) * 100}%`,
                     }}
                 ></motion.div>
             </div>

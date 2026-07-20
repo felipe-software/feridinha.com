@@ -43,17 +43,6 @@ const envSchema = z.object({
     REDIS_URL: z.string().url().default("redis://localhost:6379/0"),
 
     MURAL_VXREDDIT_URL: z.string().default("https://vxreddit.com"),
-    MURAL_MEDIA_ALLOWED_HOSTS: z
-        .string()
-        .default(
-            "vxreddit.com,.vxreddit.com,reddit.com,.reddit.com,redd.it,.redd.it,redditmedia.com,.redditmedia.com,redditstatic.com,.redditstatic.com,zzinstagram.com,.zzinstagram.com,tnktok.com,.tnktok.com,vxtwitter.com,.vxtwitter.com,twimg.com,.twimg.com",
-        )
-        .transform((value) =>
-            value
-                .split(",")
-                .map((host) => host.trim().toLowerCase())
-                .filter(Boolean),
-        ),
 
     POSTHOG_KEY: z.string(),
     POSTHOG_HOST: z.string(),

@@ -67,6 +67,9 @@ export interface UploadItem {
         code: string
     }
     response?: UploadResponse
+    source?: "file" | "social_link"
+    label?: string
+    indeterminate?: boolean
 }
 
 export default function ResultPage({

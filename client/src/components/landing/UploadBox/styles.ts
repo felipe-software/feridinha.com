@@ -1,5 +1,13 @@
 import styled from "styled-components"
 
+export const UploadBoxWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 35rem;
+    max-width: calc(100vw - 2rem);
+`
+
 export const UploadBoxContainer = styled.div`
     position: relative;
     display: flex;
@@ -9,7 +17,7 @@ export const UploadBoxContainer = styled.div`
 
     gap: 0.5rem;
     border-radius: 1.5rem;
-    width: 35rem;
+    width: 100%;
     height: 35rem;
     background-color: var(--base-dark) !important;
     padding: 1rem;
@@ -178,10 +186,4 @@ export const UploadBoxContainer = styled.div`
         z-index: 3;
     }
 
-    @media (max-width: 612px) {
-        & {
-            /* width: 20rem; */
-            /* height: 20rem; */
-        }
-    }
 `

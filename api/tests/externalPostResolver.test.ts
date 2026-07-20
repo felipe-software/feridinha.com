@@ -89,7 +89,7 @@ describe("externalPostResolver platform detection", () => {
 
     test("fetchHtml aplica headers/limite da plataforma e decodifica UTF-8", async () => {
         const fakeFetch = async (_url: string, options: { maxBytes: number; headers?: Record<string, string> }) => {
-            expect(options.maxBytes).toBe(2 * 1024 * 1024);
+            expect(options.maxBytes).toBe(5 * 1024 * 1024);
             expect(options.headers?.["User-Agent"]).toBeTruthy();
             return {
                 body: Buffer.from("olá"),

@@ -77,8 +77,7 @@ async function generateWebpPreview(
     const cdnHost = new URL(env.S3_RESULT_URL).hostname;
     const [downloadError, download] = await tryP(
         safeFetchExternal(cdnUrl, {
-            platformHosts: [cdnHost, "localhost"],
-            globalHosts: [cdnHost, "localhost"],
+            hostPolicy: { mode: "every-hop", hosts: [cdnHost, "localhost"] },
             maxBytes: MAX_FILE_SIZE,
             allowTestLocalhost: true,
         }),
