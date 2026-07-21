@@ -1,7 +1,7 @@
-import { externalPostRegexes, PLATFORM_MEDIA_HOSTS, PROXY_DOMAINS, PROXY_USER_AGENTS } from "@/services/external-post/constants";
+import { externalPostRegexes, PROXY_DOMAINS, PROXY_HOSTS, PROXY_USER_AGENTS } from "@/services/external-post/constants";
 import { safeFetchExternal } from "@/services/external-post/safeFetchExternal";
 
-const MAX_HTML_BYTES = 2 * 1024 * 1024;
+const MAX_HTML_BYTES = 5 * 1024 * 1024;
 
 type ExternalFetcher = typeof safeFetchExternal;
 
@@ -25,7 +25,8 @@ export async function fetchHtml(
     fetcher: ExternalFetcher = safeFetchExternal,
 ): Promise<string> {
     const result = await fetcher(url, {
-        platformHosts: PLATFORM_MEDIA_HOSTS[source],
+        hostPolicy: { mode: "every-hop", hosts: PROXY_HOSTS[source] },
+        trustedPrivateHosts: source === "reddit" ? [new URL(PROXY_DOMAINS.reddit).hostname] : undefined,
         maxBytes: MAX_HTML_BYTES,
         headers: { "User-Agent": PROXY_USER_AGENTS[source] },
     });

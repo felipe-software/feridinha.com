@@ -66,7 +66,7 @@
         width: 100%;
         height: fit-content;
     }
-    .wrapper h2 {
+    .wrapper > h2 {
         font-size: 2.5rem;
     }
 }

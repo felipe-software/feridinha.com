@@ -16,7 +16,7 @@ const _PROXY_DOMAINS = {
 } as const;
 
 const _PROXY_USER_AGENTS = {
-    reddit: "Mozilla/5.0",
+    reddit: "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
     instagram: "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
     tiktok: "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
     twitter: "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
@@ -33,6 +33,20 @@ Object.entries(_PROXY_DOMAINS).forEach(([key, value]) => {
 export const PROXY_DOMAINS = _PROXY_DOMAINS;
 export const PROXY_USER_AGENTS = _PROXY_USER_AGENTS;
 
+export const PROXY_HOSTS: Record<keyof typeof PROXY_DOMAINS, readonly string[]> = {
+    reddit: [
+        new URL(env.MURAL_VXREDDIT_URL).hostname,
+        "vxreddit.com",
+        "reddit.com",
+        "redd.it",
+        "redditmedia.com",
+        "redditstatic.com",
+    ],
+    instagram: ["zzinstagram.com"],
+    tiktok: ["tnktok.com"],
+    twitter: ["vxtwitter.com"],
+};
+
 export const PLATFORM_MEDIA_HOSTS = {
     reddit: [
         "vxreddit.com",
@@ -42,7 +56,7 @@ export const PLATFORM_MEDIA_HOSTS = {
         "redditstatic.com",
         new URL(env.MURAL_VXREDDIT_URL).hostname,
     ],
-    instagram: ["zzinstagram.com"],
+    instagram: ["zzinstagram.com", "vxinstagram.com"],
     tiktok: ["tnktok.com"],
     twitter: ["vxtwitter.com", "twimg.com"],
 } as const;

@@ -28,6 +28,8 @@ export type UploadResponse =
           mimeType: string
           optimized?: boolean
           time?: number
+          size?: number
+          sourcePlatform?: "reddit" | "instagram" | "tiktok" | "twitter"
       }
 
 const uploadFile = async (file: File, onProgress: (progress: AxiosProgressEvent) => void): Promise<UploadResponse> => {
@@ -37,6 +39,12 @@ const uploadFile = async (file: File, onProgress: (progress: AxiosProgressEvent)
     const rawResponse = await axiosClient.post("/upload", formData, {
         onUploadProgress: onProgress,
     })
+
+    return rawResponse.data
+}
+
+const uploadSocialLink = async (link: string): Promise<UploadResponse> => {
+    const rawResponse = await axiosClient.post("/upload/link", { link })
 
     return rawResponse.data
 }
@@ -171,6 +179,7 @@ axiosClient.interceptors.response.use(
 
 const apiService = {
     uploadFile,
+    uploadSocialLink,
     fetchUserData,
     fetchApiKeys,
     createApiKey,
