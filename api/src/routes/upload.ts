@@ -1,4 +1,5 @@
 import uploadController from "@/controllers/upload";
+import uploadLinkController from "@/controllers/uploadLink";
 import middlewares from "@/middlewares";
 import { validateSchema } from "@/middlewares/zod";
 import { Router } from "express";
@@ -14,7 +15,7 @@ route.post(
     "/link",
     middlewares.auth({ strict: false }),
     validateSchema(uploadValidations.uploadLinkSchema, "body"),
-    asyncHandler(uploadController.handleLinkUpload),
+    asyncHandler(uploadLinkController.handleLinkUpload),
 );
 
 const deleteSchema = z.object({
