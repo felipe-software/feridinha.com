@@ -69,22 +69,24 @@ export const isBlockedIp = (address: string) => {
 
 export const validateExternalDestination = async (
     url: URL,
-    platformHosts: readonly string[],
-    globalHosts: readonly string[],
+    allowedHosts: readonly string[] | undefined,
     signal: AbortSignal,
     allowTestLocalhost = false,
+    trustedPrivateHosts: readonly string[] = [],
 ) => {
-    const isTestLocalhost = allowTestLocalhost && myEnv.NODE_ENV === "test" && url.hostname === "localhost";
-    if (url.protocol !== "https:" && !isTestLocalhost) throw new SafeFetchError("https_required");
+    const hostname = url.hostname.toLowerCase().replace(/\.$/, "");
+    const isTrustedPrivateHost = trustedPrivateHosts.some((rule) => hostMatchesRule(hostname, rule));
+    const isTestLocalhost = allowTestLocalhost && myEnv.NODE_ENV === "test" && hostname === "localhost";
+    if (url.protocol !== "https:" && !isTestLocalhost && !isTrustedPrivateHost) {
+        throw new SafeFetchError("https_required");
+    }
     if (url.username || url.password) throw new SafeFetchError("url_credentials_forbidden");
 
-    const hostname = url.hostname.toLowerCase().replace(/\.$/, "");
-    if (hostname === "localhost" && !isTestLocalhost) throw new SafeFetchError("private_address");
-    if (!platformHosts.some((rule) => hostMatchesRule(hostname, rule))) {
-        throw new SafeFetchError("platform_host_not_allowed");
+    if (hostname === "localhost" && !isTestLocalhost && !isTrustedPrivateHost) {
+        throw new SafeFetchError("private_address");
     }
-    if (!globalHosts.some((rule) => hostMatchesRule(hostname, rule))) {
-        throw new SafeFetchError("host_not_allowed");
+    if (allowedHosts && !allowedHosts.some((rule) => hostMatchesRule(hostname, rule))) {
+        throw new SafeFetchError("platform_host_not_allowed");
     }
 
     const addresses = isIP(hostname)
@@ -95,14 +97,28 @@ export const validateExternalDestination = async (
                   signal.addEventListener("abort", () => reject(new SafeFetchError("timeout")), { once: true }),
               ),
           ]);
-    if (addresses.length === 0 || (!isTestLocalhost && addresses.some(({ address }) => isBlockedIp(address)))) {
+    if (
+        addresses.length === 0 ||
+        (!isTestLocalhost && !isTrustedPrivateHost && addresses.some(({ address }) => isBlockedIp(address)))
+    ) {
         throw new SafeFetchError("private_address");
     }
 };
 
+export type ExternalHostPolicy =
+    | { mode: "every-hop"; hosts: readonly string[] }
+    | { mode: "initial-only"; hosts: readonly string[] }
+    | { mode: "public-only" };
+
+export const allowedHostsForHop = (policy: ExternalHostPolicy, redirectIndex: number): readonly string[] | undefined => {
+    if (policy.mode === "public-only") return undefined;
+    if (policy.mode === "initial-only" && redirectIndex > 0) return undefined;
+    return policy.hosts;
+};
+
 export interface SafeFetchOptions {
-    platformHosts: readonly string[];
-    globalHosts?: readonly string[];
+    hostPolicy: ExternalHostPolicy;
+    trustedPrivateHosts?: readonly string[];
     maxBytes: number;
     headers?: Record<string, string>;
     timeoutMs?: number;
@@ -151,10 +167,10 @@ export const safeFetchExternal = async (input: string, options: SafeFetchOptions
         for (let redirects = 0; redirects <= maxRedirects; redirects += 1) {
             await validateExternalDestination(
                 currentUrl,
-                options.platformHosts,
-                options.globalHosts ?? myEnv.MURAL_MEDIA_ALLOWED_HOSTS,
+                allowedHostsForHop(options.hostPolicy, redirects),
                 controller.signal,
                 options.allowTestLocalhost,
+                options.trustedPrivateHosts,
             );
             response = await fetch(currentUrl, {
                 headers: options.headers,
@@ -176,6 +192,7 @@ export const safeFetchExternal = async (input: string, options: SafeFetchOptions
         return {
             body,
             contentType: response.headers.get("content-type"),
+            contentDisposition: response.headers.get("content-disposition"),
             finalUrl: currentUrl,
         };
     } catch (error) {

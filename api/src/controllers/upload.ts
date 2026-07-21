@@ -37,13 +37,15 @@ export const saveUserUploadAndAchievements =
     ({
         user,
         uploadName,
-        file,
+        uploadSize,
+        mimeType,
         userAgent,
         deleteCode,
     }: {
         user?: Required<Request["session"]["user"]>;
         uploadName: UploadNameResult;
-        file: File;
+        uploadSize: number;
+        mimeType?: string;
         userAgent?: string;
         deleteCode: string;
     }) =>
@@ -56,14 +58,14 @@ export const saveUserUploadAndAchievements =
         if (user) {
             await achievements.handleUpdate(
                 user,
-                { context: "upload", uploadSize: file.size },
+                { context: "upload", uploadSize },
                 { uploadCount: { increment: 1 } },
             );
         }
         const data = {
             name: uploadName.filename,
-            size: file.size,
-            mimeType: mimetype.lookup(uploadName.filename)!,
+            size: uploadSize,
+            mimeType: mimeType ?? (mimetype.lookup(uploadName.filename) || "application/octet-stream"),
             userId: user?.id,
             userAgent,
         } as Upload;
@@ -75,7 +77,9 @@ export const saveUserUploadAndAchievements =
 
         if (dbError) {
             logger.error({ msg: "Falha ao salvar upload no database", error: dbError });
+            return false;
         }
+        return true;
     };
 
 const parseForm = (req: any, streamUUID: string, userLimit: number): Promise<Files> =>
@@ -182,7 +186,7 @@ const handleUpload: RequestHandler = async (req, res) => {
         Promise.resolve().then(async () => {
             await saveUserUploadAndAchievements({
                 deleteCode,
-                file: file!,
+                uploadSize: file!.size,
                 uploadName,
                 userAgent,
                 user: req.session.user,

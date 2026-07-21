@@ -127,7 +127,7 @@ describe("upload controller helpers", () => {
         try {
             await saveUserUploadAndAchievements({
                 uploadName: { filename: "anonymous.png", filenameWithPath: "/tmp/anonymous.png" },
-                file: { size: 10 } as never,
+                uploadSize: 10,
                 deleteCode: "delete-code",
                 userAgent: "test-agent",
             })();
@@ -150,7 +150,7 @@ describe("upload controller helpers", () => {
             await saveUserUploadAndAchievements({
                 user: { id: "user-id", name: "User" } as never,
                 uploadName: { filename: "authenticated.jpg", filenameWithPath: "/tmp/authenticated.jpg" },
-                file: { size: 20 } as never,
+                uploadSize: 20,
                 deleteCode: "delete-code",
             })();
             expect(achievementCalled).toBe(true);
