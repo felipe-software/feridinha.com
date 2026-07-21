@@ -245,7 +245,7 @@ describe("safeFetchExternal", () => {
             (async (_url: string, options: { hostPolicy: unknown; maxBytes: number }) => {
                 expect(options.hostPolicy).toEqual({
                     mode: "initial-only",
-                    hosts: ["zzinstagram.com", "vxinstagram.com"],
+                    hosts: ["zzinstagram.com", "vxinstagram.com", "oginstagram.com"],
                 });
                 expect(options.maxBytes).toBe(15 * 1024 * 1024);
                 return {
@@ -258,6 +258,29 @@ describe("safeFetchExternal", () => {
         );
 
         expect(media).toMatchObject({ extension: "mp4", contentType: "video/mp4", size: 9_508_023 });
+    });
+
+    test("regressão Instagram aceita oginstagram como host inicial de mídia", async () => {
+        const media = await downloadExternalMedia(
+            { contentUrl: "https://oginstagram.com/offload/C1AIp0POMSX/1", contentType: "VIDEO" },
+            "instagram",
+            15 * 1024 * 1024,
+            (async (_url: string, options: { hostPolicy: unknown; maxBytes: number }) => {
+                expect(options.hostPolicy).toEqual({
+                    mode: "initial-only",
+                    hosts: ["zzinstagram.com", "vxinstagram.com", "oginstagram.com"],
+                });
+                expect(options.maxBytes).toBe(15 * 1024 * 1024);
+                return {
+                    body: Buffer.alloc(11_919_235),
+                    contentType: "video/mp4",
+                    contentDisposition: null,
+                    finalUrl: new URL("https://scontent.cdninstagram.com/video.mp4"),
+                };
+            }) as never,
+        );
+
+        expect(media).toMatchObject({ extension: "mp4", contentType: "video/mp4", size: 11_919_235 });
     });
 
     test("uploader externo escreve, envia ao S3 e limpa o temporário", async () => {
