@@ -1,7 +1,19 @@
-import Tooltip from "@/components/Tooltip"
 import { useTranslations } from "next-intl"
 import { FormEventHandler, RefObject } from "react"
-import styled from "styled-components"
+import styled, { keyframes } from "styled-components"
+
+const GradientBackground = keyframes`
+    0% {
+        background-position: 15% 0%;
+    }
+    50% {
+        background-position: 86% 100%;
+    }
+    100% {
+        background-position: 15% 0%;
+    }
+
+`
 
 const SocialLinkBar = styled.form`
     position: relative;
@@ -15,7 +27,7 @@ const SocialLinkBar = styled.form`
     padding: 0.5rem 0.5rem;
 
     border-bottom: 0;
-    border-radius: 1rem 1rem .25rem .25rem;
+    border-radius: 1rem 1rem 0.25rem 0.25rem;
     background: var(--base-dark);
     color: var(--foreground);
     cursor: default;
@@ -56,7 +68,6 @@ const SocialLinkBar = styled.form`
         gap: 0.5rem;
         flex-grow: 1;
         width: 100%;
-
     }
 
     .social-link-controls input {
@@ -70,7 +81,9 @@ const SocialLinkBar = styled.form`
         font-family: inherit;
         font-size: 0.82rem;
         padding: 0.68rem 0.8rem;
-        transition: border-color 0.2s, background-color 0.2s;
+        transition:
+            border-color 0.2s,
+            background-color 0.2s;
         flex-grow: 1;
         width: 100%;
 
@@ -99,7 +112,11 @@ const SocialLinkBar = styled.form`
         font-weight: 650;
         white-space: nowrap;
         cursor: pointer;
-        transition: background-color 0.2s, border-color 0.2s, opacity 0.2s, transform 0.1s;
+        transition:
+            background-color 0.2s,
+            border-color 0.2s,
+            opacity 0.2s,
+            transform 0.1s;
 
         &:hover:not(:disabled),
         &:focus-visible {
@@ -144,6 +161,25 @@ const SocialLinkBar = styled.form`
             width: 100%;
         }
     }
+
+    .new-tag {
+        position: absolute;
+        top: -0.5rem;
+        right: -1rem;
+        background: linear-gradient(318deg, var(--pink-gradient), var(--purple-gradient));
+        background-size: 150% 150%;
+        -webkit-animation: ${GradientBackground} 5s ease infinite;
+        -moz-animation: ${GradientBackground} 5s ease infinite;
+        animation: ${GradientBackground} 5s ease infinite;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.5rem;
+        transform: rotateZ(10deg);
+        box-shadow: 0px 0px 5px #00000050;
+
+        font-size: 0.875rem;
+        font-weight: 500;
+        line-height: 0.85rem;
+    }
 `
 
 interface SocialLinkFormProps {
@@ -182,6 +218,7 @@ export default function SocialLinkForm({ inputRef, value, onChange, onImport }: 
                     aria-label={t("socialLinkInputLabel")}
                     autoComplete="off"
                 />
+                <div className="new-tag">{t("newTag")}</div>
                 {/* <button type="submit" className="import-link" disabled={!value.trim()}>
                     {t("importLink")}
                 </button> */}
