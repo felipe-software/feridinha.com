@@ -1,9 +1,12 @@
 "use client"
 
+import Loading from "@/components/Loading"
+import { useAlbumQuery } from "@/hooks/useAlbumQuery"
 import { PageContainer } from "@/components/dashboard/styles"
 import { cdnUrl, formatFileSize } from "@/utils"
 import { motion } from "motion/react"
 import { useLocale, useTranslations } from "next-intl"
+import { useParams } from "next/navigation"
 import styled from "styled-components"
 import relativeTime from "dayjs/plugin/relativeTime"
 import dayjs from "dayjs"
@@ -11,7 +14,6 @@ import "dayjs/locale/en"
 import "dayjs/locale/pt-br"
 import { Upload } from "@/hooks/useUserDataStore"
 import { getFileType } from "@/components/FilePreviewGrid"
-import type { Album } from "@/services/api"
 dayjs.extend(relativeTime)
 
 const Container = styled(PageContainer)`
@@ -143,42 +145,49 @@ const AlbumItem = ({ upload }: { upload: Upload }) => {
     )
 }
 
-export default function AlbumPageClient({ albumData }: { albumData: Album }) {
+export default function AlbumPageClient() {
+    const params = useParams()
+    const albumId = params.albumId as string
+    const album = useAlbumQuery(albumId)
     const locale = useLocale()
     const t = useTranslations("Album")
+    const albumData = album.data
 
-    const uploads = albumData.uploads
+    const uploads = albumData?.uploads
     dayjs.locale(locale === "pt-BR" ? "pt-br" : "en")
 
     return (
         <Container>
-            <motion.div className="content">
-                <div className="header">
-                    <p>
-                        {t.rich("createdBy", {
-                            author: (chunks) => (
-                                <a
-                                    className="author"
-                                    href="#"
-                                    target="_blank"
-                                    style={{ color: albumData.user.color }}
-                                >
-                                    {chunks}
-                                </a>
-                            ),
-                            name: albumData.user.name,
-                            time: dayjs(albumData.createdAt).fromNow(),
-                            count: uploads.length,
-                            views: albumData.viewCount,
-                        })}
-                    </p>
-                </div>
-                <div className="items">
-                    {albumData.uploads.map((upload) => (
-                        <AlbumItem upload={upload} key={upload.name} />
-                    ))}
-                </div>
-            </motion.div>
+            <Loading isLoading={album.isLoading} />
+            {albumData && (
+                <motion.div className="content">
+                    <div className="header">
+                        <p>
+                            {t.rich("createdBy", {
+                                author: (chunks) => (
+                                    <a
+                                        className="author"
+                                        href="#"
+                                        target="_blank"
+                                        style={{ color: albumData.user.color }}
+                                    >
+                                        {chunks}
+                                    </a>
+                                ),
+                                name: albumData.user.name,
+                                time: dayjs(albumData.createdAt).fromNow(),
+                                count: uploads!.length,
+                                views: albumData.viewCount,
+                            })}
+                        </p>
+                    </div>
+                    <div className="items">
+                        {albumData.uploads.map((upload) => (
+                            <AlbumItem upload={upload} key={upload.name} />
+                        ))}
+                    </div>
+                </motion.div>
+            )}
         </Container>
     )
 }
