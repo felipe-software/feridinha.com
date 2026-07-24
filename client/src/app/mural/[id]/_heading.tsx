@@ -4,9 +4,8 @@ import { Button } from "@/components/Button"
 import { filterToLabel, orderToLabel } from "@/app/mural/[id]/_constants"
 import { Selector } from "@/components/ui/Selector"
 import useUserData from "@/hooks/useUserData"
-import Link from "next/link"
+import { Link, usePathname, useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
-import { usePathname, useRouter } from "next/navigation"
 import { LuArrowUpDown, LuChevronLeft, LuFilter, LuSquarePlus } from "react-icons/lu"
 
 export const MuralCommunityHeading = ({

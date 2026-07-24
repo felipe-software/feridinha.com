@@ -3,9 +3,9 @@
 import useToken from "@/hooks/useToken"
 import useUserDataStore from "@/hooks/useUserDataStore"
 import apiService from "@/services/api"
+import { useRouter } from "@/i18n/navigation"
 import Cookies from "js-cookie"
 import { useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { clearAuthSession } from "@/services/api/authSession"
 
 const LoginCallback = () => {

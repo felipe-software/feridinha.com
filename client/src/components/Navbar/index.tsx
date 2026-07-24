@@ -1,7 +1,7 @@
 "use client"
 
 import { AppLocale } from "@/i18n/config"
-import { getStoredLocale, setStoredLocale } from "@/i18n/client"
+import { Link, usePathname, useRouter } from "@/i18n/navigation"
 import LoginButton from "@/components/LoginButton"
 import { LogoText } from "@/components/LogoText"
 import { BrainMadeIcon } from "@/components/Navbar/BrainMadeIcon"
@@ -13,9 +13,7 @@ import useUserData from "@/hooks/useUserData"
 import { UserData } from "@/hooks/useUserDataStore"
 import { AnimatePresence, motion } from "motion/react"
 import { useLocale, useTranslations } from "next-intl"
-// import Link from "next/link"
-import { Link } from "next-view-transitions"
-import { usePathname, useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { memo, useEffect, useState } from "react"
 import styled from "styled-components"
 
@@ -100,6 +98,7 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
     const [isMenuActive, setMenuActive] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const pathname = usePathname()
+    const searchParams = useSearchParams()
     const router = useRouter()
     const locale = useLocale() as AppLocale
     const t = useTranslations("Nav")
@@ -127,15 +126,15 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
     }, [pathname])
 
     const handleLocaleChange = (targetLocale: AppLocale) => {
-        setStoredLocale(targetLocale)
         document.documentElement.lang = targetLocale
-        router.refresh()
+        const query = searchParams.toString()
+        router.replace(query ? `${pathname}?${query}` : pathname, { locale: targetLocale })
     }
 
     return (
         <Nav>
             <div className="locale-selector">
-                <LocaleSelector locale={locale || getStoredLocale()} onChange={handleLocaleChange} />
+                <LocaleSelector locale={locale} onChange={handleLocaleChange} />
             </div>
             <Link href="/" className="logo">
                 <LogoText

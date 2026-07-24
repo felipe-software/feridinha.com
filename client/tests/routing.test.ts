@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test"
 import { NextRequest } from "next/server"
 import { proxy } from "@/proxy"
+import robots from "@/app/robots"
+import sitemap from "@/app/sitemap"
 import {
     DEFAULT_LOCALE,
     getBrowserLocale,
@@ -10,11 +12,13 @@ import {
     SUPPORTED_LOCALES,
     type AppLocale,
 } from "@/i18n/config"
+import { routing } from "@/i18n/routing"
 
 type LocaleInput = {
     localeCookie?: string | null
     countryCode?: string | null
     acceptLanguage?: string | null
+    pathname?: string
 }
 
 type LocaleCase = LocaleInput & {
@@ -28,6 +32,7 @@ const requestWithLocaleHeaders = ({
     localeCookie,
     countryCode,
     acceptLanguage,
+    pathname = "/",
 }: LocaleInput) => {
     const headers = new Headers()
 
@@ -41,7 +46,7 @@ const requestWithLocaleHeaders = ({
         headers.set("accept-language", acceptLanguage)
     }
 
-    return new NextRequest("https://feridinha.com/", { headers })
+    return new NextRequest(new URL(pathname, "https://feridinha.com"), { headers })
 }
 
 describe("automatic locale detection", () => {
@@ -351,5 +356,82 @@ describe("locale proxy persistence", () => {
         expect(setCookie).toContain("Path=/")
         expect(setCookie).toContain("Max-Age=31536000")
         expect(setCookie?.toLowerCase()).toContain("samesite=lax")
+    })
+})
+
+describe("locale URL routing", () => {
+    test("uses an as-needed prefix with Portuguese as the default locale", () => {
+        expect(routing.localePrefix).toBe("as-needed")
+        expect(routing.defaultLocale).toBe("pt-BR")
+    })
+
+    test("redirects an English preference from an unprefixed URL to /en", () => {
+        const response = proxy(
+            requestWithLocaleHeaders({
+                pathname: "/faq",
+                localeCookie: "en",
+            }),
+        )
+
+        expect(response.status).toBe(307)
+        expect(response.headers.get("location")).toBe("https://feridinha.com/en/faq")
+    })
+
+    test("keeps Portuguese public URLs unprefixed", () => {
+        const response = proxy(
+            requestWithLocaleHeaders({
+                pathname: "/faq",
+                localeCookie: "pt-BR",
+            }),
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.headers.get("x-middleware-rewrite")).toBe("https://feridinha.com/pt-BR/faq")
+    })
+
+    test("redirects a redundant Portuguese prefix to the canonical URL", () => {
+        const response = proxy(
+            requestWithLocaleHeaders({
+                pathname: "/pt-BR/faq",
+                localeCookie: "pt-BR",
+            }),
+        )
+
+        expect(response.status).toBe(307)
+        expect(response.headers.get("location")).toBe("https://feridinha.com/faq")
+    })
+
+    test("serves English URLs with hreflang alternates and updates the preference", () => {
+        const response = proxy(
+            requestWithLocaleHeaders({
+                pathname: "/en/faq",
+                localeCookie: "pt-BR",
+            }),
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.cookies.get(LOCALE_COOKIE)?.value).toBe("en")
+        expect(response.headers.get("link")).toContain('hreflang="en"')
+        expect(response.headers.get("link")).toContain('hreflang="pt-BR"')
+    })
+
+    test("publishes Portuguese and English sitemap alternates", () => {
+        const entries = sitemap()
+        const faq = entries.find((entry) => entry.url === "https://feridinha.com/faq")
+
+        expect(faq?.alternates?.languages).toEqual({
+            "pt-BR": "https://feridinha.com/faq",
+            en: "https://feridinha.com/en/faq",
+            "x-default": "https://feridinha.com/faq",
+        })
+        expect(entries.find((entry) => entry.url === "https://feridinha.com")?.alternates?.languages).toEqual({
+            "pt-BR": "https://feridinha.com",
+            en: "https://feridinha.com/en",
+            "x-default": "https://feridinha.com",
+        })
+    })
+
+    test("advertises the localized sitemap to crawlers", () => {
+        expect(robots().sitemap).toBe("https://feridinha.com/sitemap.xml")
     })
 })

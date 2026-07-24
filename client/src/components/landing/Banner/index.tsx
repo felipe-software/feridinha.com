@@ -3,7 +3,7 @@ import { useModalStore } from "@/hooks/useModalStore"
 import useTokenStore from "@/hooks/useToken"
 import { motion } from "motion/react"
 import { useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 import styled, { keyframes } from "styled-components"
 
 const GradientBackground = keyframes`
