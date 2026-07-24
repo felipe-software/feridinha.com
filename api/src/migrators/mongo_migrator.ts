@@ -98,9 +98,29 @@ async function main() {
                 twitchId: oldUser.id,
                 uploadCount: oldUser.stats.total_uploads,
                 createdAt: (oldUser.stats.created_at as any as Date).toISOString(),
+                oauthAccounts: {
+                    create: {
+                        provider: "TWITCH",
+                        providerAccountId: oldUser.id,
+                    },
+                },
                 uploads: {
                     //   create: uploads,
                 },
+            },
+        });
+        await database.oAuthAccount.upsert({
+            where: {
+                provider_providerAccountId: {
+                    provider: "TWITCH",
+                    providerAccountId: oldUser.id,
+                },
+            },
+            update: { userId: newUser.id },
+            create: {
+                provider: "TWITCH",
+                providerAccountId: oldUser.id,
+                userId: newUser.id,
             },
         });
 

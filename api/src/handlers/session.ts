@@ -3,7 +3,7 @@ import database from "@/services/database";
 import { ApiError } from "@/utils/promises";
 import { createSecretKey } from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { Prisma, User } from "@prisma/client";
+import { AUTHENTICATED_USER_INCLUDE, type AuthenticatedUser } from "@/models/userModel";
 
 interface JwtData extends JwtPayload {
     sessionId: string;
@@ -21,24 +21,12 @@ const verifyJwt = async (token: string) => {
     return payload as JwtData;
 };
 
-const verify = async (
-    token: string,
-): Promise<
-    Prisma.UserGetPayload<{
-        include: { uploads: true; achievements: true };
-    }>
-> => {
+const verify = async (token: string): Promise<AuthenticatedUser> => {
     const payload = (await verifyJwt(token)) as JwtData;
 
     const user = await database.user.findFirst({
         where: { sessions: { has: payload.sessionId } },
-        include: {
-            albums: true,
-            uploads: true,
-            achievements: true,
-            
-            moderatedCommunities: { select: { name: true, id: true } },
-        },
+        include: AUTHENTICATED_USER_INCLUDE,
     });
 
     if (!user) {

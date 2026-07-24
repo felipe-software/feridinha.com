@@ -17,6 +17,12 @@ export const createTestUser = async (suffix: string = ""): Promise<TestUser> => 
             name: `Test User ${suffix}`,
             profileImage: "https://example.com/avatar.png",
             sessions: [],
+            oauthAccounts: {
+                create: {
+                    provider: "TWITCH",
+                    providerAccountId: twitchId,
+                },
+            },
         },
     });
 

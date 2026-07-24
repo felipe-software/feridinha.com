@@ -4,13 +4,13 @@
 
 # Feridinha.com
 
-The most overengineered file hosting service for Twitch Users
+The most overengineered file hosting service
 
 [![Deploy Production IRIS](https://github.com/Feridinha/feridinha.com/actions/workflows/deploy.yaml/badge.svg?branch=main)](https://github.com/Feridinha/feridinha.com/actions/workflows/deploy.yaml)
 
 ## Features
 
-- Twitch Account support
+- Twitch, Google and Discord account support
 - Super fast uploads (uploads to memory and gives you a link instantly)
 - Automatically uploads the file to a CDN (S3) and cleans the memory cache
 - Supports albums
@@ -29,6 +29,12 @@ TWITCH_SECRET: z.string(), // Twitch App. Fully required for authentication
 TMI_ACCESS_TOKEN: z.string(), // Twitch Bot. Fully required for authentication
 TMI_CLIENT_ID: z.string(), // Twitch Bot. Fully required for authentication
 TWITCH_REDIRECT_URL: z.string(), // Twitch App. Fully required for authentication
+GOOGLE_CLIENT_ID: z.string(), // Google OAuth Web Client
+GOOGLE_CLIENT_SECRET: z.string(), // Google OAuth Web Client secret
+GOOGLE_REDIRECT_URL: z.string(), // Google OAuth callback URL
+DISCORD_CLIENT_ID: z.string(), // Discord Application client id
+DISCORD_CLIENT_SECRET: z.string(), // Discord Application client secret
+DISCORD_REDIRECT_URL: z.string(), // Discord OAuth callback URL
 CLIENT_URL: z.string(), // The front-end URL. Fully required for authentication. Feridinha.com for Production and localhost:5173 for dev (for example)
 JWT_SECRET: z.string(), // Jwt secret. Fully required for authentication
 IMAGE_PREFIX_URL: z.string().endsWith("/"), // The prefix for the image result. For example: "https://f.feridinha.com/" + imageName. The imageName will be appended to the prefix.

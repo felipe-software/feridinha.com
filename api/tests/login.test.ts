@@ -10,9 +10,19 @@ import twitch from "@/services/twitch";
 import { createOAuthState, oauthStatesMatch } from "@/controllers/login";
 import { ExternalServiceError } from "@/utils/httpErrors";
 import achievements from "@/handlers/achievements";
+import { getOAuthProvider, type OAuthProviderSlug } from "@/services/oauth";
 
 let testUser: TestUser;
 const oauthUserIds: string[] = [];
+
+const startOAuth = async (provider = "twitch") => {
+    const response = await fetch(`${baseURL}/login/${provider}/redirect`, { redirect: "manual" });
+    const location = response.headers.get("location")!;
+    const state = new URL(location).searchParams.get("state")!;
+    const setCookie = response.headers.get("set-cookie") ?? "";
+    const cookie = setCookie.match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+    return { response, state, cookie, location };
+};
 
 beforeAll(async () => {
     testUser = await createTestUser("login");
@@ -98,6 +108,20 @@ describe("Login Routes", () => {
             expect(Array.isArray(json.data.achievements)).toBe(true);
         });
 
+        test("retorna provedores sem expor campos internos", async () => {
+            const res = await fetch(`${baseURL}/login/validate`, {
+                headers: { Authorization: testUser.token },
+            });
+            expect(res.status).toBe(200);
+            const json = (await res.json()) as { data: Record<string, unknown> & { authProviders: unknown[] } };
+            expect(json.data.authProviders).toEqual([
+                expect.objectContaining({ provider: "twitch", linkedAt: expect.any(String) }),
+            ]);
+            expect(json.data).not.toHaveProperty("sessions");
+            expect(json.data).not.toHaveProperty("twitchId");
+            expect(json.data).not.toHaveProperty("oauthAccounts");
+        });
+
         test("retorna readableLimit → 200", async () => {
             const res = await fetch(`${baseURL}/login/validate`, {
                 headers: { Authorization: testUser.token },
@@ -173,14 +197,15 @@ describe("Login Routes", () => {
         });
 
         test("erro assíncrono não expõe stack ou objeto interno", async () => {
-            const res = await fetch(`${baseURL}/login/twitch/callback?state=expected`, {
-                headers: { Cookie: "fd_oauth_state=expected" },
+            const oauth = await startOAuth();
+            const res = await fetch(`${baseURL}/login/twitch/callback?state=${oauth.state}`, {
+                headers: { Cookie: oauth.cookie },
                 redirect: "manual",
             });
-            expect(res.status).toBe(500);
+            expect(res.status).toBe(400);
             const body = await res.text();
             const json = JSON.parse(body) as { code: string };
-            expect(json.code).toBe("internal_error");
+            expect(json.code).toBe("oauth_code_invalid");
             expect(body).not.toContain("ZodError");
             expect(body).not.toContain("stack");
             expect(body).not.toContain("client_secret");
@@ -216,11 +241,11 @@ describe("Login Routes", () => {
             twitch.fetchUserData = async () => ({ profile_image_url: "https://example.com/avatar.png" }) as never;
 
             try {
-                const state = createOAuthState();
+                const oauth = await startOAuth();
                 const res = await fetch(
-                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(state)}`,
+                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(oauth.state)}`,
                     {
-                        headers: { Cookie: `fd_oauth_state=${encodeURIComponent(state)}` },
+                        headers: { Cookie: oauth.cookie },
                         redirect: "manual",
                     },
                 );
@@ -272,10 +297,10 @@ describe("Login Routes", () => {
             twitch[stage === "auth" ? "fetchAuthDataFromCallback" : stage === "token" ? "fetchTokenData" : stage === "color" ? "fetchUserColor" : "fetchUserData"] = failure as never;
 
             try {
-                const state = createOAuthState();
+                const oauth = await startOAuth();
                 const res = await fetch(
-                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(state)}`,
-                    { headers: { Cookie: `fd_oauth_state=${state}` }, redirect: "manual" },
+                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(oauth.state)}`,
+                    { headers: { Cookie: oauth.cookie }, redirect: "manual" },
                 );
                 expect(res.status).toBe(418);
                 const body = await res.text();
@@ -287,6 +312,287 @@ describe("Login Routes", () => {
                 twitch.fetchTokenData = originals.token;
                 twitch.fetchUserColor = originals.color;
                 twitch.fetchUserData = originals.user;
+            }
+        });
+    });
+
+    describe("OAuth multi-provider", () => {
+        const mockProvider = (provider: OAuthProviderSlug, providerAccountId: string) => {
+            const adapter = getOAuthProvider(provider);
+            const originals = {
+                exchangeCode: adapter.exchangeCode,
+                fetchProfile: adapter.fetchProfile,
+            };
+            adapter.exchangeCode = async () => ({ accessToken: "sentinel-access-token" });
+            adapter.fetchProfile = async () => ({
+                providerAccountId,
+                displayName: `${provider} user`,
+                profileImage: "https://example.com/oauth-avatar.png",
+                color: "#abcdef",
+            });
+            return () => {
+                adapter.exchangeCode = originals.exchangeCode;
+                adapter.fetchProfile = originals.fetchProfile;
+            };
+        };
+
+        const finishProviderCallback = async (provider: OAuthProviderSlug) => {
+            const oauth = await startOAuth(provider);
+            return fetch(
+                `${baseURL}/login/${provider}/callback?code=valid&state=${encodeURIComponent(oauth.state)}&ignored=value`,
+                {
+                    headers: { Cookie: oauth.cookie },
+                    redirect: "manual",
+                },
+            );
+        };
+
+        test.each(["google", "discord"] as const)("cria e reutiliza usuário com %s", async (provider) => {
+            const providerAccountId = `${provider}-${crypto.randomUUID()}`;
+            const restore = mockProvider(provider, providerAccountId);
+            try {
+                const first = await finishProviderCallback(provider);
+                expect(first.status).toBe(302);
+                expect(first.headers.get("set-cookie")).toContain("Token=");
+
+                const account = await database.oAuthAccount.findUniqueOrThrow({
+                    where: {
+                        provider_providerAccountId: {
+                            provider: provider.toUpperCase() as "GOOGLE" | "DISCORD",
+                            providerAccountId,
+                        },
+                    },
+                    include: { user: true },
+                });
+                oauthUserIds.push(account.userId);
+                expect(account.user.twitchId).toBeNull();
+                expect(account.user.name).toBe(`${provider} user`);
+
+                const second = await finishProviderCallback(provider);
+                expect(second.status).toBe(302);
+                const users = await database.user.count({
+                    where: {
+                        oauthAccounts: {
+                            some: {
+                                provider: provider.toUpperCase() as "GOOGLE" | "DISCORD",
+                                providerAccountId,
+                            },
+                        },
+                    },
+                });
+                expect(users).toBe(1);
+            } finally {
+                restore();
+            }
+        });
+
+        test("callback concorrente reutiliza a identidade sem criar usuário órfão", async () => {
+            const providerAccountId = `google-concurrent-${crypto.randomUUID()}`;
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const responses = await Promise.all([
+                    finishProviderCallback("google"),
+                    finishProviderCallback("google"),
+                ]);
+                expect(responses.map((response) => response.status)).toEqual([302, 302]);
+
+                const accounts = await database.oAuthAccount.findMany({
+                    where: { provider: "GOOGLE", providerAccountId },
+                });
+                expect(accounts).toHaveLength(1);
+                oauthUserIds.push(accounts[0]!.userId);
+
+                const orphanedUsers = await database.user.count({
+                    where: {
+                        name: "google user",
+                        oauthAccounts: { none: {} },
+                    },
+                });
+                expect(orphanedUsers).toBe(0);
+            } finally {
+                restore();
+            }
+        });
+
+        test("vincula, confirma com JWT e permite desvincular sem remover o último provedor", async () => {
+            const providerAccountId = `google-link-${crypto.randomUUID()}`;
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const start = await fetch(`${baseURL}/login/google/link`, {
+                    method: "POST",
+                    headers: { Authorization: testUser.token },
+                });
+                expect(start.status).toBe(200);
+                const startBody = (await start.json()) as { data: { redirectUrl: string } };
+                const redirectPath = new URL(startBody.data.redirectUrl);
+                const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                    redirect: "manual",
+                });
+                expect(intermediate.status).toBe(302);
+                const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+                const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+
+                const callback = await fetch(
+                    `${baseURL}/login/google/callback?code=valid&state=${encodeURIComponent(state)}&scope=profile`,
+                    { headers: { Cookie: cookie }, redirect: "manual" },
+                );
+                expect(callback.status).toBe(302);
+                const completionTicket = decodeURIComponent(
+                    new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+                );
+                expect(completionTicket).not.toBe("");
+                expect(
+                    await database.oAuthAccount.findUnique({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: "GOOGLE",
+                                providerAccountId,
+                            },
+                        },
+                    }),
+                ).toBeNull();
+
+                const complete = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: testUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket: completionTicket }),
+                });
+                expect(complete.status).toBe(200);
+                expect(
+                    await database.oAuthAccount.findUniqueOrThrow({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: "GOOGLE",
+                                providerAccountId,
+                            },
+                        },
+                    }),
+                ).toMatchObject({ userId: testUser.id });
+
+                const replay = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: testUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket: completionTicket }),
+                });
+                expect(replay.status).toBe(400);
+                expect(((await replay.json()) as { code: string }).code).toBe("oauth_link_ticket_invalid");
+
+                const unlinkGoogle = await fetch(`${baseURL}/login/accounts/google`, {
+                    method: "DELETE",
+                    headers: { Authorization: testUser.token },
+                });
+                expect(unlinkGoogle.status).toBe(200);
+
+                const unlinkLast = await fetch(`${baseURL}/login/accounts/twitch`, {
+                    method: "DELETE",
+                    headers: { Authorization: testUser.token },
+                });
+                expect(unlinkLast.status).toBe(409);
+                expect(((await unlinkLast.json()) as { code: string }).code).toBe("last_login_provider");
+            } finally {
+                restore();
+            }
+        });
+
+        test("impede que outro usuário conclua uma vinculação compartilhada", async () => {
+            const otherUser = await createTestUser("oauth-link-other");
+            const providerAccountId = `discord-link-${crypto.randomUUID()}`;
+            const restore = mockProvider("discord", providerAccountId);
+            try {
+                const start = await fetch(`${baseURL}/login/discord/link`, {
+                    method: "POST",
+                    headers: { Authorization: testUser.token },
+                });
+                const redirectUrl = ((await start.json()) as { data: { redirectUrl: string } }).data.redirectUrl;
+                const redirectPath = new URL(redirectUrl);
+                const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                    redirect: "manual",
+                });
+                const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+                const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+                const callback = await fetch(
+                    `${baseURL}/login/discord/callback?code=valid&state=${encodeURIComponent(state)}`,
+                    { headers: { Cookie: cookie }, redirect: "manual" },
+                );
+                const ticket = decodeURIComponent(
+                    new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+                );
+
+                const wrongUser = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: otherUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket }),
+                });
+                expect(wrongUser.status).toBe(403);
+                expect(((await wrongUser.json()) as { code: string }).code).toBe("oauth_link_user_mismatch");
+                expect(
+                    await database.oAuthAccount.findUnique({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: "DISCORD",
+                                providerAccountId,
+                            },
+                        },
+                    }),
+                ).toBeNull();
+            } finally {
+                restore();
+                await deleteTestUser(otherUser.id);
+            }
+        });
+
+        test("rejeita identidade que já pertence a outro usuário", async () => {
+            const otherUser = await createTestUser("oauth-link-owner");
+            const providerAccountId = `google-owned-${crypto.randomUUID()}`;
+            await database.oAuthAccount.create({
+                data: {
+                    provider: "GOOGLE",
+                    providerAccountId,
+                    userId: otherUser.id,
+                },
+            });
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const start = await fetch(`${baseURL}/login/google/link`, {
+                    method: "POST",
+                    headers: { Authorization: testUser.token },
+                });
+                const redirectUrl = ((await start.json()) as { data: { redirectUrl: string } }).data.redirectUrl;
+                const redirectPath = new URL(redirectUrl);
+                const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                    redirect: "manual",
+                });
+                const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+                const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+                const callback = await fetch(
+                    `${baseURL}/login/google/callback?code=valid&state=${encodeURIComponent(state)}`,
+                    { headers: { Cookie: cookie }, redirect: "manual" },
+                );
+                const ticket = decodeURIComponent(
+                    new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+                );
+                const complete = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: testUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket }),
+                });
+                expect(complete.status).toBe(409);
+                expect(((await complete.json()) as { code: string }).code).toBe("oauth_account_already_linked");
+            } finally {
+                restore();
+                await deleteTestUser(otherUser.id);
             }
         });
     });

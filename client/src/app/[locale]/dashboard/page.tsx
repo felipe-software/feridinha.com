@@ -7,6 +7,7 @@ import useUserData from "@/hooks/useUserData"
 import Achievement from "@/components/dashboard/Achievement"
 import { AlbunsView } from "@/components/dashboard/AlbunsView"
 import Integrations from "@/components/dashboard/IntegrationsBox"
+import LinkedAccountsBox from "@/components/dashboard/LinkedAccountsBox"
 import { UploadsView } from "@/components/dashboard/UploadsView"
 import { AnimatePresence } from "motion/react"
 import { useFormatter, useTranslations } from "next-intl"
@@ -102,6 +103,9 @@ function DashboardPage() {
                             ))}
                         </div>
                     </AchievementsBox>
+                    <LinkedAccountsBox
+                        linkedAccounts={user.data.authProviders}
+                    />
                     <Integrations />
                 </IdentityCard>
 

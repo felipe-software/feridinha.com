@@ -34,8 +34,14 @@
   "Auth": {
     "login": "Sign in",
     "loginWithTwitch": "Sign in with Twitch",
+    "loginWith": {
+      "twitch": "Continue with Twitch",
+      "google": "Continue with Google",
+      "discord": "Continue with Discord"
+    },
     "loginAgreement": "By signing in, you agree to our <terms>terms of service</terms>",
     "loginButton": "LOGIN",
+    "oauthAccessDenied": "Sign-in was cancelled or not authorized",
     "mustLogin": "You must sign in to access this page",
     "sessionEnded": "Your session was ended. Please sign in again",
     "sessionExpired": "Your session expired. Please sign in again",
@@ -270,6 +276,21 @@
     "apiKeysTitle": "API keys",
     "apiKeyAutoCreatedTooltip": "This key was created automatically by the \"How to use it\" page",
     "noApiKeys": "You don't have any integration keys yet, <link>learn how to use them here</link>",
+    "linkedAccountsTitle": "Connected accounts",
+    "oauthProviders": {
+      "twitch": "Twitch",
+      "google": "Google",
+      "discord": "Discord"
+    },
+    "oauthConnected": "Connected",
+    "oauthNotConnected": "Not connected",
+    "oauthConnect": "Connect",
+    "oauthDisconnect": "Disconnect",
+    "oauthLastProviderHint": "You must keep at least one login method",
+    "oauthLinkSuccess": "Account connected successfully",
+    "oauthLinkError": "The account could not be connected",
+    "oauthUnlinkSuccess": "Account disconnected successfully",
+    "oauthUnlinkConfirm": "Disconnect {provider}? Signing in with it later may create a new account.",
     "nameColumn": "Name",
     "sizeColumn": "Size",
     "dateColumn": "Date"
@@ -307,7 +328,7 @@
     "accept": "By using the service, you agree to the terms below.",
     "tosTitle": "Terms of Service",
     "privacyTitle": "Privacy Policy",
-    "lastUpdated": "Last updated: April 13, 2025",
+    "lastUpdated": "Last updated: July 24, 2026",
     "sections": {
       "ugc": {
         "title": "User-generated content",
@@ -339,15 +360,15 @@
       },
       "collection": {
         "title": "Data collection",
-        "body": "We collect minimal operational data, including IP and User-Agent."
+        "body": "We collect minimal operational data, including IP and User-Agent. When you create an account, we also store the stable login-provider identifier and the display name and profile picture used in the service."
       },
       "usage": {
         "title": "Use of data",
-        "body": "This data is used for security, abuse prevention and identification of parties responsible for content that violates the terms."
+        "body": "This data is used for authentication, profile display, security, abuse prevention and identification of parties responsible for content that violates the terms. We do not store your password or OAuth tokens from Google, Discord or Twitch."
       },
       "sharing": {
         "title": "Data sharing",
-        "body": "We do not share your data with third parties except when necessary to comply with legal obligations."
+        "body": "Signing in requires communication with the provider you choose. We do not sell your data or share it for advertising, except as needed to operate authentication or comply with legal obligations."
       },
       "security": {
         "title": "Security",

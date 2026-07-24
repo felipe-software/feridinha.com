@@ -34,8 +34,14 @@
   "Auth": {
     "login": "Fazer login",
     "loginWithTwitch": "Fazer login com a Twitch",
+    "loginWith": {
+      "twitch": "Entrar com Twitch",
+      "google": "Entrar com Google",
+      "discord": "Entrar com Discord"
+    },
     "loginAgreement": "Ao fazer login, você concorda com nossos <terms>termos de uso</terms>",
     "loginButton": "LOGIN",
+    "oauthAccessDenied": "O login foi cancelado ou não autorizado",
     "mustLogin": "Você deve fazer login para acessar essa página",
     "sessionEnded": "Sua sessão foi finalizada, faça login novamente",
     "sessionExpired": "Sua sessão expirou, faça login novamente",
@@ -270,6 +276,21 @@
     "apiKeysTitle": "Chaves de API",
     "apiKeyAutoCreatedTooltip": "Essa chave foi criada automaticamente pela página de \"Como usar\"",
     "noApiKeys": "Você ainda não tem nenhuma chave de integração, <link>aprenda a usar aqui</link>",
+    "linkedAccountsTitle": "Contas conectadas",
+    "oauthProviders": {
+      "twitch": "Twitch",
+      "google": "Google",
+      "discord": "Discord"
+    },
+    "oauthConnected": "Conectado",
+    "oauthNotConnected": "Não conectado",
+    "oauthConnect": "Conectar",
+    "oauthDisconnect": "Desconectar",
+    "oauthLastProviderHint": "Você precisa manter pelo menos um método de login",
+    "oauthLinkSuccess": "Conta conectada com sucesso",
+    "oauthLinkError": "Não foi possível conectar a conta",
+    "oauthUnlinkSuccess": "Conta desconectada com sucesso",
+    "oauthUnlinkConfirm": "Desconectar {provider}? Um login futuro por esse provedor poderá criar uma nova conta.",
     "nameColumn": "Nome",
     "sizeColumn": "Tamanho",
     "dateColumn": "Data"
@@ -307,7 +328,7 @@
     "accept": "Ao utilizar o serviço, você concorda com os termos abaixo.",
     "tosTitle": "Termos de Serviço",
     "privacyTitle": "Política de Privacidade",
-    "lastUpdated": "Última atualização: 13 de abril de 2025",
+    "lastUpdated": "Última atualização: 24 de julho de 2026",
     "sections": {
       "ugc": {
         "title": "Conteúdo gerado pelo usuário",
@@ -339,15 +360,15 @@
       },
       "collection": {
         "title": "Coleta de dados",
-        "body": "Coletamos dados mínimos de operação, incluindo IP e User-Agent."
+        "body": "Coletamos dados mínimos de operação, incluindo IP e User-Agent. Quando você cria uma conta, também armazenamos o identificador estável do provedor de login e o nome e a foto de perfil usados para exibição."
       },
       "usage": {
         "title": "Uso dos dados",
-        "body": "Esses dados são utilizados para segurança, prevenção de abuso e identificação de responsáveis por conteúdo que viole os termos."
+        "body": "Esses dados são utilizados para autenticação, exibição do perfil, segurança, prevenção de abuso e identificação de responsáveis por conteúdo que viole os termos. Não armazenamos sua senha nem tokens OAuth do Google, Discord ou Twitch."
       },
       "sharing": {
         "title": "Compartilhamento",
-        "body": "Não compartilhamos seus dados com terceiros, exceto quando necessário para cumprir obrigações legais."
+        "body": "O login exige comunicação com o provedor escolhido. Não vendemos seus dados nem os compartilhamos para publicidade, exceto quando necessário para operar a autenticação ou cumprir obrigações legais."
       },
       "security": {
         "title": "Segurança",

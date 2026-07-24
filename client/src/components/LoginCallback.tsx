@@ -7,13 +7,30 @@ import { useRouter } from "@/i18n/navigation"
 import Cookies from "js-cookie"
 import { useEffect } from "react"
 import { clearAuthSession } from "@/services/api/authSession"
+import { toast } from "react-toastify"
+import { useTranslations } from "next-intl"
+import { getOAuthFragmentValue } from "@/lib/oauth"
 
 const LoginCallback = () => {
     const router = useRouter()
     const setToken = useToken((state) => state.setToken)
     const { setUserData } = useUserDataStore()
+    const t = useTranslations("Auth")
 
     useEffect(() => {
+        const oauthError = getOAuthFragmentValue(
+            window.location.hash,
+            "oauth-error",
+        )
+        if (oauthError) {
+            toast.error(t("oauthAccessDenied"))
+            window.history.replaceState(
+                null,
+                "",
+                `${window.location.pathname}${window.location.search}`,
+            )
+        }
+
         const checkAndSetupSession = async () => {
             const tokenCookie = Cookies.get("Token")
             if (tokenCookie) {
@@ -42,7 +59,7 @@ const LoginCallback = () => {
         }
 
         checkAndSetupSession()
-    }, [setToken, setUserData, router])
+    }, [setToken, setUserData, router, t])
 
     return null
 }
