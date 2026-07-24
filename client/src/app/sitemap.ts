@@ -1,20 +1,26 @@
 import type { MetadataRoute } from "next"
-import { IS_MURAL_AVAILABLE } from "@/config/features"
+import { SITE_URL } from "@/lib/seo"
 
-const SITE_URL = "https://feridinha.com"
-const publicPathnames = ["/", "/tutorial", "/faq", "/termos-de-servico"]
+const pagePairs = [
+    ["/", "/en"],
+    ["/faq", "/en/faq"],
+    ["/tutorial", "/en/tutorial"],
+    ["/termos-de-servico.html", "/termos-de-servico-en.html"],
+] as const
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const pathnames = IS_MURAL_AVAILABLE ? [...publicPathnames, "/mural"] : publicPathnames
+    return pagePairs.flatMap(([ptPath, enPath]) => {
+        const languages = {
+            "pt-BR": new URL(ptPath, SITE_URL).toString(),
+            en: new URL(enPath, SITE_URL).toString(),
+            "x-default": new URL(ptPath, SITE_URL).toString(),
+        }
 
-    return pathnames.map((pathname) => ({
-        url: `${SITE_URL}${pathname === "/" ? "" : pathname}`,
-        alternates: {
-            languages: {
-                "pt-BR": `${SITE_URL}${pathname === "/" ? "" : pathname}`,
-                en: `${SITE_URL}/en${pathname === "/" ? "" : pathname}`,
-                "x-default": `${SITE_URL}${pathname === "/" ? "" : pathname}`,
+        return [ptPath, enPath].map((pathname) => ({
+            url: new URL(pathname, SITE_URL).toString(),
+            alternates: {
+                languages,
             },
-        },
-    }))
+        }))
+    })
 }

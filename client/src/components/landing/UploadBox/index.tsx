@@ -6,16 +6,19 @@ import SocialLinkForm from "@/components/landing/UploadBox/SocialLinkForm"
 import { getClipboardHttpUrl, isEditablePasteTarget } from "@/components/landing/UploadBox/clipboard"
 import { UploadBoxContainer, UploadBoxWrapper } from "@/components/landing/UploadBox/styles"
 import apiService, { Album } from "@/services/api"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { ChangeEventHandler, useCallback, useEffect, useRef, useState } from "react"
 import { LuCircleHelp } from "react-icons/lu"
 import { toast } from "react-toastify"
 import { RectReadOnly } from "react-use-measure"
+import type { AppLocale } from "@/i18n/config"
+import { getTermsUrl } from "@/lib/seo"
 
 const SOCIAL_LINK_DETECTION_DELAY_MS = 600
 
 export default function UploadBox() {
     const t = useTranslations("UploadBox")
+    const locale = useLocale() as AppLocale
     const [uploads, setUploads] = useState<UploadItem[]>([])
     const [isResultOpen, setResultOpen] = useState(false)
     const fileRef = useRef<HTMLInputElement>(null)
@@ -298,7 +301,7 @@ export default function UploadBox() {
                             <p>
                                 {t.rich("uploadAgreement", {
                                     terms: (chunks) => (
-                                        <a href="/termos-de-servico.html" target="_blank">
+                                        <a href={getTermsUrl(locale)} target="_blank">
                                             {chunks}
                                         </a>
                                     ),

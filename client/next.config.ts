@@ -1,6 +1,7 @@
 import type { NextConfig } from "next"
 import createNextIntlPlugin from "next-intl/plugin"
 import { POSTHOG_PROXY_PATH } from "./src/config/posthog"
+import { SEO_REDIRECTS } from "./src/config/seoRedirects"
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
@@ -42,7 +43,9 @@ const nextConfig: NextConfig = {
             ],
         }
     },
-    skipTrailingSlashRedirect: true,
+    async redirects() {
+        return [...SEO_REDIRECTS]
+    },
 }
 
 const withNextIntl = createNextIntlPlugin()

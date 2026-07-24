@@ -1,52 +1,17 @@
-"use client"
+import type { Metadata } from "next"
+import type { AppLocale } from "@/i18n/config"
+import { buildPageMetadata } from "@/lib/seo"
+import HomePageClient from "./_page-client"
 
-export const dynamic = "force-dynamic"
+type HomePageProps = {
+    params: Promise<{ locale: AppLocale }>
+}
 
-import { useEffect } from "react"
-import Banner from "@/components/landing/Banner"
-import Cards from "@/components/landing/Cards"
-import FeaturesBox from "@/components/landing/FeaturesBox"
-import styles from "@/components/landing/landing.module.css"
-import Reviews from "@/components/landing/Reviews"
-import UploadBox from "@/components/landing/UploadBox"
+export async function generateMetadata({ params }: HomePageProps): Promise<Metadata> {
+    const { locale } = await params
+    return buildPageMetadata("home", locale)
+}
 
-export default function Page() {
-    useEffect(() => {
-        document.documentElement.style.setProperty(
-            "--nav-highlight",
-            "rgb(189, 147, 249)",
-        )
-    }, [])
-    return (
-        <div className={styles.pageContainer} key="tutorial" style={{ viewTransitionName: "page-content" }}>
-            <div
-                className={styles.wrapper}
-                style={{
-                    minHeight: "fit-content",
-                    background: "var(--base)",
-                }}
-            >
-                <FeaturesBox />
-                <UploadBox />
-            </div>
-            <div
-                className={styles.wrapper}
-                style={{ backgroundColor: "var(--base-dark-transparent)" }}
-            >
-                <Cards />
-            </div>
-            <div
-                className={styles.wrapper}
-                style={{ backgroundColor: "var(--base)" }}
-            >
-                <Reviews />
-            </div>
-            <div
-                className={styles.wrapper}
-                style={{ backgroundColor: "var(--base-dark-transparent)" }}
-            >
-                <Banner />
-            </div>
-        </div>
-    )
+export default function HomePage() {
+    return <HomePageClient />
 }

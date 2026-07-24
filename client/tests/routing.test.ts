@@ -401,7 +401,7 @@ describe("locale URL routing", () => {
         expect(response.headers.get("location")).toBe("https://feridinha.com/faq")
     })
 
-    test("serves English URLs with hreflang alternates and updates the preference", () => {
+    test("serves English URLs without duplicate HTTP hreflang headers and updates the preference", () => {
         const response = proxy(
             requestWithLocaleHeaders({
                 pathname: "/en/faq",
@@ -411,8 +411,7 @@ describe("locale URL routing", () => {
 
         expect(response.status).toBe(200)
         expect(response.cookies.get(LOCALE_COOKIE)?.value).toBe("en")
-        expect(response.headers.get("link")).toContain('hreflang="en"')
-        expect(response.headers.get("link")).toContain('hreflang="pt-BR"')
+        expect(response.headers.get("link")).toBeNull()
     })
 
     test("publishes Portuguese and English sitemap alternates", () => {
@@ -424,10 +423,10 @@ describe("locale URL routing", () => {
             en: "https://feridinha.com/en/faq",
             "x-default": "https://feridinha.com/faq",
         })
-        expect(entries.find((entry) => entry.url === "https://feridinha.com")?.alternates?.languages).toEqual({
-            "pt-BR": "https://feridinha.com",
+        expect(entries.find((entry) => entry.url === "https://feridinha.com/")?.alternates?.languages).toEqual({
+            "pt-BR": "https://feridinha.com/",
             en: "https://feridinha.com/en",
-            "x-default": "https://feridinha.com",
+            "x-default": "https://feridinha.com/",
         })
     })
 

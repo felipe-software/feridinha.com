@@ -2,7 +2,8 @@ import { motion, MotionProps } from "motion/react"
 import { memo, useEffect, useRef } from "react"
 import styled from "styled-components"
 
-const Container = styled(motion.h1)`
+const Container = styled(motion.span)`
+    display: block;
     position: relative;
     width: max-content;
     white-space: nowrap;
@@ -11,10 +12,12 @@ const Container = styled(motion.h1)`
     --color-1: rgb(255, 148, 191);
     --color-2: rgb(149, 131, 255);
     transition: transform 0.15s ease;
+    font-size: 2rem;
 
-    .base {
+    &::before {
+        content: "Feridinha.com";
         display: block;
-        opacity: 0;
+        visibility: hidden;
         pointer-events: none;
         user-select: none;
     }
@@ -23,6 +26,13 @@ const Container = styled(motion.h1)`
         position: absolute;
         inset: 0;
         display: flex;
+    }
+
+    .animated::after {
+        content: "™";
+        display: inline-block;
+        font-family: inherit;
+        color: var(--color-2);
     }
 
     .animated span {
@@ -110,7 +120,7 @@ export const LogoText = memo(
             autoAnimateDelay?: number
         }
     ) => {
-        const ref = useRef<HTMLHeadingElement>(null)
+        const ref = useRef<HTMLSpanElement>(null)
         const spanRefs = useRef<(HTMLSpanElement | null)[]>(
             Array.from({ length: props.children.length }, () => null)
         )
@@ -255,7 +265,6 @@ export const LogoText = memo(
                 // onMouseEnter={onMouseEnter}
                 {...props}
                 ref={ref}
-                aria-label={props.children}
                 // @ts-ignore
                 onMouseMove={onMouseMove}
                 onMouseLeave={() => {
@@ -263,9 +272,6 @@ export const LogoText = memo(
                 }}
                 className="notranslate"
             >
-                <span className="base" aria-hidden="true">
-                    {props.children}
-                </span>
                 <span className="animated" aria-hidden="true">
                     {props.children.split("").map((d, i) => (
                         <motion.span
