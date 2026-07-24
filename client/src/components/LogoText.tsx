@@ -8,6 +8,7 @@ const Container = styled(motion.span)`
     width: max-content;
     white-space: nowrap;
     font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
 
     --color-1: rgb(255, 148, 191);
     --color-2: rgb(149, 131, 255);
