@@ -3,10 +3,10 @@
 import useTokenStore from "@/hooks/useToken"
 import useUserData from "@/hooks/useUserData"
 import { handleAuthSessionError } from "@/services/api/authSession"
+import { useRouter } from "@/i18n/navigation"
 import { useTranslations } from "next-intl"
 
 import React, { ReactNode, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { toast } from "react-toastify"
 
 const PrivateRoute: React.FC<{ children: ReactNode }> = ({ children }) => {

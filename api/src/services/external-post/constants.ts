@@ -56,7 +56,13 @@ export const PLATFORM_MEDIA_HOSTS = {
         "redditstatic.com",
         new URL(env.MURAL_VXREDDIT_URL).hostname,
     ],
-    instagram: ["zzinstagram.com", "vxinstagram.com", "oginstagram.com"],
+    instagram: [
+        "zzinstagram.com",
+        "vxinstagram.com",
+        "oginstagram.com",
+        "eeinstagram.com",
+        "uuinstagram.com",
+    ],
     tiktok: ["tnktok.com"],
     twitter: ["vxtwitter.com", "twimg.com"],
 } as const;

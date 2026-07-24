@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import Loading from "@/components/Loading"
 import { useAlbumQuery } from "@/hooks/useAlbumQuery"
 import { PageContainer } from "@/components/dashboard/styles"
@@ -147,7 +145,7 @@ const AlbumItem = ({ upload }: { upload: Upload }) => {
     )
 }
 
-export default function AlbumPage() {
+export default function AlbumPageClient() {
     const params = useParams()
     const albumId = params.albumId as string
     const album = useAlbumQuery(albumId)

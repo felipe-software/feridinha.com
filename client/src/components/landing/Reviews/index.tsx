@@ -1,7 +1,7 @@
 import { Button } from "@/components/Button"
 import Loading from "@/components/Loading"
 import { useModalStore } from "@/hooks/useModalStore"
-import CreateReviewPage from "@/app/create-review/page"
+import CreateReviewPage from "@/app/[locale]/create-review/page"
 import apiService, { MyReview, Review } from "@/services/api"
 import { useFormatter, useTranslations } from "next-intl"
 import { useEffect, useState } from "react"

@@ -4,11 +4,13 @@ import { Button } from "@/components/Button"
 import { useCreatePostMutation } from "@/hooks/mutations/usePostMutations"
 import { useModalStore } from "@/hooks/useModalStore"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import styled from "styled-components"
 import z from "zod"
+import type { AppLocale } from "@/i18n/config"
+import { getTermsUrl } from "@/lib/seo"
 
 export const MyInputWrapper = styled.div`
     input {
@@ -88,6 +90,7 @@ const CreatePostWrapper = styled.div`
 
 export const CreatePostForm = ({ communityId }: { communityId: string }) => {
     const t = useTranslations("Mural")
+    const locale = useLocale() as AppLocale
     const createPostMutation = useCreatePostMutation()
     const modalStore = useModalStore()
     const formSchema = useMemo(
@@ -150,7 +153,7 @@ export const CreatePostForm = ({ communityId }: { communityId: string }) => {
                 <p className="text-white">
                     {t.rich("createPostAgreement", {
                         terms: (chunks) => (
-                            <a href="/termos-de-servico.html" target="_blank" className="text-dracula-cyan">
+                            <a href={getTermsUrl(locale)} target="_blank" className="text-dracula-cyan">
                                 {chunks}
                             </a>
                         ),

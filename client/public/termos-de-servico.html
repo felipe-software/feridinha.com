@@ -3,18 +3,31 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <script>
-            const savedLocale = document.cookie
-                .split("; ")
-                .find((cookie) => cookie.startsWith("fd_locale="))
-                ?.split("=")[1]
-            const locale = savedLocale || navigator.language
-
-            if (locale && !locale.toLowerCase().startsWith("pt")) {
-                window.location.replace("/termos-de-servico-en.html")
-            }
-        </script>
-        <title>Termos de Serviço e Política de Privacidade</title>
+        <title>Termos de Serviço e Política de Privacidade | Feridinha</title>
+        <meta
+            name="description"
+            content="Leia os Termos de Serviço e a Política de Privacidade do Feridinha."
+        />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://feridinha.com/termos-de-servico.html" />
+        <link rel="alternate" hreflang="pt-BR" href="https://feridinha.com/termos-de-servico.html" />
+        <link rel="alternate" hreflang="en" href="https://feridinha.com/termos-de-servico-en.html" />
+        <link rel="alternate" hreflang="x-default" href="https://feridinha.com/termos-de-servico.html" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Feridinha" />
+        <meta property="og:locale" content="pt_BR" />
+        <meta property="og:locale:alternate" content="en_US" />
+        <meta property="og:title" content="Termos de Serviço e Política de Privacidade | Feridinha" />
+        <meta property="og:description" content="Leia os Termos de Serviço e a Política de Privacidade do Feridinha." />
+        <meta property="og:url" content="https://feridinha.com/termos-de-servico.html" />
+        <meta property="og:image" content="https://feridinha.com/banner.png" />
+        <meta property="og:image:width" content="620" />
+        <meta property="og:image:height" content="349" />
+        <meta property="og:image:alt" content="Feridinha — upload de arquivos grátis" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Termos de Serviço e Política de Privacidade | Feridinha" />
+        <meta name="twitter:description" content="Leia os Termos de Serviço e a Política de Privacidade do Feridinha." />
+        <meta name="twitter:image" content="https://feridinha.com/banner.png" />
         <style>
             body {
                 font-family: Arial, sans-serif;
@@ -39,9 +52,15 @@
                 margin-top: 40px;
                 font-style: italic;
             }
+            .language-link {
+                text-align: right;
+            }
         </style>
     </head>
     <body>
+        <p class="language-link" lang="en">
+            <a href="/termos-de-servico-en.html" hreflang="en">Read in English</a>
+        </p>
         <h1>Termos de Serviço e Política de Privacidade</h1>
 
         <p>
@@ -82,7 +101,7 @@
 
             <p>
                 Para reportar violações, você pode enviar um email para
-                <a href="/cdn-cgi/l/email-protection#a5d1cad6e5c3c0d7ccc1cccbcdc48bc6cac8"><span class="__cf_email__" data-cfemail="56223925163033243f323f383e377835393b">[email&#160;protected]</span></a> ou
+                <a href="mailto:tos@feridinha.com">tos@feridinha.com</a> ou
                 entrar em contato através das redes sociais disponíveis em nossa
                 página de
                 <a href="/faq">FAQ</a>
@@ -116,7 +135,7 @@
 
         <strong>9. Denúncias:</strong> Para denunciar Conteúdo que viole estes
         termos, utilize o email
-        <a href="/cdn-cgi/l/email-protection#1b6f74685b7d7e69727f7275737a35787476"><span class="__cf_email__" data-cfemail="ed99829ead8b889f84898483858cc38e8280">[email&#160;protected]</span></a> ou entrar em
+        <a href="mailto:tos@feridinha.com">tos@feridinha.com</a> ou entrar em
         contato através das redes sociais disponíveis em nossa página de
         <a href="/faq">FAQ</a>
 
@@ -159,6 +178,5 @@
         <p class="last-update">
             <strong>Última Atualização: 13 de Abril de 2025</strong>
         </p>
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v4513226cdae34746b4dedf0b4dfa099e1781791509496" integrity="sha512-ZE9pZaUXND66v380QUtch/5sE9tPFh2zg45pR2PB0CVkCtOREv2AJKkSidISWkysEuQ0EH8faUU5du78bx87UQ==" data-cf-beacon='{"version":"2024.11.0","token":"9a36431e04994981bc6be729df6a407f","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

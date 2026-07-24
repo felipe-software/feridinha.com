@@ -1,7 +1,8 @@
 "use client"
 
 import { AppLocale } from "@/i18n/config"
-import { getStoredLocale, setStoredLocale } from "@/i18n/client"
+import { Link, usePathname, useRouter } from "@/i18n/navigation"
+import { getLocaleSwitchHref } from "@/i18n/switchLocale"
 import LoginButton from "@/components/LoginButton"
 import { LogoText } from "@/components/LogoText"
 import { BrainMadeIcon } from "@/components/Navbar/BrainMadeIcon"
@@ -13,9 +14,6 @@ import useUserData from "@/hooks/useUserData"
 import { UserData } from "@/hooks/useUserDataStore"
 import { AnimatePresence, motion } from "motion/react"
 import { useLocale, useTranslations } from "next-intl"
-// import Link from "next/link"
-import { Link } from "next-view-transitions"
-import { usePathname, useRouter } from "next/navigation"
 import { memo, useEffect, useState } from "react"
 import styled from "styled-components"
 
@@ -67,7 +65,11 @@ function NavLinks({
             <LinkBase path="/">{t("upload")}</LinkBase>
             <LinkBase path="/tutorial">{t("tutorial")}</LinkBase>
             <LinkBase path="/faq">{t("faq")}</LinkBase>
-            <a href="https://sync.feridinha.com" target="_blank">
+            <a
+                href="https://sync.feridinha.com"
+                target="_blank"
+                rel="nofollow external noopener noreferrer"
+            >
                 Sync
             </a>
 
@@ -127,24 +129,26 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
     }, [pathname])
 
     const handleLocaleChange = (targetLocale: AppLocale) => {
-        setStoredLocale(targetLocale)
         document.documentElement.lang = targetLocale
-        router.refresh()
+        router.replace(getLocaleSwitchHref(pathname, window.location.search), {
+            locale: targetLocale,
+        })
     }
 
     return (
         <Nav>
             <div className="locale-selector">
-                <LocaleSelector locale={locale || getStoredLocale()} onChange={handleLocaleChange} />
+                <LocaleSelector locale={locale} onChange={handleLocaleChange} />
             </div>
-            <Link href="/" className="logo">
+            <Link href="/" className="logo" aria-label="Feridinha.com">
                 <LogoText
+                    aria-hidden="true"
                     style={{ zIndex: 7, position: "relative" }}
                     autoAnimate={true}
                     autoAnimateTiming={10000}
                     autoAnimateDelay={0}
                 >
-                    Feridinha.com™
+                    Feridinha.com
                 </LogoText>
             </Link>
             <div className="description-container">
@@ -154,7 +158,9 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
                         className="brain-made"
                         style={{ display: "flex" }}
                         href="https://brainmade.org/"
-                        target="blank"
+                        target="_blank"
+                        rel="external noopener noreferrer"
+                        aria-label={`Brainmade.org — ${t("brainMade")}`}
                     >
                         <BrainMadeIcon />
                         {/* <img

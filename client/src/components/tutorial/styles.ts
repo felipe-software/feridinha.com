@@ -22,6 +22,7 @@ export const Container = styled.div`
         text-align: center;
         width: 100%;
 
+        h1,
         h2 {
             display: inline-block;
             color: var(--foreground);

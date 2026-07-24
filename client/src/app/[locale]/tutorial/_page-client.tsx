@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import LoginButton from "@/components/LoginButton"
 import Tooltip from "@/components/Tooltip"
 import useTokenStore from "@/hooks/useToken"
@@ -39,7 +37,7 @@ export default function TutorialPage() {
         <Container key="tutorial" style={{ viewTransitionName: "page-content" }}>
             <div className="title">
                 <span className="notranslate material-icon">api</span>
-                <h2>
+                <h1>
                     {t.rich("title", {
                         highlight: (chunks) => (
                             <Tooltip
@@ -50,7 +48,7 @@ export default function TutorialPage() {
                             </Tooltip>
                         ),
                     })}
-                </h2>
+                </h1>
             </div>
             <List animate={{ minHeight: "fit-content" }}>
                 <TutorialItem

@@ -7,7 +7,8 @@ export const BrainMadeIcon = () => {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             style={{ height: "1.5rem", width: "fit-content" }}
-            
+            aria-hidden="true"
+            focusable="false"
         >
             <g clipPath="url(#clip0_4_23)">
                 <path

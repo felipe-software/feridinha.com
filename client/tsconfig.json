@@ -37,7 +37,6 @@
         ".next/types/**/*.ts",
         "next-env.d.ts",
         "src",
-        "dist/types/**/*.ts",
         "../api/api-types",
         "../api/src/validations/mural.ts"
     ],
