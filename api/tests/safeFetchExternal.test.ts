@@ -245,7 +245,13 @@ describe("safeFetchExternal", () => {
             (async (_url: string, options: { hostPolicy: unknown; maxBytes: number }) => {
                 expect(options.hostPolicy).toEqual({
                     mode: "initial-only",
-                    hosts: ["zzinstagram.com", "vxinstagram.com", "oginstagram.com"],
+                    hosts: [
+                        "zzinstagram.com",
+                        "vxinstagram.com",
+                        "oginstagram.com",
+                        "eeinstagram.com",
+                        "uuinstagram.com",
+                    ],
                 });
                 expect(options.maxBytes).toBe(15 * 1024 * 1024);
                 return {
@@ -268,7 +274,13 @@ describe("safeFetchExternal", () => {
             (async (_url: string, options: { hostPolicy: unknown; maxBytes: number }) => {
                 expect(options.hostPolicy).toEqual({
                     mode: "initial-only",
-                    hosts: ["zzinstagram.com", "vxinstagram.com", "oginstagram.com"],
+                    hosts: [
+                        "zzinstagram.com",
+                        "vxinstagram.com",
+                        "oginstagram.com",
+                        "eeinstagram.com",
+                        "uuinstagram.com",
+                    ],
                 });
                 expect(options.maxBytes).toBe(15 * 1024 * 1024);
                 return {
@@ -282,6 +294,33 @@ describe("safeFetchExternal", () => {
 
         expect(media).toMatchObject({ extension: "mp4", contentType: "video/mp4", size: 11_919_235 });
     });
+
+    test.each(["eeinstagram.com", "uuinstagram.com"])(
+        "regressão Instagram aceita %s como host inicial de mídia",
+        async (hostname) => {
+            const media = await downloadExternalMedia(
+                { contentUrl: `https://${hostname}/offload/DZNQYl-BJfz/0.mp4`, contentType: "VIDEO" },
+                "instagram",
+                15 * 1024 * 1024,
+                (async (
+                    url: string,
+                    options: { hostPolicy: { mode: string; hosts: string[] }; maxBytes: number },
+                ) => {
+                    expect(new URL(url).hostname).toBe(hostname);
+                    expect(options.hostPolicy.hosts).toContain(hostname);
+                    expect(options.maxBytes).toBe(15 * 1024 * 1024);
+                    return {
+                        body: Buffer.from("video"),
+                        contentType: "video/mp4",
+                        contentDisposition: null,
+                        finalUrl: new URL(url),
+                    };
+                }) as never,
+            );
+
+            expect(media).toMatchObject({ extension: "mp4", contentType: "video/mp4", size: 5 });
+        },
+    );
 
     test("uploader externo escreve, envia ao S3 e limpa o temporário", async () => {
         const calls: string[] = [];
