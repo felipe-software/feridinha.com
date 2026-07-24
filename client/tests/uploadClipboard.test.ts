@@ -17,12 +17,12 @@ describe("social upload clipboard helpers", () => {
         expect(getClipboardHttpUrl("https://example.com/one https://example.com/two")).toBeNull()
     })
 
-    test("does not hijack editable targets other than the social input", () => {
+    test("does not hijack editable targets, including the social input", () => {
         const socialInput = { tagName: "INPUT" } as HTMLInputElement
-        expect(isEditablePasteTarget(socialInput, socialInput)).toBe(false)
-        expect(isEditablePasteTarget({ tagName: "INPUT" } as never, socialInput)).toBe(true)
-        expect(isEditablePasteTarget({ tagName: "TEXTAREA" } as never, socialInput)).toBe(true)
-        expect(isEditablePasteTarget({ tagName: "DIV", isContentEditable: true } as never, socialInput)).toBe(true)
-        expect(isEditablePasteTarget({ tagName: "DIV", isContentEditable: false } as never, socialInput)).toBe(false)
+        expect(isEditablePasteTarget(socialInput)).toBe(true)
+        expect(isEditablePasteTarget({ tagName: "INPUT" } as never)).toBe(true)
+        expect(isEditablePasteTarget({ tagName: "TEXTAREA" } as never)).toBe(true)
+        expect(isEditablePasteTarget({ tagName: "DIV", isContentEditable: true } as never)).toBe(true)
+        expect(isEditablePasteTarget({ tagName: "DIV", isContentEditable: false } as never)).toBe(false)
     })
 })

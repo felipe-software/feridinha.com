@@ -1,5 +1,4 @@
 import { useTranslations } from "next-intl"
-import { FormEventHandler, RefObject } from "react"
 import styled, { keyframes } from "styled-components"
 
 const GradientBackground = keyframes`
@@ -15,7 +14,7 @@ const GradientBackground = keyframes`
 
 `
 
-const SocialLinkBar = styled.form`
+const SocialLinkBar = styled.div`
     position: relative;
     z-index: 0;
     display: flex;
@@ -101,44 +100,6 @@ const SocialLinkBar = styled.form`
         }
     }
 
-    .import-link {
-        border: 1px solid rgba(189, 147, 249, 0.55);
-        border-radius: 0.55rem;
-        background: rgba(189, 147, 249, 0.14);
-        color: #eadcff;
-        padding: 0.68rem 0.9rem;
-        font-family: inherit;
-        font-size: 0.82rem;
-        font-weight: 650;
-        white-space: nowrap;
-        cursor: pointer;
-        transition:
-            background-color 0.2s,
-            border-color 0.2s,
-            opacity 0.2s,
-            transform 0.1s;
-
-        &:hover:not(:disabled),
-        &:focus-visible {
-            border-color: #bd93f9;
-            background: rgba(189, 147, 249, 0.24);
-        }
-
-        &:active:not(:disabled) {
-            transform: translateY(1px);
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--dracula-cyan);
-            outline-offset: 2px;
-        }
-
-        &:disabled {
-            cursor: not-allowed;
-            opacity: 0.45;
-        }
-    }
-
     @media (max-width: 612px) {
         grid-template-columns: 1fr;
         gap: 0.55rem;
@@ -156,8 +117,7 @@ const SocialLinkBar = styled.form`
             flex-direction: column;
         }
 
-        .social-link-controls input,
-        .import-link {
+        .social-link-controls input {
             width: 100%;
         }
     }
@@ -183,22 +143,15 @@ const SocialLinkBar = styled.form`
 `
 
 interface SocialLinkFormProps {
-    inputRef: RefObject<HTMLInputElement | null>
     value: string
     onChange: (value: string) => void
-    onImport: (link: string) => void
 }
 
-export default function SocialLinkForm({ inputRef, value, onChange, onImport }: SocialLinkFormProps) {
+export default function SocialLinkForm({ value, onChange }: SocialLinkFormProps) {
     const t = useTranslations("UploadBox")
 
-    const handleSubmit: FormEventHandler<HTMLFormElement> = (event) => {
-        event.preventDefault()
-        onImport(value)
-    }
-
     return (
-        <SocialLinkBar onSubmit={handleSubmit} noValidate>
+        <SocialLinkBar>
             {/* <div className="social-link-label">
                 <label htmlFor="social-link">{t("socialLinkLabel")}</label>
                 <Tooltip content={t("socialLinkTooltip")} maxWidth={320} trigger="mouseenter focus click">
@@ -210,8 +163,9 @@ export default function SocialLinkForm({ inputRef, value, onChange, onImport }: 
             <div className="social-link-controls">
                 <input
                     id="social-link"
-                    ref={inputRef}
                     type="url"
+                    inputMode="url"
+                    enterKeyHint="go"
                     value={value}
                     onChange={(event) => onChange(event.target.value)}
                     placeholder={t("socialLinkPlaceholder")}
@@ -219,9 +173,6 @@ export default function SocialLinkForm({ inputRef, value, onChange, onImport }: 
                     autoComplete="off"
                 />
                 <div className="new-tag">{t("newTag")}</div>
-                {/* <button type="submit" className="import-link" disabled={!value.trim()}>
-                    {t("importLink")}
-                </button> */}
             </div>
         </SocialLinkBar>
     )

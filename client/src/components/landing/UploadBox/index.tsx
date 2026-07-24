@@ -12,12 +12,13 @@ import { LuCircleHelp } from "react-icons/lu"
 import { toast } from "react-toastify"
 import { RectReadOnly } from "react-use-measure"
 
+const SOCIAL_LINK_DETECTION_DELAY_MS = 600
+
 export default function UploadBox() {
     const t = useTranslations("UploadBox")
     const [uploads, setUploads] = useState<UploadItem[]>([])
     const [isResultOpen, setResultOpen] = useState(false)
     const fileRef = useRef<HTMLInputElement>(null)
-    const socialInputRef = useRef<HTMLInputElement>(null)
     const [resultSize, setResultSize] = useState<RectReadOnly | null>(null)
     const { token } = useTokenStore()
     const userStore = useUserDataStore()
@@ -145,7 +146,7 @@ export default function UploadBox() {
                 return
             }
 
-            if (isEditablePasteTarget(e.target, socialInputRef.current)) return
+            if (isEditablePasteTarget(e.target)) return
             const link = getClipboardHttpUrl(clipboard.getData("text/plain"))
             if (!link) return
 
@@ -156,6 +157,17 @@ export default function UploadBox() {
         document.addEventListener("paste", handlePaste)
         return () => document.removeEventListener("paste", handlePaste)
     }, [handleUpload, handleSocialLink])
+
+    useEffect(() => {
+        const link = getClipboardHttpUrl(socialLink)
+        if (!link) return
+
+        const timeout = setTimeout(() => {
+            void handleSocialLink(link)
+        }, SOCIAL_LINK_DETECTION_DELAY_MS)
+
+        return () => clearTimeout(timeout)
+    }, [handleSocialLink, socialLink])
 
     const handleCreateAlbum = async () => {
         if (!token) {
@@ -215,10 +227,8 @@ export default function UploadBox() {
     return (
         <UploadBoxWrapper>
             <SocialLinkForm
-                inputRef={socialInputRef}
                 value={socialLink}
                 onChange={setSocialLink}
-                onImport={(link) => void handleSocialLink(link)}
             />
             <UploadBoxContainer
                 // {...getRootProps()}

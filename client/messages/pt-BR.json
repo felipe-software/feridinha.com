@@ -27,6 +27,8 @@
     "tutorial": "Como usar",
     "faq": "Dúvidas",
     "dashboard": "Dashboard",
+    "openMenu": "Abrir menu",
+    "closeMenu": "Fechar menu",
     "brainMade": "Esse projeto foi criado por um ser humano como você"
   },
   "Auth": {
@@ -106,7 +108,6 @@
     "socialLinkLabel": "Importe direto de uma rede social",
     "socialLinkPlaceholder": "Cole um link do TikTok, Instagram, Reddit ou X",
     "socialLinkInputLabel": "Link de uma publicação em rede social",
-    "importLink": "Importar",
     "newBadge": "Novo",
     "newTag": "Novidade!!!!",
     "socialLinkTooltipLabel": "Saiba mais sobre importação por link",
