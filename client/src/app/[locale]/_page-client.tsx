@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import { useEffect } from "react"
 import Banner from "@/components/landing/Banner"
 import Cards from "@/components/landing/Cards"
@@ -10,7 +8,7 @@ import styles from "@/components/landing/landing.module.css"
 import Reviews from "@/components/landing/Reviews"
 import UploadBox from "@/components/landing/UploadBox"
 
-export default function Page() {
+export default function HomePageClient() {
     useEffect(() => {
         document.documentElement.style.setProperty(
             "--nav-highlight",

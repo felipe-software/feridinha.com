@@ -1,7 +1,5 @@
 "use client"
 
-export const dynamic = "force-dynamic"
-
 import { ExpandableCard } from "@/components/ExpandableCard"
 import { motion } from "motion/react"
 import { useTranslations } from "next-intl"
@@ -168,7 +166,7 @@ const Container = styled.div`
     }
 `
 
-export default function FaqPage() {
+export default function FaqPageClient() {
     const t = useTranslations("Faq")
 
     useEffect(() => {

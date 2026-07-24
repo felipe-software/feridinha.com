@@ -8,7 +8,7 @@ import "dayjs/locale/en"
 import "dayjs/locale/pt-br"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useLocale, useTranslations } from "next-intl"
-import { useRouter } from "next/navigation"
+import { useRouter } from "@/i18n/navigation"
 dayjs.extend(relativeTime)
 
 import { useEffect } from "react"

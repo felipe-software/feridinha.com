@@ -1,8 +1,10 @@
 import { useModalStore } from "@/hooks/useModalStore"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { ModalBase } from "@/components/ViewFileModal"
 import { FaTwitch } from "react-icons/fa6"
 import styled from "styled-components"
+import type { AppLocale } from "@/i18n/config"
+import { getTermsUrl } from "@/lib/seo"
 
 const Button = styled.button`
     position: relative;
@@ -52,6 +54,7 @@ const Container = styled(ModalBase)`
 
 export const LoginModal = () => {
     const t = useTranslations("Auth")
+    const locale = useLocale() as AppLocale
 
     const handleLogin = () => {
         window.open(
@@ -70,7 +73,7 @@ export const LoginModal = () => {
             <p>
                 {t.rich("loginAgreement", {
                     terms: (chunks) => (
-                        <a href="/termos-de-servico.html" target="_blank">
+                        <a href={getTermsUrl(locale)} target="_blank">
                             {chunks}
                         </a>
                     ),
