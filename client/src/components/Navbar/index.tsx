@@ -167,8 +167,17 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
                 </Tooltip>
             </div>
             {isMobile && (
-                <button className={"burgerMenu"} onClick={handleMenu}>
-                    <span className="notranslate material-symbols-rounded">menu</span>
+                <button
+                    type="button"
+                    className={"burgerMenu"}
+                    onClick={handleMenu}
+                    aria-expanded={isMenuActive}
+                    aria-controls="mobile-navigation"
+                    aria-label={isMenuActive ? t("closeMenu") : t("openMenu")}
+                >
+                    <span className="notranslate material-symbols-rounded" aria-hidden="true">
+                        {isMenuActive ? "close" : "menu"}
+                    </span>
                 </button>
             )}
             {!isMobile && (
@@ -187,7 +196,7 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
                 )} */}
                 {isMobile && isMenuActive && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key={2}>
-                        <div className={"menu"}>
+                        <div className={"menu"} id="mobile-navigation">
                             <NavLinks userData={user.data} isMuralAvailable={isMuralAvailable} />
                         </div>
                     </motion.div>

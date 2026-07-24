@@ -51,6 +51,8 @@ const Nav = styled.nav`
     }
 
     a.logo {
+        position: relative;
+        z-index: 1000;
         display: flex;
         margin: 0 1rem;
         margin-right: 1rem;
@@ -198,10 +200,11 @@ const Nav = styled.nav`
     }
 
     .burgerMenu {
+        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 7;
+        z-index: 1000;
         border: none;
         background: none;
         margin-left: auto;

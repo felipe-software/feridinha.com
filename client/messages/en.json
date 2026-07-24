@@ -27,6 +27,8 @@
     "tutorial": "Integrations",
     "faq": "FAQ",
     "dashboard": "Dashboard",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "brainMade": "This project was created by a human being like you"
   },
   "Auth": {
@@ -106,7 +108,6 @@
     "socialLinkLabel": "Or import from social media",
     "socialLinkPlaceholder": "Paste a TikTok, Instagram, Reddit or X link",
     "socialLinkInputLabel": "Social media post link",
-    "importLink": "Import",
     "newBadge": "New",
     "newTag": "New!!!!",
     "socialLinkTooltipLabel": "Learn about importing from a link",

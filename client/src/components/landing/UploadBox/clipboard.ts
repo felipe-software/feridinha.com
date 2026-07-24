@@ -10,8 +10,8 @@ export const getClipboardHttpUrl = (text: string): string | null => {
     }
 }
 
-export const isEditablePasteTarget = (target: EventTarget | null, socialInput?: HTMLInputElement | null): boolean => {
-    if (!target || target === socialInput) return false
+export const isEditablePasteTarget = (target: EventTarget | null): boolean => {
+    if (!target) return false
 
     const element = target as HTMLElement
     const tagName = element.tagName?.toLowerCase()
