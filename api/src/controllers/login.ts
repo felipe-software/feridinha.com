@@ -4,6 +4,7 @@ import session from "@/handlers/session";
 import { AUTHENTICATED_USER_INCLUDE } from "@/models/userModel";
 import database from "@/services/database";
 import { findOrCreateOAuthUser } from "@/services/oauth/accounts";
+import { mergeOAuthUsers, OAuthMergeError } from "@/services/oauth/merge";
 import {
     getOAuthProvider,
     parseOAuthProvider,
@@ -14,13 +15,14 @@ import {
     createOAuthState,
     linkCompletionStore,
     linkInitStore,
+    mergeConfirmationStore,
     oauthStateMaxAgeMs,
     oauthStatesMatch,
     oauthStateStore,
 } from "@/services/oauth/state";
 import { readCookie } from "@/utils/cookies";
 import { ExternalServiceError } from "@/utils/httpErrors";
-import { OAuthProvider, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 import type { Request, RequestHandler, Response } from "express";
 import constants from "@/constants";
@@ -210,14 +212,31 @@ const completeLink: RequestHandler = async (req, res) => {
     const existingIdentity = await database.oAuthAccount.findUnique({ where: identityWhere });
     if (existingIdentity) {
         if (existingIdentity.userId !== req.session.user!.id) {
-            return res
-                .status(409)
-                .error(req.t("auth.oauthAccountAlreadyLinked"), "oauth_account_already_linked");
+            const mergeTicket = await mergeConfirmationStore.create({
+                provider: linkData.provider,
+                providerAccountId: linkData.providerAccountId,
+                expectedUserId: req.session.user!.id,
+                sourceUserId: existingIdentity.userId,
+            });
+            return res.success(
+                req.t("auth.oauthMergeRequired"),
+                {
+                    kind: "merge_required" as const,
+                    provider: providerToSlug(linkData.provider),
+                    ticket: mergeTicket,
+                },
+                "oauth_merge_required",
+            );
         }
-        return res.success(req.t("auth.oauthLinked"), {
-            provider: providerToSlug(linkData.provider),
-            linkedAt: existingIdentity.createdAt,
-        });
+        return res.success(
+            req.t("auth.oauthLinked"),
+            {
+                kind: "linked" as const,
+                provider: providerToSlug(linkData.provider),
+                linkedAt: existingIdentity.createdAt,
+            },
+            "oauth_account_linked",
+        );
     }
 
     const existingProvider = await database.oAuthAccount.findUnique({
@@ -236,7 +255,7 @@ const completeLink: RequestHandler = async (req, res) => {
 
     try {
         const account = await database.$transaction(async (tx) => {
-            const created = await tx.oAuthAccount.create({
+            return tx.oAuthAccount.create({
                 data: {
                     provider: linkData.provider,
                     providerAccountId: linkData.providerAccountId,
@@ -244,33 +263,48 @@ const completeLink: RequestHandler = async (req, res) => {
                     lastLoginAt: new Date(),
                 },
             });
-            if (linkData.provider === OAuthProvider.TWITCH) {
-                await tx.user.update({
-                    where: { id: req.session.user!.id },
-                    data: { twitchId: linkData.providerAccountId },
-                });
-            }
-            return created;
         });
-        return res.success(req.t("auth.oauthLinked"), {
-            provider: providerToSlug(account.provider),
-            linkedAt: account.createdAt,
-        });
+        return res.success(
+            req.t("auth.oauthLinked"),
+            {
+                kind: "linked" as const,
+                provider: providerToSlug(account.provider),
+                linkedAt: account.createdAt,
+            },
+            "oauth_account_linked",
+        );
     } catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
             const concurrentIdentity = await database.oAuthAccount.findUnique({
                 where: identityWhere,
             });
             if (concurrentIdentity?.userId === req.session.user!.id) {
-                return res.success(req.t("auth.oauthLinked"), {
-                    provider: providerToSlug(concurrentIdentity.provider),
-                    linkedAt: concurrentIdentity.createdAt,
-                });
+                return res.success(
+                    req.t("auth.oauthLinked"),
+                    {
+                        kind: "linked" as const,
+                        provider: providerToSlug(concurrentIdentity.provider),
+                        linkedAt: concurrentIdentity.createdAt,
+                    },
+                    "oauth_account_linked",
+                );
             }
             if (concurrentIdentity) {
-                return res
-                    .status(409)
-                    .error(req.t("auth.oauthAccountAlreadyLinked"), "oauth_account_already_linked");
+                const mergeTicket = await mergeConfirmationStore.create({
+                    provider: linkData.provider,
+                    providerAccountId: linkData.providerAccountId,
+                    expectedUserId: req.session.user!.id,
+                    sourceUserId: concurrentIdentity.userId,
+                });
+                return res.success(
+                    req.t("auth.oauthMergeRequired"),
+                    {
+                        kind: "merge_required" as const,
+                        provider: providerToSlug(linkData.provider),
+                        ticket: mergeTicket,
+                    },
+                    "oauth_merge_required",
+                );
             }
 
             const concurrentProvider = await database.oAuthAccount.findUnique({
@@ -289,6 +323,44 @@ const completeLink: RequestHandler = async (req, res) => {
             return res
                 .status(409)
                 .error(req.t("auth.oauthAccountAlreadyLinked"), "oauth_account_already_linked");
+        }
+        throw error;
+    }
+};
+
+const completeMerge: RequestHandler = async (req, res) => {
+    const ticket = typeof req.body?.ticket === "string" ? req.body.ticket : "";
+    const mergeData = ticket ? await mergeConfirmationStore.consume(ticket) : null;
+    if (!mergeData) {
+        return res.status(400).error(req.t("auth.oauthMergeTicketInvalid"), "oauth_merge_ticket_invalid");
+    }
+    if (mergeData.expectedUserId !== req.session.user!.id) {
+        return res.status(403).error(req.t("auth.oauthMergeUserMismatch"), "oauth_merge_user_mismatch");
+    }
+
+    try {
+        const result = await mergeOAuthUsers({
+            targetUserId: req.session.user!.id,
+            sourceUserId: mergeData.sourceUserId,
+            provider: mergeData.provider,
+            providerAccountId: mergeData.providerAccountId,
+        });
+        return res.success(
+            req.t("auth.oauthMerged"),
+            {
+                provider: providerToSlug(mergeData.provider),
+                linkedAt: result.linkedAt,
+            },
+            "oauth_users_merged",
+        );
+    } catch (error) {
+        if (error instanceof OAuthMergeError) {
+            if (error.code === "provider_conflict") {
+                return res
+                    .status(409)
+                    .error(req.t("auth.oauthMergeProviderConflict"), "oauth_merge_provider_conflict");
+            }
+            return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
         }
         throw error;
     }
@@ -318,12 +390,6 @@ const unlinkAccount: RequestHandler = async (req, res) => {
                 },
             },
         });
-        if (target.provider === OAuthProvider.TWITCH) {
-            await tx.user.update({
-                where: { id: req.session.user!.id },
-                data: { twitchId: null },
-            });
-        }
         return "deleted" as const;
     });
 
@@ -378,6 +444,7 @@ const loginController = {
     startLink,
     linkRedirect,
     completeLink,
+    completeMerge,
     unlinkAccount,
 };
 

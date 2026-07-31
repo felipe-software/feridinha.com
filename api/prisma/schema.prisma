@@ -74,6 +74,7 @@ enum OAuthProvider {
 
 model User {
   id           String   @id @unique @default(uuid())
+  /// Deprecated compatibility column. OAuthAccount is authoritative; drop this only after the phase-1 deploy.
   twitchId     String?  @unique
   name         String
   profileImage String

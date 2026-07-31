@@ -20,6 +20,19 @@ export type ApiResponse<T = undefined> =
           success: true
           data?: T
           message?: string
+          code?: string
+      }
+
+export type OAuthLinkCompletion =
+    | {
+          kind: "linked"
+          provider: OAuthProviderName
+          linkedAt: string
+      }
+    | {
+          kind: "merge_required"
+          provider: OAuthProviderName
+          ticket: string
       }
 
 export type UploadResponse =
@@ -69,8 +82,17 @@ const startOAuthLink = async (
 
 const completeOAuthLink = async (
     ticket: string,
-): Promise<ApiResponse<LinkedAuthProvider>> => {
+): Promise<ApiResponse<OAuthLinkCompletion>> => {
     const response = await axiosClient.post("/login/accounts/link/complete", {
+        ticket,
+    })
+    return response.data
+}
+
+const completeOAuthMerge = async (
+    ticket: string,
+): Promise<ApiResponse<LinkedAuthProvider>> => {
+    const response = await axiosClient.post("/login/accounts/merge/complete", {
         ticket,
     })
     return response.data
@@ -211,6 +233,7 @@ const apiService = {
     fetchUserData,
     startOAuthLink,
     completeOAuthLink,
+    completeOAuthMerge,
     unlinkOAuthAccount,
     fetchApiKeys,
     createApiKey,

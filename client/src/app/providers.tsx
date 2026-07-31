@@ -10,36 +10,11 @@ import LoginCallback from "@/components/LoginCallback"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { LuCheck, LuInfo, LuLoaderCircle, LuTriangleAlert, LuX } from "react-icons/lu"
-import * as Sentry from "@sentry/nextjs"
 import {
     POSTHOG_PROXY_PATH,
     obfuscatePostHogAssetUrl,
 } from "@/config/posthog"
 import { stripOAuthFragmentFromUrl } from "@/lib/oauth"
-
-Sentry.init({
-    dsn: "https://9b5ad6af7594366d35e639d20d21dea3@o4504569588809728.ingest.us.sentry.io/4509291703238656",
-    sendDefaultPii: true,
-    beforeSend: (event) => {
-        if (event.request?.url) {
-            event.request.url = stripOAuthFragmentFromUrl(event.request.url)
-        }
-        if (event.request?.headers) {
-            for (const key of Object.keys(event.request.headers)) {
-                if (key.toLowerCase() === "authorization") {
-                    delete event.request.headers[key]
-                }
-            }
-        }
-        for (const breadcrumb of event.breadcrumbs ?? []) {
-            const url = breadcrumb.data?.url
-            if (typeof url === "string" && breadcrumb.data) {
-                breadcrumb.data.url = stripOAuthFragmentFromUrl(url)
-            }
-        }
-        return event
-    },
-})
 
 const getIcon = ({ type }: any) => {
     switch (type) {

@@ -6,21 +6,19 @@ import { MuralPostType } from "@prisma/client";
 export interface TestUser {
     id: string;
     token: string;
-    twitchId: string;
 }
 
 export const createTestUser = async (suffix: string = ""): Promise<TestUser> => {
-    const twitchId = `test-${suffix}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+    const twitchAccountId = `test-${suffix}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
     const user = await database.user.create({
         data: {
-            twitchId,
             name: `Test User ${suffix}`,
             profileImage: "https://example.com/avatar.png",
             sessions: [],
             oauthAccounts: {
                 create: {
                     provider: "TWITCH",
-                    providerAccountId: twitchId,
+                    providerAccountId: twitchAccountId,
                 },
             },
         },
@@ -33,7 +31,7 @@ export const createTestUser = async (suffix: string = ""): Promise<TestUser> => 
     });
 
     const token = await session.createJwt(sessionId);
-    return { id: user.id, token, twitchId };
+    return { id: user.id, token };
 };
 
 export const deleteTestUser = async (userId: string) => {

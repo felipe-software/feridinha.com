@@ -89,13 +89,19 @@ async function main() {
         const uploads = await Promise.all(oldUser.uploads.map(getUpload));
         const names = uploads.map((u) => u.name);
 
-        const newUser = await database.user.upsert({
-            where: { twitchId: oldUser.id },
-            update: {},
-            create: {
+        const existingAccount = await database.oAuthAccount.findUnique({
+            where: {
+                provider_providerAccountId: {
+                    provider: "TWITCH",
+                    providerAccountId: oldUser.id,
+                },
+            },
+            include: { user: true },
+        });
+        const newUser = existingAccount?.user ?? await database.user.create({
+            data: {
                 name: oldUser.name,
                 profileImage: oldUser.image,
-                twitchId: oldUser.id,
                 uploadCount: oldUser.stats.total_uploads,
                 createdAt: (oldUser.stats.created_at as any as Date).toISOString(),
                 oauthAccounts: {
@@ -107,20 +113,6 @@ async function main() {
                 uploads: {
                     //   create: uploads,
                 },
-            },
-        });
-        await database.oAuthAccount.upsert({
-            where: {
-                provider_providerAccountId: {
-                    provider: "TWITCH",
-                    providerAccountId: oldUser.id,
-                },
-            },
-            update: { userId: newUser.id },
-            create: {
-                provider: "TWITCH",
-                providerAccountId: oldUser.id,
-                userId: newUser.id,
             },
         });
 

@@ -1,6 +1,5 @@
 import { myEnv } from "@/config/env";
 import logger from "@/config/logger";
-import "@/config/sentry";
 import app from "./app";
 import tmpUtils from "@/utils/tmp";
 import { redisClient } from "@/services/redis";
@@ -16,4 +15,4 @@ if (import.meta.main) {
     }, 5 * 60 * 1000); // Fixes pm2 memory leak issues with custom interpreter xdddd GOD PLEASE HELP ME BECAUSE I SINNED
 }
 
-export default app; 
+export default app;

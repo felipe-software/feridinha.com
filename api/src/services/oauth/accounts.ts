@@ -35,31 +35,9 @@ export const findOrCreateOAuthUser = async (provider: OAuthProvider, profile: OA
     const existing = await findAccountUser(provider, profile.providerAccountId);
     if (existing) return touchAccount(provider, profile.providerAccountId);
 
-    if (provider === OAuthProvider.TWITCH) {
-        const legacyUser = await database.user.findUnique({
-            where: { twitchId: profile.providerAccountId },
-        });
-        if (legacyUser) {
-            try {
-                await database.oAuthAccount.create({
-                    data: {
-                        provider,
-                        providerAccountId: profile.providerAccountId,
-                        userId: legacyUser.id,
-                        lastLoginAt: new Date(),
-                    },
-                });
-                return legacyUser;
-            } catch (error) {
-                return recoverConcurrentAccount(provider, profile.providerAccountId, error);
-            }
-        }
-    }
-
     try {
         return await database.user.create({
             data: {
-                twitchId: provider === OAuthProvider.TWITCH ? profile.providerAccountId : null,
                 name: profile.displayName,
                 profileImage: profile.profileImage,
                 color: profile.color,

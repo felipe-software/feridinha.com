@@ -8,7 +8,11 @@ import type {
     OAuthProviderName,
 } from "@/hooks/useUserDataStore"
 import apiService from "@/services/api"
-import { getOAuthFragmentValue, OAUTH_PROVIDERS } from "@/lib/oauth"
+import {
+    getOAuthFragmentValue,
+    OAUTH_PROVIDERS,
+    resolveOAuthLinkCompletion,
+} from "@/lib/oauth"
 import { FaDiscord, FaGoogle, FaTwitch } from "react-icons/fa6"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
@@ -73,6 +77,14 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
         await queryClient.invalidateQueries({ queryKey: ["userData"] })
     }
 
+    const refreshMergedAccount = async () => {
+        await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["userData"] }),
+            queryClient.invalidateQueries({ queryKey: ["my-albums"] }),
+            queryClient.invalidateQueries({ queryKey: ["api-keys"] }),
+        ])
+    }
+
     useEffect(() => {
         if (completionStarted.current) return
         const ticket = getOAuthFragmentValue(
@@ -91,12 +103,36 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
         void (async () => {
             try {
                 const response = await apiService.completeOAuthLink(ticket)
-                if (response.success) {
+                if (!response.success || !response.data) {
+                    toast.error(response.success ? t("oauthLinkError") : response.error)
+                    return
+                }
+
+                const result = await resolveOAuthLinkCompletion(
+                    response.data,
+                    (provider) =>
+                        window.confirm(
+                            t("oauthMergeConfirm", {
+                                provider: t(`oauthProviders.${provider}`),
+                            }),
+                        ),
+                    apiService.completeOAuthMerge,
+                )
+                if (result.kind === "linked") {
                     toast.success(t("oauthLinkSuccess"))
                     await refreshUser()
                     return
                 }
-                toast.error(response.error || t("oauthLinkError"))
+                if (result.kind === "cancelled") {
+                    toast.info(t("oauthMergeCancelled"))
+                    return
+                }
+                if (result.kind === "error") {
+                    toast.error(result.error || t("oauthLinkError"))
+                    return
+                }
+                toast.success(t("oauthMergeSuccess"))
+                await refreshMergedAccount()
             } catch {
                 toast.error(t("oauthLinkError"))
             }

@@ -21,11 +21,16 @@ const linkCompletionSchema = linkInitSchema.extend({
     providerAccountId: z.string().min(1),
 });
 
+const mergeConfirmationSchema = linkCompletionSchema.extend({
+    sourceUserId: z.string().min(1),
+});
+
 export type OAuthStateData = z.infer<typeof oauthStateSchema>;
 export type LinkInitData = z.infer<typeof linkInitSchema>;
 export type LinkCompletionData = z.infer<typeof linkCompletionSchema>;
+export type MergeConfirmationData = z.infer<typeof mergeConfirmationSchema>;
 
-type TicketNamespace = "state" | "link-init" | "link-complete";
+type TicketNamespace = "state" | "link-init" | "link-complete" | "merge-confirm";
 
 const createToken = () => randomBytes(32).toString("base64url");
 const keyFor = (namespace: TicketNamespace, token: string) => `oauth:${namespace}:${token}`;
@@ -69,6 +74,11 @@ export const linkInitStore = {
 export const linkCompletionStore = {
     create: (data: LinkCompletionData) => create("link-complete", data, LINK_TICKET_TTL_SECONDS),
     consume: (token: string) => consume("link-complete", token, linkCompletionSchema),
+};
+
+export const mergeConfirmationStore = {
+    create: (data: MergeConfirmationData) => create("merge-confirm", data, LINK_TICKET_TTL_SECONDS),
+    consume: (token: string) => consume("merge-confirm", token, mergeConfirmationSchema),
 };
 
 export const oauthStateMaxAgeMs = OAUTH_STATE_TTL_SECONDS * 1000;
