@@ -92,29 +92,31 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    
 }
 
 .authors a {
-    display: inline-flex;
+    display: flex;
+    height: fit-content;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.35rem 0.6rem 0.35rem 0.35rem;
+    padding: 0.25rem;
     border-radius: var(--border-radius-s);
     color: var(--foreground);
     font-size: 0.9rem;
     font-weight: 600;
     text-decoration: none;
     transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    will-change: tranform;
 }
 
 .authors a:hover {
     background-color: var(--base);
-    transform: scale(1.03);
+    transform: scale(1.1);
 }
 
 .authors a:focus-visible {
-    outline: 2px solid var(--dracula-red);
+
     outline-offset: 0.2rem;
 }
 
