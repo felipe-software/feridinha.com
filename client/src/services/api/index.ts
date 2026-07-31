@@ -91,6 +91,8 @@ const createReview = async (review: string, suggestion?: string): Promise<ApiRes
 export interface Album {
     id: string
     createdAt: Date
+    title: string
+    canEdit: boolean
 
     uploads: Upload[]
     user: {
@@ -112,6 +114,23 @@ const updateMyAlbum = async (id: Album["id"], itemsToPush: string[]): Promise<Ap
     const response = await axiosClient.post(`/album/update-my/${id}`, {
         itemsToPush: itemsToPush,
     })
+
+    return response.data
+}
+
+export interface AlbumMetadataInput {
+    title: string
+    uploads: Array<{
+        name: string
+        description: string | null
+    }>
+}
+
+const updateAlbumMetadata = async (
+    id: Album["id"],
+    metadata: AlbumMetadataInput,
+): Promise<ApiResponse<Album>> => {
+    const response = await axiosClient.patch(`/album/${id}`, metadata)
 
     return response.data
 }
@@ -191,5 +210,6 @@ const apiService = {
     fetchReviews,
     fetchMyAlbums,
     updateMyAlbum,
+    updateAlbumMetadata,
 }
 export default apiService

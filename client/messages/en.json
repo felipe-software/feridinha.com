@@ -279,6 +279,16 @@
     "previewUnavailableInline": "Preview unavailable.",
     "openLink": "Open the link.",
     "openLinkAbove": "Open the link above.",
+    "albumTitle": "Album title",
+    "titlePlaceholder": "Give this album a title",
+    "untitled": "Untitled album",
+    "edit": "Edit album",
+    "save": "Save changes",
+    "cancel": "Cancel",
+    "imageDescription": "Image description",
+    "descriptionPlaceholder": "Add a description for this image...",
+    "saved": "Album updated successfully",
+    "saveError": "Could not save the changes",
     "createdBy": "Created by <author>@{name}</author> {time}. {count, plural, one {# file in total.} other {# files in total.}} {views, plural, one {# view.} other {# views.}}"
   },
   "Faq": {

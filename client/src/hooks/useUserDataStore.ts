@@ -4,6 +4,7 @@ export interface Upload {
     name: string
     size: number
     mimeType: string
+    description?: string | null
     userId: string
     deletedAt?: string
     albumId: null

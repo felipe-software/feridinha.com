@@ -186,10 +186,14 @@ describe("Album Routes", () => {
         test("album existente sem auth → 200", async () => {
             const res = await fetch(`${baseURL}/album/${createdAlbumId}`);
             expect(res.status).toBe(200);
-            const json = (await res.json()) as { data: { id: string; viewCount: number; uploads: unknown[] } };
+            const json = (await res.json()) as {
+                data: { id: string; viewCount: number; uploads: unknown[]; canEdit: boolean; title: string };
+            };
             expect(json.data.id).toBe(createdAlbumId);
             expect(json.data.viewCount).toBeGreaterThan(0);
             expect(json.data.uploads.length).toBe(1);
+            expect(json.data.canEdit).toBe(false);
+            expect(json.data.title).toBe("");
         });
 
         test("album existente com auth → 200", async () => {
@@ -197,6 +201,8 @@ describe("Album Routes", () => {
                 headers: { Authorization: testUser.token },
             });
             expect(res.status).toBe(200);
+            const json = (await res.json()) as { data: { canEdit: boolean } };
+            expect(json.data.canEdit).toBe(true);
         });
 
         test("viewCount incrementa a cada acesso → 200", async () => {
@@ -355,6 +361,100 @@ describe("Album Routes", () => {
             const res = await fetch(`${baseURL}/album/${createdAlbumId}`);
             const json = (await res.json()) as { data: { uploads: Array<{ name: string }> } };
             expect(json.data.uploads.length).toBe(2);
+        });
+    });
+
+    describe("PATCH /album/:id", () => {
+        test("sem autenticação → 401", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ title: "Meu álbum" }),
+            });
+            expect(res.status).toBe(401);
+        });
+
+        test("body vazio → 422", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: testUser.token,
+                },
+                body: JSON.stringify({}),
+            });
+            expect(res.status).toBe(422);
+        });
+
+        test("título acima do limite → 422", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: testUser.token,
+                },
+                body: JSON.stringify({ title: "a".repeat(121) }),
+            });
+            expect(res.status).toBe(422);
+        });
+
+        test("outro usuário não pode editar → 404", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: testUser2.token,
+                },
+                body: JSON.stringify({ title: "Não autorizado" }),
+            });
+            expect(res.status).toBe(404);
+        });
+
+        test("não permite editar descrição de upload fora do álbum → 403", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: testUser.token,
+                },
+                body: JSON.stringify({
+                    uploads: [{ name: upload2.name, description: "Descrição indevida" }],
+                }),
+            });
+            expect(res.status).toBe(403);
+        });
+
+        test("criador atualiza título e descrição → 200", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: testUser.token,
+                },
+                body: JSON.stringify({
+                    title: "  Memórias da viagem  ",
+                    uploads: [{ name: upload1.name, description: "  Primeiro dia  " }],
+                }),
+            });
+
+            expect(res.status).toBe(200);
+            const json = (await res.json()) as {
+                data: { title: string; canEdit: boolean; uploads: Array<{ name: string; description: string | null }> };
+            };
+            expect(json.data.title).toBe("Memórias da viagem");
+            expect(json.data.canEdit).toBe(true);
+            expect(json.data.uploads.find((upload) => upload.name === upload1.name)?.description).toBe("Primeiro dia");
+        });
+
+        test("metadados atualizados ficam públicos, mas não editáveis → 200", async () => {
+            const res = await fetch(`${baseURL}/album/${createdAlbumId}`);
+            expect(res.status).toBe(200);
+            const json = (await res.json()) as {
+                data: { title: string; canEdit: boolean; uploads: Array<{ name: string; description: string | null }> };
+            };
+            expect(json.data.title).toBe("Memórias da viagem");
+            expect(json.data.canEdit).toBe(false);
+            expect(json.data.uploads.find((upload) => upload.name === upload1.name)?.description).toBe("Primeiro dia");
         });
     });
 });

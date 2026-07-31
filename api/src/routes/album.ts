@@ -12,8 +12,16 @@ route.get("/list-my", middlewares.auth({ strict: true }), asyncHandler(albumCont
 route.get(
     "/:id",
     rateLimit.album,
+    middlewares.auth({ strict: false }),
     middlewares.zod(z.object({ id: z.string() }), "params"),
     asyncHandler(albumController.getAlbum),
+);
+route.patch(
+    "/:id",
+    middlewares.auth({ strict: true }),
+    middlewares.zod(z.object({ id: z.string() }), "params"),
+    middlewares.zod(albumController.updateAlbumMetadataSchema, "body"),
+    asyncHandler(albumController.updateAlbumMetadata),
 );
 route.post(
     "/update-my/:id",
