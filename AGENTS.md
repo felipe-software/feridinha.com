@@ -36,7 +36,12 @@ as duas aplicações sem necessidade clara de contrato compartilhado.
 ### Styled-components
 
 `styled-components` é a opção preferencial para estilos específicos de
-componentes React. Exporte os elementos estilizados de um arquivo `styles.ts`
+componentes React. Evite criar novos arquivos `.module.css`; use
+`styled-components` e um `styles.ts` local como padrão. Arquivos CSS Modules
+existentes devem ser tratados como legado e só devem ser ampliados quando não
+houver uma alternativa razoável.
+
+Exporte os elementos estilizados de um arquivo `styles.ts`
 quando o componente possuir vários blocos, regras aninhadas, responsividade ou
 animações.
 
@@ -64,6 +69,30 @@ Evite misturar `styled-components`, CSS Modules e `style={{ ... }}` no mesmo
 componente. A mistura só é aceitável quando houver uma razão específica, como
 um valor realmente dinâmico, uma API de terceiro ou uma regra global/legada que
 não possa ser encapsulada.
+
+### Layout e alinhamento
+
+Não use `margin` como mecanismo principal para alinhar ou distribuir elementos.
+Prefira:
+
+- `display: flex` como padrão para layouts lineares;
+- `display: grid` somente quando houver uma relação real de linhas e colunas
+  bidimensionais;
+- `gap` para espaçamento entre elementos;
+- `align-items`, `justify-content` e `place-items` para alinhamento;
+- `padding` para o espaço interno de um container;
+- `margin-inline: auto` somente quando o objetivo for centralizar um bloco com
+  largura definida ou limitada.
+
+Não use `grid` automaticamente em todo container. Para uma linha, coluna,
+toolbar, lista, navegação ou grupo de ações, prefira `flex`. Reserve `grid` para
+composições realmente bidimensionais, como galerias, tabelas visuais ou áreas
+com linhas e colunas independentes.
+
+Evite compensar desalinhamentos com margens negativas, combinações de margens
+entre irmãos ou valores arbitrários. Se o layout precisar de margem para
+funcionar, revise primeiro a estrutura do container e a distribuição com flex;
+use grid somente quando a relação bidimensional justificar.
 
 ### Unidades
 
@@ -152,7 +181,8 @@ alteração:
 - cores hexadecimais e `rgb()` diretamente em alguns estilos;
 - dimensões e breakpoints em `px`;
 - tokens duplicados ou com nomes históricos em `global.css`;
-- CSS Modules antigos nas áreas de landing page;
+- CSS Modules antigos nas áreas de landing page; não criar novos `.module.css`
+  sem uma justificativa técnica;
 - alguns estilos inline necessários para valores dinâmicos ou transições.
 
 Novas alterações devem seguir este guia. A migração do legado deve ser feita em
@@ -163,6 +193,9 @@ mudanças isoladas, com validação visual e funcional própria.
 Antes de finalizar uma alteração no client, confirme:
 
 - [ ] O estilo está no local correto ou em um `styles.ts` separado.
+- [ ] O alinhamento usa principalmente flex e `gap`, sem margens arbitrárias entre irmãos.
+- [ ] `grid` só foi usado quando existe uma necessidade real de layout bidimensional.
+- [ ] Não foi criado um novo arquivo `.module.css` sem justificativa.
 - [ ] Novas medidas usam `rem`.
 - [ ] Novas cores usam variáveis CSS.
 - [ ] Não foram adicionadas bordas desnecessárias.
