@@ -6,8 +6,8 @@ const Nav = styled.nav`
     display: flex;
     flex-direction: row;
     background-color: var(--base-dark);
-    height: 80px;
-    min-height: 80px;
+    height: 5rem;
+    min-height: 5rem;
     align-items: center;
     z-index: 6;
     margin: unset;
@@ -43,7 +43,7 @@ const Nav = styled.nav`
                 color: #53576d;
                 transition: .2s;
                 &:hover {
-                    text-shadow: 0 0 1px var(--dracula-cyan);
+                    text-shadow: 0 0 0.0625rem var(--dracula-cyan);
                     color: var(--dracula-cyan);
                 }
             }
@@ -74,8 +74,8 @@ const Nav = styled.nav`
     }
 
     .language-toggle {
-        width: 44px;
-        height: 44px;
+        width: 2.75rem;
+        height: 2.75rem;
         padding: 0;
         display: inline-flex;
         align-items: center;
@@ -86,24 +86,19 @@ const Nav = styled.nav`
         color: #a7a9b3;
         cursor: pointer;
         line-height: 1;
-        transition: transform 0.2s ease, color 0.2s ease;
+        transition: color 0.15s ease;
 
         svg {
             width: 1.65rem;
             height: 1.65rem;
             pointer-events: none;
             stroke-width: 2;
-            filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.8))
-                drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.06));
+            filter: drop-shadow(0 0.0625rem 0 rgba(0, 0, 0, 0.8))
+                drop-shadow(0 -0.0625rem 0 rgba(255, 255, 255, 0.06));
         }
 
         &:hover {
             color: #d3d5dc;
-            transform: translateY(-1px);
-        }
-
-        &:active {
-            transform: scale(0.96);
         }
 
         &[aria-expanded="true"] {
@@ -111,19 +106,27 @@ const Nav = styled.nav`
         }
 
         &:focus-visible {
-            outline: 2px solid #a7a9b3;
+            outline: 0.125rem solid #a7a9b3;
             outline-offset: 0.25rem;
         }
     }
 
     .language-popover {
-        width: clamp(160px, 10.625rem, 190px);
-        border: 1px solid #353745;
+        width: clamp(10rem, 10.625rem, 11.875rem);
+        border: 0.0625rem solid #353745;
         background-color: var(--base-dark-transparent) !important;
-        box-shadow: 0 12px 32px rgba(8, 8, 14, 0.35);
+        box-shadow: 0 0.75rem 2rem rgba(8, 8, 14, 0.35);
 
         .tippy-content {
             padding: 0.4rem;
+        }
+
+        .tippy-arrow {
+            color: #353745;
+
+            svg {
+                stroke: #353745;
+            }
         }
     }
 
@@ -136,24 +139,24 @@ const Nav = styled.nav`
 
     .language-option {
         display: grid;
-        grid-template-columns: 24px minmax(0, 1fr) 16px;
+        grid-template-columns: 1.5rem minmax(0, 1fr) 1rem;
         align-items: center;
         gap: 0.65rem;
         width: 100%;
-        min-height: 44px;
+        min-height: 2.75rem;
         margin: 0;
         padding: 0.55rem 0.65rem;
-        border: 1px solid transparent;
+        border: 0.0625rem solid transparent;
         border-radius: var(--border-radius-s);
         background: transparent;
         color: var(--foreground);
         cursor: pointer;
-        font-size: 14px;
+        font-size: 0.875rem;
         font-weight: 500;
         line-height: 1.2;
         text-align: left;
-        transition: color 0.2s ease, background-color 0.2s ease,
-            border-color 0.2s ease, transform 0.2s ease;
+        transition: color 0.15s ease, background-color 0.15s ease,
+            border-color 0.15s ease;
 
         &:hover:not(:disabled) {
             color: #d3d5dc;
@@ -161,13 +164,9 @@ const Nav = styled.nav`
             border-color: rgba(255, 255, 255, 0.11);
         }
 
-        &:active:not(:disabled) {
-            transform: scale(0.98);
-        }
-
         &:focus-visible {
-            outline: 2px solid #a7a9b3;
-            outline-offset: -2px;
+            outline: 0.125rem solid #a7a9b3;
+            outline-offset: -0.125rem;
         }
 
         &:disabled {
@@ -181,8 +180,8 @@ const Nav = styled.nav`
 
     .language-flag {
         display: block;
-        width: 24px;
-        height: 24px;
+        width: 1.5rem;
+        height: 1.5rem;
         object-fit: contain;
     }
 
@@ -193,8 +192,8 @@ const Nav = styled.nav`
         color: var(--nav-highlight);
 
         svg {
-            width: 16px;
-            height: 16px;
+            width: 1rem;
+            height: 1rem;
             stroke-width: 2.5;
         }
     }
@@ -213,7 +212,7 @@ const Nav = styled.nav`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 10px;
+        gap: 0.625rem;
         margin-left: auto;
 
         a {
@@ -223,7 +222,7 @@ const Nav = styled.nav`
             text-decoration: none;
             border-radius: var(--border-radius-s);
             padding: 0.5rem 1rem;
-            border: 1px solid transparent;
+            border: 0.0625rem solid transparent;
             text-transform: uppercase;
             text-shadow: 0 0 0 var(--nav-highlight);
             transition: text-shadow 0.5s, color 0.5s, background-color 0.5s,
@@ -235,20 +234,20 @@ const Nav = styled.nav`
 
             &.active {
                 color: var(--nav-highlight);
-                text-shadow: 0 0 5px var(--nav-highlight);
+                text-shadow: 0 0 0.3125rem var(--nav-highlight);
             }
         }
 
         span.underline_active {
             position: absolute;
             content: "";
-            height: 2px;
+            height: 0.125rem;
             background-color: var(--nav-highlight);
             width: calc(100% - 3rem);
-            bottom: 3px;
+            bottom: 0.1875rem;
             margin: auto;
-            box-shadow: 0 0 5px 0.5px var(--nav-highlight);
-            border-radius: 2px;
+            box-shadow: 0 0 0.3125rem 0.03125rem var(--nav-highlight);
+            border-radius: 0.125rem;
             z-index: 4;
             transition: text-shadow 0.5s, color 0.5s, background-color 0.5s,
                 box-shadow 0.5s;
@@ -331,7 +330,7 @@ const Nav = styled.nav`
         }
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 68.75rem) {
         & {
             padding: 0 1rem;
         }

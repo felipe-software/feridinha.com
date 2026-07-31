@@ -33,8 +33,10 @@ export function LocaleSelector({ locale, onChange }: LocaleSelectorProps) {
             if (event.key !== "Escape" || !tooltip.current?.state.isVisible) return
 
             event.preventDefault()
-            tooltip.current.hide()
+            const instance = tooltip.current
+            instance.disable()
             trigger.current?.focus()
+            requestAnimationFrame(() => instance.enable())
         }
 
         document.addEventListener("keydown", handleKeyDown)
@@ -85,9 +87,11 @@ export function LocaleSelector({ locale, onChange }: LocaleSelectorProps) {
 
     return (
         <Tooltip
+            animation="fade"
             appendTo="parent"
             className="language-popover"
             content={content}
+            duration={[150, 100]}
             interactive={true}
             maxWidth="none"
             offset={[0, 8]}
@@ -98,7 +102,7 @@ export function LocaleSelector({ locale, onChange }: LocaleSelectorProps) {
                 tooltip.current = null
             }}
             placement="bottom-start"
-            trigger="click"
+            trigger="mouseenter focus"
         >
             <button
                 ref={trigger}
