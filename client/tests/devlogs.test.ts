@@ -12,6 +12,7 @@ describe("devlogs", () => {
         const dates = DEVLOGS.map(({ date }) => date)
 
         expect(dates).toEqual([...dates].sort().reverse())
+        expect(new Set(dates).size).toBe(dates.length)
         expect(LATEST_DEVLOG_DATE).toBe(dates[0])
 
         for (const entry of DEVLOGS) {
@@ -21,6 +22,11 @@ describe("devlogs", () => {
                 expect(entry.items[locale].length).toBeGreaterThan(0)
                 expect(DEVLOG_PAGE_COPY[locale].title.length).toBeGreaterThan(0)
             }
+        }
+
+        for (const locale of SUPPORTED_LOCALES) {
+            const items = DEVLOGS.flatMap((entry) => entry.items[locale])
+            expect(new Set(items).size).toBe(items.length)
         }
     })
 

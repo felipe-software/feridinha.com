@@ -1,0 +1,83 @@
+{
+  "page": {
+    "pt-BR": {
+      "title": "Devlogs",
+      "description": "Novidades e notas de desenvolvimento do Feridinha."
+    },
+    "en": {
+      "title": "Devlogs",
+      "description": "Updates and development notes from Feridinha."
+    }
+  },
+  "entries": [
+    {
+      "date": "2026-07-31",
+      "items": {
+        "pt-BR": [
+          "Criamos uma página de devlogs para reunir as novidades do site.",
+          "A navbar agora avisa quando existe uma atualização que você ainda não leu.",
+          "Deixamos a execução dos testes automatizados mais confiável."
+        ],
+        "en": [
+          "We added a devlogs page to keep the site's updates in one place.",
+          "The navbar now lets you know when there is an update you have not read yet.",
+          "We made the automated test runs more reliable."
+        ]
+      }
+    },
+    {
+      "date": "2026-07-24",
+      "items": {
+        "pt-BR": [
+          "O idioma escolhido agora aparece na URL, com páginas em inglês usando o prefixo /en.",
+          "Melhoramos a presença do site em buscas e compartilhamentos com metadados, sitemap e links canônicos.",
+          "Melhoramos o carregamento de álbuns e a compatibilidade com links do Instagram."
+        ],
+        "en": [
+          "The selected language now appears in the URL, with English pages using the /en prefix.",
+          "We improved search and sharing support with metadata, a sitemap and canonical links.",
+          "We improved album loading and compatibility with Instagram links."
+        ]
+      }
+    },
+    {
+      "date": "2026-07-23",
+      "items": {
+        "pt-BR": [
+          "Corrigimos a colagem e o processamento de links em celulares."
+        ],
+        "en": [
+          "We fixed link pasting and processing on mobile devices."
+        ]
+      }
+    },
+    {
+      "date": "2026-07-20",
+      "items": {
+        "pt-BR": [
+          "Agora você pode colar links do TikTok, Instagram, Reddit e X/Twitter para importar a mídia direto no upload.",
+          "Melhoramos a responsividade da página inicial em celulares."
+        ],
+        "en": [
+          "You can now paste TikTok, Instagram, Reddit and X/Twitter links to import media directly into the uploader.",
+          "We improved the home page layout on mobile devices."
+        ]
+      }
+    },
+    {
+      "date": "2026-07-18",
+      "items": {
+        "pt-BR": [
+          "Corrigimos as permissões de acesso aos álbuns.",
+          "Tornamos as métricas de uso mais confiáveis mesmo com bloqueadores de conteúdo.",
+          "Publicamos os termos de uso em português e inglês."
+        ],
+        "en": [
+          "We fixed album access permissions.",
+          "We made usage metrics more reliable even with content blockers enabled.",
+          "We published the terms of service in Portuguese and English."
+        ]
+      }
+    }
+  ]
+}
