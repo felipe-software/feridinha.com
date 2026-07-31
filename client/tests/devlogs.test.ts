@@ -21,7 +21,7 @@ describe("devlogs", () => {
             for (const locale of SUPPORTED_LOCALES) {
                 expect(entry.items[locale].length).toBeGreaterThan(0)
                 expect(DEVLOG_PAGE_COPY[locale].title.length).toBeGreaterThan(0)
-                expect(DEVLOG_PAGE_COPY[locale].titlePrefix).toBe("Devlops:")
+                expect(DEVLOG_PAGE_COPY[locale].titlePrefix).toBe("Devlogs:")
             }
 
             expect(entry.authors.length).toBeGreaterThan(0)
@@ -41,6 +41,15 @@ describe("devlogs", () => {
 
     test("new visitors start without unread updates", () => {
         expect(hasUnreadDevlogs(null)).toBe(false)
+    })
+
+    test("page heading is localized", () => {
+        expect(DEVLOG_PAGE_COPY["pt-BR"].title).toBe(
+            "Novidades do feridinha.com",
+        )
+        expect(DEVLOG_PAGE_COPY.en.title).toBe(
+            "Development notes for feridinha.com",
+        )
     })
 
     test("a newer entry is unread until its date is stored", () => {

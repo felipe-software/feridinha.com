@@ -50,31 +50,34 @@
 }
 
 .entry {
-    display: grid;
-    grid-template-columns: minmax(8.5rem, 10rem) minmax(0, 1fr);
-    grid-template-areas:
-        "date items"
-        "authors items";
-    gap: 0.5rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
     padding: 1.5rem;
     border-radius: var(--border-radius-m);
     background-color: var(--base-dark);
 }
 
+.meta {
+    display: flex;
+    flex: 0 0 10rem;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
 .date {
-    grid-area: date;
     color: var(--dracula-red);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.95rem;
     font-variant-numeric: tabular-nums;
     font-weight: 700;
     letter-spacing: 0.025em;
-    line-height: 1.7;
+    line-height: 1.2;
 }
 
 .items {
-    grid-area: items;
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 0.9rem;
     padding-left: 1.15rem;
@@ -88,22 +91,20 @@
 }
 
 .authors {
-    grid-area: authors;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
-    
+    gap: 0.35rem;
 }
 
 .authors a {
     display: flex;
     height: fit-content;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem;
+    gap: 0.35rem;
+    padding: 0;
     border-radius: var(--border-radius-s);
     color: var(--foreground);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-decoration: none;
     transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
@@ -111,8 +112,7 @@
 }
 
 .authors a:hover {
-    background-color: var(--base);
-    transform: scale(1.1);
+    transform: scale(1.03);
 }
 
 .authors a:focus-visible {
@@ -135,13 +135,14 @@
     }
 
     .entry {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-            "date"
-            "authors"
-            "items";
+        flex-direction: column;
         gap: 0.75rem;
         padding: 1.25rem;
+    }
+
+    .meta {
+        flex-basis: auto;
+        gap: 0.5rem;
     }
 
     .items {

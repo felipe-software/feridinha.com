@@ -1,11 +1,11 @@
 {
   "page": {
     "pt-BR": {
-      "titlePrefix": "Devlops:",
-      "title": "Development notes for feridinha.com"
+      "titlePrefix": "Devlogs:",
+      "title": "Novidades do feridinha.com"
     },
     "en": {
-      "titlePrefix": "Devlops:",
+      "titlePrefix": "Devlogs:",
       "title": "Development notes for feridinha.com"
     }
   },

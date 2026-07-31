@@ -42,38 +42,40 @@ export default function DevlogsPageClient() {
                                 aria-labelledby={headingId}
                                 key={entry.date}
                             >
-                                <time
-                                    className={styles.date}
-                                    dateTime={entry.date}
-                                    id={headingId}
-                                >
-                                    {entry.date}
-                                </time>
+                                <div className={styles.meta}>
+                                    <time
+                                        className={styles.date}
+                                        dateTime={entry.date}
+                                        id={headingId}
+                                    >
+                                        {entry.date}
+                                    </time>
+                                    <div className={styles.authors}>
+                                        {entry.authors.map((author) => (
+                                            <a
+                                                href={author.profileUrl}
+                                                key={author.profileUrl}
+                                                rel="noopener noreferrer"
+                                                target="_blank"
+                                            >
+                                                {/* Author avatars are externally configured in devlogs.json. */}
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                    alt={author.name}
+                                                    height={20}
+                                                    src={author.avatarUrl}
+                                                    width={20}
+                                                />
+                                                <span>{author.name}</span>
+                                            </a>
+                                        ))}
+                                    </div>
+                                </div>
                                 <ul className={styles.items}>
                                     {entry.items[locale].map((item) => (
                                         <li key={item}>{item}</li>
                                     ))}
                                 </ul>
-                                <div className={styles.authors}>
-                                    {entry.authors.map((author) => (
-                                        <a
-                                            href={author.profileUrl}
-                                            key={author.profileUrl}
-                                            rel="noopener noreferrer"
-                                            target="_blank"
-                                        >
-                                            {/* Author avatars are externally configured in devlogs.json. */}
-                                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img
-                                                alt={author.name}
-                                                height={20}
-                                                src={author.avatarUrl}
-                                                width={20}
-                                            />
-                                            <span>{author.name}</span>
-                                        </a>
-                                    ))}
-                                </div>
                             </article>
                         )
                     })}
