@@ -5,7 +5,7 @@ export const SITE_URL = new URL("https://feridinha.com")
 export const SOCIAL_IMAGE_PATH = "/banner.png"
 
 export type SeoLocale = AppLocale
-export type PublicSeoPage = "home" | "faq" | "tutorial"
+export type PublicSeoPage = "home" | "devlogs" | "faq" | "tutorial"
 
 export type SeoPageConfig = {
     title: string
@@ -34,6 +34,11 @@ const PAGE_CONFIG: Record<SeoLocale, Record<PublicSeoPage, SeoPageConfig>> = {
             description: "Respostas sobre uploads, exclusão de arquivos, privacidade e funcionamento do Feridinha.",
             pathname: "/faq",
         },
+        devlogs: {
+            title: "Devlogs | Feridinha",
+            description: "Acompanhe as novidades e notas de desenvolvimento do Feridinha.",
+            pathname: "/devlogs",
+        },
         tutorial: {
             title: "Upload com Chatterino e ShareX | Feridinha",
             description: "Aprenda a configurar uploads no Chatterino, ShareX, DankChat e outros aplicativos.",
@@ -51,6 +56,11 @@ const PAGE_CONFIG: Record<SeoLocale, Record<PublicSeoPage, SeoPageConfig>> = {
             description: "Answers about file uploads, deletion, privacy and how Feridinha works.",
             pathname: "/en/faq",
         },
+        devlogs: {
+            title: "Devlogs | Feridinha",
+            description: "Follow Feridinha updates and development notes.",
+            pathname: "/en/devlogs",
+        },
         tutorial: {
             title: "File Upload Setup for Chatterino and ShareX | Feridinha",
             description: "Learn how to configure file uploads for Chatterino, ShareX, DankChat and other apps.",
@@ -61,6 +71,7 @@ const PAGE_CONFIG: Record<SeoLocale, Record<PublicSeoPage, SeoPageConfig>> = {
 
 const PAGE_PATHS: Record<PublicSeoPage, Record<SeoLocale, string>> = {
     home: { "pt-BR": "/", en: "/en" },
+    devlogs: { "pt-BR": "/devlogs", en: "/en/devlogs" },
     faq: { "pt-BR": "/faq", en: "/en/faq" },
     tutorial: { "pt-BR": "/tutorial", en: "/en/tutorial" },
 }

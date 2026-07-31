@@ -23,6 +23,8 @@
   },
   "Nav": {
     "mural": "Mural",
+    "devlogs": "Devlogs",
+    "devlogsUnread": "Devlogs, há novidades não lidas",
     "upload": "Upload",
     "tutorial": "Como usar",
     "faq": "Dúvidas",

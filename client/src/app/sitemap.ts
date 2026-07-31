@@ -3,6 +3,7 @@ import { SITE_URL } from "@/lib/seo"
 
 const pagePairs = [
     ["/", "/en"],
+    ["/devlogs", "/en/devlogs"],
     ["/faq", "/en/faq"],
     ["/tutorial", "/en/tutorial"],
     ["/termos-de-servico.html", "/termos-de-servico-en.html"],

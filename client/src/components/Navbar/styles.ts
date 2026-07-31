@@ -149,6 +149,17 @@ const Nav = styled.nav`
             transition: text-shadow 0.5s, color 0.5s, background-color 0.5s,
                 box-shadow 0.5s;
         }
+
+        span.devlog-unread {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.35rem;
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: var(--dracula-red);
+            box-shadow: 0 0 0 2px var(--base-dark);
+        }
     }
 
     .menu {
@@ -175,6 +186,17 @@ const Nav = styled.nav`
             display: flex;
             justify-content: center;
             align-items: center;
+
+            span.devlog-unread {
+                position: absolute;
+                top: 0.45rem;
+                right: 0.55rem;
+                width: 0.55rem;
+                height: 0.55rem;
+                border-radius: 50%;
+                background-color: var(--dracula-red);
+                box-shadow: 0 0 0 2px rgba(17, 18, 24, 1);
+            }
 
             &::before {
                 position: absolute;
