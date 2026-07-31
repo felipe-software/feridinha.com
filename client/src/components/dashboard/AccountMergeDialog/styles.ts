@@ -9,16 +9,14 @@ export const Backdrop = styled(motion.div)`
     place-items: center;
     padding: 1rem;
     overflow-y: auto;
-    background: rgba(7, 8, 14, 0.78);
-    backdrop-filter: blur(12px) saturate(0.7);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px) grayscale(0.75) brightness(0.75);
 `
 
 export const Dialog = styled(motion.div)`
     width: min(100%, 38rem);
-    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 1rem;
-    background: #171820;
-    box-shadow: 0 1.5rem 5rem rgba(0, 0, 0, 0.55);
+    background: var(--base-dark);
     color: var(--foreground);
     overflow: hidden;
 
@@ -56,18 +54,25 @@ export const Dialog = styled(motion.div)`
         margin: 1.35rem 0;
     }
 
-    .merge-arrow {
+    .merge-operator {
         display: grid;
         place-items: center;
-        height: 1.5rem;
-        color: #6272a4;
+        height: 1rem;
+        color: var(--dracula-gray);
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    .merge-operator.result {
+        color: var(--foreground);
+        font-size: 1.15rem;
     }
 
     .warning {
         display: flex;
         gap: 0.7rem;
         padding: 0.8rem;
-        border: 1px solid rgba(255, 184, 108, 0.22);
         border-radius: 0.65rem;
         background: rgba(255, 184, 108, 0.07);
         color: #f1dfc9;
@@ -86,7 +91,6 @@ export const Dialog = styled(motion.div)`
         justify-content: flex-end;
         gap: 0.65rem;
         padding: 1rem clamp(1.1rem, 4vw, 1.75rem);
-        border-top: 1px solid rgba(255, 255, 255, 0.07);
         background: rgba(0, 0, 0, 0.12);
     }
 
@@ -102,36 +106,15 @@ export const Dialog = styled(motion.div)`
     }
 `
 
-export const AccountCard = styled.div<{ $kept: boolean }>`
+export const AccountCard = styled.div<{ $accent: string; $kept: boolean }>`
     position: relative;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 0.8rem;
     padding: 0.9rem;
-    border: 1px solid ${({ $kept }) => ($kept ? "rgba(80, 250, 123, 0.34)" : "rgba(255, 255, 255, 0.08)")};
     border-radius: 0.75rem;
-    background: ${({ $kept }) => ($kept ? "rgba(80, 250, 123, 0.06)" : "rgba(255, 255, 255, 0.025)")};
-
-    .provider-icons {
-        display: flex;
-        align-items: center;
-    }
-
-    .provider-icon {
-        display: grid;
-        place-items: center;
-        width: 2rem;
-        height: 2rem;
-        margin-left: -0.35rem;
-        border: 2px solid #171820;
-        border-radius: 50%;
-        background: #282a36;
-    }
-
-    .provider-icon:first-child {
-        margin-left: 0;
-    }
+    background: var(--base);
 
     .account-copy {
         min-width: 0;
@@ -140,7 +123,7 @@ export const AccountCard = styled.div<{ $kept: boolean }>`
     .account-label {
         display: block;
         margin-bottom: 0.15rem;
-        color: ${({ $kept }) => ($kept ? "#50fa7b" : "var(--dracula-gray)")};
+        color: ${({ $accent, $kept }) => ($kept ? "var(--foreground)" : $accent)};
         font-size: 0.64rem;
         font-weight: 800;
         letter-spacing: 0.08em;
@@ -159,7 +142,7 @@ export const AccountCard = styled.div<{ $kept: boolean }>`
     .provider-name {
         flex: 0 1 auto;
         overflow: hidden;
-        color: ${({ $kept }) => ($kept ? "#8fffa9" : "#d6d7df")};
+        color: ${({ $accent }) => $accent};
         text-overflow: ellipsis;
         white-space: nowrap;
     }
@@ -178,6 +161,16 @@ export const AccountCard = styled.div<{ $kept: boolean }>`
     }
 
     .kept-icon {
-        color: #50fa7b;
+        color: ${({ $accent }) => $accent};
     }
+`
+
+export const ProviderIcon = styled.span<{ $color: string }>`
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--base-dark);
+    color: ${({ $color }) => $color};
 `

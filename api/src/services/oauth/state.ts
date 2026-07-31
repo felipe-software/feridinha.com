@@ -19,6 +19,7 @@ const linkInitSchema = z.object({
 
 const linkCompletionSchema = linkInitSchema.extend({
     providerAccountId: z.string().min(1),
+    providerDisplayName: z.string().trim().min(1).max(256),
 });
 
 const mergeConfirmationSchema = linkCompletionSchema.extend({

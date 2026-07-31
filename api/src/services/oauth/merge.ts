@@ -16,6 +16,7 @@ interface MergeOAuthUsersInput {
     sourceUserId: string;
     provider: OAuthProvider;
     providerAccountId: string;
+    providerDisplayName: string;
 }
 
 const rolePriority: Record<UserRole, number> = {
@@ -36,7 +37,7 @@ const isSerializationFailure = (error: unknown) => {
 
 const runMerge = async (
     tx: Prisma.TransactionClient,
-    { targetUserId, sourceUserId, provider, providerAccountId }: MergeOAuthUsersInput,
+    { targetUserId, sourceUserId, provider, providerAccountId, providerDisplayName }: MergeOAuthUsersInput,
 ) => {
     await tx.$queryRaw(
         Prisma.sql`SELECT "id" FROM "User" WHERE "id" IN (${targetUserId}, ${sourceUserId}) ORDER BY "id" FOR UPDATE`,
@@ -49,6 +50,10 @@ const runMerge = async (
         where: { provider_providerAccountId: { provider, providerAccountId } },
     });
     if (identity?.userId === targetUserId) {
+        await tx.oAuthAccount.update({
+            where: { provider_providerAccountId: { provider, providerAccountId } },
+            data: { displayName: providerDisplayName },
+        });
         return { linkedAt: identity.createdAt, alreadyMerged: true };
     }
     if (!identity || identity.userId !== sourceUserId || targetUserId === sourceUserId) {
@@ -74,6 +79,11 @@ const runMerge = async (
         });
         throw new OAuthMergeError("provider_conflict");
     }
+
+    await tx.oAuthAccount.update({
+        where: { provider_providerAccountId: { provider, providerAccountId } },
+        data: { displayName: providerDisplayName },
+    });
 
     const transferCounts = {
         uploads: await tx.upload.count({ where: { userId: sourceUserId } }),

@@ -172,6 +172,7 @@ const oauthCallback: RequestHandler = async (req, res) => {
             const completionTicket = await linkCompletionStore.create({
                 provider: provider.adapter.provider,
                 providerAccountId: profile.providerAccountId,
+                providerDisplayName: profile.displayName,
                 expectedUserId: stateData.expectedUserId,
             });
             return res.redirect(clientRedirect("/dashboard", "oauth-link", completionTicket));
@@ -199,29 +200,48 @@ const createMergeConfirmation = async ({
     sourceUserId,
     provider,
     providerAccountId,
+    providerDisplayName,
 }: {
     targetUser: NonNullable<Request["session"]["user"]>;
     sourceUserId: string;
     provider: Parameters<typeof providerToSlug>[0];
     providerAccountId: string;
+    providerDisplayName: string;
 }) => {
-    const sourceUser = await database.user.findUnique({
-        where: { id: sourceUserId },
-        select: {
-            name: true,
-            oauthAccounts: { select: { provider: true } },
+    const userPreviewSelect = {
+        name: true,
+        oauthAccounts: {
+            select: {
+                provider: true,
+                displayName: true,
+            },
         },
-    });
-    if (!sourceUser) return null;
+    } as const;
+    const [currentTarget, sourceUser] = await Promise.all([
+        database.user.findUnique({ where: { id: targetUser.id }, select: userPreviewSelect }),
+        database.user.findUnique({ where: { id: sourceUserId }, select: userPreviewSelect }),
+    ]);
+    if (!currentTarget || !sourceUser) return null;
 
-    const orderedProviders = (accounts: Array<{ provider: Parameters<typeof providerToSlug>[0] }>) => {
-        const linkedProviders = new Set(accounts.map((account) => providerToSlug(account.provider)));
-        return OAUTH_PROVIDER_SLUGS.filter((slug) => linkedProviders.has(slug));
+    type PreviewUser = NonNullable<typeof sourceUser>;
+    const identities = (user: PreviewUser, verifiedIdentity?: { provider: typeof provider; name: string }) => {
+        const accounts = new Map(user.oauthAccounts.map((account) => [providerToSlug(account.provider), account]));
+        return OAUTH_PROVIDER_SLUGS.flatMap((slug) => {
+            const account = accounts.get(slug);
+            if (!account) return [];
+            return [{
+                provider: slug,
+                name: verifiedIdentity?.provider === account.provider
+                    ? verifiedIdentity.name
+                    : account.displayName ?? user.name,
+            }];
+        });
     };
 
     const ticket = await mergeConfirmationStore.create({
         provider,
         providerAccountId,
+        providerDisplayName,
         expectedUserId: targetUser.id,
         sourceUserId,
     });
@@ -230,12 +250,10 @@ const createMergeConfirmation = async ({
         provider: providerToSlug(provider),
         ticket,
         accountToKeep: {
-            name: targetUser.name,
-            providers: orderedProviders(targetUser.oauthAccounts),
+            identities: identities(currentTarget),
         },
         accountToMerge: {
-            name: sourceUser.name,
-            providers: orderedProviders(sourceUser.oauthAccounts),
+            identities: identities(sourceUser, { provider, name: providerDisplayName }),
         },
     };
 };
@@ -264,6 +282,7 @@ const completeLink: RequestHandler = async (req, res) => {
                 sourceUserId: existingIdentity.userId,
                 provider: linkData.provider,
                 providerAccountId: linkData.providerAccountId,
+                providerDisplayName: linkData.providerDisplayName,
             });
             if (!confirmation) {
                 return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
@@ -305,6 +324,7 @@ const completeLink: RequestHandler = async (req, res) => {
                 data: {
                     provider: linkData.provider,
                     providerAccountId: linkData.providerAccountId,
+                    displayName: linkData.providerDisplayName,
                     userId: req.session.user!.id,
                     lastLoginAt: new Date(),
                 },
@@ -341,6 +361,7 @@ const completeLink: RequestHandler = async (req, res) => {
                     sourceUserId: concurrentIdentity.userId,
                     provider: linkData.provider,
                     providerAccountId: linkData.providerAccountId,
+                    providerDisplayName: linkData.providerDisplayName,
                 });
                 if (!confirmation) {
                     return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
@@ -389,6 +410,7 @@ const completeMerge: RequestHandler = async (req, res) => {
             sourceUserId: mergeData.sourceUserId,
             provider: mergeData.provider,
             providerAccountId: mergeData.providerAccountId,
+            providerDisplayName: mergeData.providerDisplayName,
         });
         return res.success(
             req.t("auth.oauthMerged"),

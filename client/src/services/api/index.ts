@@ -38,8 +38,12 @@ export type OAuthLinkCompletion =
       }
 
 export interface OAuthMergeAccountPreview {
+    identities: OAuthMergeIdentityPreview[]
+}
+
+export interface OAuthMergeIdentityPreview {
+    provider: OAuthProviderName
     name: string
-    providers: OAuthProviderName[]
 }
 
 export type UploadResponse =

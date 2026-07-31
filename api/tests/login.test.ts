@@ -504,7 +504,10 @@ describe("Login Routes", () => {
                             },
                         },
                     }),
-                ).toMatchObject({ userId: testUser.id });
+                ).toMatchObject({
+                    userId: testUser.id,
+                    displayName: "google user",
+                });
 
                 const replay = await fetch(`${baseURL}/login/accounts/link/complete`, {
                     method: "POST",
@@ -629,16 +632,20 @@ describe("Login Routes", () => {
                         kind: string;
                         provider: string;
                         ticket: string;
-                        accountToKeep: { name: string; providers: string[] };
-                        accountToMerge: { name: string; providers: string[] };
+                        accountToKeep: { identities: Array<{ provider: string; name: string }> };
+                        accountToMerge: { identities: Array<{ provider: string; name: string }> };
                     };
                 };
                 expect(body.code).toBe("oauth_merge_required");
                 expect(body.data).toMatchObject({ kind: "merge_required", provider: "google" });
-                expect(body.data.accountToKeep).toEqual({ name: "Test User login", providers: ["twitch"] });
+                expect(body.data.accountToKeep).toEqual({
+                    identities: [{ provider: "twitch", name: "Test User login" }],
+                });
                 expect(body.data.accountToMerge).toEqual({
-                    name: "Test User oauth-link-owner",
-                    providers: ["twitch", "google"],
+                    identities: [
+                        { provider: "twitch", name: "Test User oauth-link-owner" },
+                        { provider: "google", name: "google user" },
+                    ],
                 });
                 expect(JSON.stringify(body.data)).not.toContain(providerAccountId);
                 expect(body.data).not.toHaveProperty("sourceUserId");
@@ -772,6 +779,8 @@ describe("Login Routes", () => {
                     createdAt: sourceCreatedAt,
                 });
                 expect(merged.oauthAccounts.map((account) => account.provider).sort()).toEqual(["GOOGLE", "TWITCH"]);
+                expect(merged.oauthAccounts.find((account) => account.provider === "GOOGLE")?.displayName)
+                    .toBe("google user");
                 expect(merged.achievements.map((achievement) => achievement.id)).toContain("upload-1st");
                 expect(merged.review?.content).toBe("current review");
                 expect(merged.moderatedCommunities.map((community) => community.id)).toContain(communityId);
@@ -868,6 +877,7 @@ describe("Login Routes", () => {
                 sourceUserId: source.id,
                 provider: "GOOGLE",
                 providerAccountId,
+                providerDisplayName: "Merge owner Google",
             });
 
             try {
@@ -901,6 +911,7 @@ describe("Login Routes", () => {
                 sourceUserId: source.id,
                 provider: "GOOGLE" as const,
                 providerAccountId,
+                providerDisplayName: "Concurrent Google",
             };
             const tickets = await Promise.all([
                 mergeConfirmationStore.create(ticketData),

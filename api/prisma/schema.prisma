@@ -107,6 +107,7 @@ model User {
 model OAuthAccount {
   provider          OAuthProvider
   providerAccountId String
+  displayName       String?
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

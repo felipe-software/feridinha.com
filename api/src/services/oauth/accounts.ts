@@ -15,25 +15,28 @@ const findAccountUser = (provider: OAuthProvider, providerAccountId: string) =>
         include: { user: true },
     });
 
-const touchAccount = async (provider: OAuthProvider, providerAccountId: string) => {
+const touchAccount = async (provider: OAuthProvider, profile: OAuthProfile) => {
     const account = await database.oAuthAccount.update({
-        where: accountWhere(provider, providerAccountId),
-        data: { lastLoginAt: new Date() },
+        where: accountWhere(provider, profile.providerAccountId),
+        data: {
+            displayName: profile.displayName,
+            lastLoginAt: new Date(),
+        },
         include: { user: true },
     });
     return account.user;
 };
 
-const recoverConcurrentAccount = async (provider: OAuthProvider, providerAccountId: string, error: unknown) => {
+const recoverConcurrentAccount = async (provider: OAuthProvider, profile: OAuthProfile, error: unknown) => {
     if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
-    const account = await findAccountUser(provider, providerAccountId);
+    const account = await findAccountUser(provider, profile.providerAccountId);
     if (!account) throw error;
-    return touchAccount(provider, providerAccountId);
+    return touchAccount(provider, profile);
 };
 
 export const findOrCreateOAuthUser = async (provider: OAuthProvider, profile: OAuthProfile) => {
     const existing = await findAccountUser(provider, profile.providerAccountId);
-    if (existing) return touchAccount(provider, profile.providerAccountId);
+    if (existing) return touchAccount(provider, profile);
 
     try {
         return await database.user.create({
@@ -45,12 +48,13 @@ export const findOrCreateOAuthUser = async (provider: OAuthProvider, profile: OA
                     create: {
                         provider,
                         providerAccountId: profile.providerAccountId,
+                        displayName: profile.displayName,
                         lastLoginAt: new Date(),
                     },
                 },
             },
         });
     } catch (error) {
-        return recoverConcurrentAccount(provider, profile.providerAccountId, error);
+        return recoverConcurrentAccount(provider, profile, error);
     }
 };

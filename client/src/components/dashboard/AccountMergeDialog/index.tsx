@@ -5,51 +5,53 @@ import {
     AccountCard,
     Backdrop,
     Dialog,
+    ProviderIcon,
 } from "./styles"
 import type { OAuthProviderName } from "@/hooks/useUserDataStore"
 import type {
     OAuthLinkCompletion,
-    OAuthMergeAccountPreview,
+    OAuthMergeIdentityPreview,
 } from "@/services/api"
 import { AnimatePresence } from "motion/react"
 import { useTranslations } from "next-intl"
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { FaDiscord, FaGoogle, FaTwitch } from "react-icons/fa6"
-import { LuArrowDown, LuGitMerge, LuShieldCheck, LuTriangleAlert } from "react-icons/lu"
+import { LuGitMerge, LuShieldCheck, LuTriangleAlert } from "react-icons/lu"
 
 type MergeRequest = Extract<OAuthLinkCompletion, { kind: "merge_required" }>
 
-const providerIcons = {
-    twitch: FaTwitch,
-    google: FaGoogle,
-    discord: FaDiscord,
-} satisfies Record<OAuthProviderName, typeof FaTwitch>
+const providerVisuals = {
+    twitch: { Icon: FaTwitch, color: "#9146ff" },
+    google: { Icon: FaGoogle, color: "#4285f4" },
+    discord: { Icon: FaDiscord, color: "#5865f2" },
+} satisfies Record<OAuthProviderName, { Icon: typeof FaTwitch; color: string }>
 
-const Account = ({ account, kept }: { account: OAuthMergeAccountPreview; kept: boolean }) => {
+const Account = ({
+    identity,
+    kept,
+}: {
+    identity: OAuthMergeIdentityPreview
+    kept: boolean
+}) => {
     const t = useTranslations("Dashboard")
-    const providerNames = account.providers.map((provider) => t(`oauthProviders.${provider}`)).join(" + ")
+    const { provider } = identity
+    const providerName = t(`oauthProviders.${provider}`)
+    const { Icon, color } = providerVisuals[provider]
 
     return (
-        <AccountCard $kept={kept}>
-            <div className="provider-icons" aria-label={providerNames}>
-                {account.providers.map((provider) => {
-                    const Icon = providerIcons[provider]
-                    return (
-                        <span className="provider-icon" key={provider} title={t(`oauthProviders.${provider}`)}>
-                            <Icon size={17} aria-hidden="true" />
-                        </span>
-                    )
-                })}
-            </div>
+        <AccountCard $accent={color} $kept={kept}>
+            <ProviderIcon $color={color} title={providerName}>
+                <Icon size={18} aria-hidden="true" />
+            </ProviderIcon>
             <div className="account-copy">
                 <span className="account-label">
                     {t(kept ? "oauthMergeAccountKept" : "oauthMergeAccountAbsorbed")}
                 </span>
                 <strong>
-                    <span className="provider-name">{providerNames}</span>
+                    <span className="provider-name">{providerName}</span>
                     <span className="separator" aria-hidden="true">+</span>
-                    <span className="account-name">{account.name}</span>
+                    <span className="account-name">{identity.name}</span>
                 </strong>
             </div>
             {kept && <LuShieldCheck className="kept-icon" size={22} aria-hidden="true" />}
@@ -124,11 +126,21 @@ const AccountMergeDialog = ({ request, isLoading, onCancel, onConfirm }: Account
                             <p className="description">{t("oauthMergeDescription")}</p>
 
                             <div className="accounts">
-                                <Account account={request.accountToMerge} kept={false} />
-                                <div className="merge-arrow" aria-hidden="true">
-                                    <LuArrowDown size={20} />
-                                </div>
-                                <Account account={request.accountToKeep} kept />
+                                {request.accountToMerge.identities.map((identity, index) => (
+                                    <Fragment key={`merge-${identity.provider}`}>
+                                        {index > 0 && <span className="merge-operator" aria-hidden="true">+</span>}
+                                        <Account identity={identity} kept={false} />
+                                    </Fragment>
+                                ))}
+
+                                <span className="merge-operator result" aria-hidden="true">=</span>
+
+                                {request.accountToKeep.identities.map((identity, index) => (
+                                    <Fragment key={`keep-${identity.provider}`}>
+                                        {index > 0 && <span className="merge-operator" aria-hidden="true">+</span>}
+                                        <Account identity={identity} kept />
+                                    </Fragment>
+                                ))}
                             </div>
 
                             <div className="warning">

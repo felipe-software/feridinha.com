@@ -108,6 +108,7 @@ async function main() {
                     create: {
                         provider: "TWITCH",
                         providerAccountId: oldUser.id,
+                        displayName: oldUser.name,
                     },
                 },
                 uploads: {

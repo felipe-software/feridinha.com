@@ -19,6 +19,7 @@ export const createTestUser = async (suffix: string = ""): Promise<TestUser> => 
                 create: {
                     provider: "TWITCH",
                     providerAccountId: twitchAccountId,
+                    displayName: `Test User ${suffix}`,
                 },
             },
         },
