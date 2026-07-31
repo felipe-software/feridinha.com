@@ -15,17 +15,27 @@ const findAccountUser = (provider: OAuthProvider, providerAccountId: string) =>
         include: { user: true },
     });
 
-const touchAccount = async (provider: OAuthProvider, profile: OAuthProfile) => {
-    const account = await database.oAuthAccount.update({
-        where: accountWhere(provider, profile.providerAccountId),
-        data: {
-            displayName: profile.displayName,
-            lastLoginAt: new Date(),
-        },
-        include: { user: true },
+const touchAccount = (provider: OAuthProvider, profile: OAuthProfile) =>
+    database.$transaction(async (tx) => {
+        const account = await tx.oAuthAccount.update({
+            where: accountWhere(provider, profile.providerAccountId),
+            data: {
+                displayName: profile.displayName,
+                profileImage: profile.profileImage,
+                lastLoginAt: new Date(),
+            },
+            include: { user: true },
+        });
+        if (account.user.primaryOAuthProvider !== provider) return account.user;
+
+        return tx.user.update({
+            where: { id: account.userId },
+            data: {
+                name: profile.displayName,
+                profileImage: profile.profileImage,
+            },
+        });
     });
-    return account.user;
-};
 
 const recoverConcurrentAccount = async (provider: OAuthProvider, profile: OAuthProfile, error: unknown) => {
     if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2002") throw error;
@@ -43,12 +53,14 @@ export const findOrCreateOAuthUser = async (provider: OAuthProvider, profile: OA
             data: {
                 name: profile.displayName,
                 profileImage: profile.profileImage,
+                primaryOAuthProvider: provider,
                 color: profile.color,
                 oauthAccounts: {
                     create: {
                         provider,
                         providerAccountId: profile.providerAccountId,
                         displayName: profile.displayName,
+                        profileImage: profile.profileImage,
                         lastLoginAt: new Date(),
                     },
                 },

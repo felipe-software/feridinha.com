@@ -33,6 +33,9 @@ export type OAuthProviderName = "twitch" | "google" | "discord"
 export interface LinkedAuthProvider {
     provider: OAuthProviderName
     linkedAt: string
+    name: string
+    profileImage: string
+    isPrimary: boolean
 }
 
 export interface UserData {

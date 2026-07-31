@@ -8,6 +8,8 @@ export const AUTHENTICATED_USER_INCLUDE = {
         select: {
             provider: true,
             createdAt: true,
+            displayName: true,
+            profileImage: true,
         },
     },
     moderatedCommunities: {

@@ -173,6 +173,7 @@ const oauthCallback: RequestHandler = async (req, res) => {
                 provider: provider.adapter.provider,
                 providerAccountId: profile.providerAccountId,
                 providerDisplayName: profile.displayName,
+                providerProfileImage: profile.profileImage,
                 expectedUserId: stateData.expectedUserId,
             });
             return res.redirect(clientRedirect("/dashboard", "oauth-link", completionTicket));
@@ -201,12 +202,14 @@ const createMergeConfirmation = async ({
     provider,
     providerAccountId,
     providerDisplayName,
+    providerProfileImage,
 }: {
     targetUser: NonNullable<Request["session"]["user"]>;
     sourceUserId: string;
     provider: Parameters<typeof providerToSlug>[0];
     providerAccountId: string;
     providerDisplayName: string;
+    providerProfileImage: string;
 }) => {
     const userPreviewSelect = {
         name: true,
@@ -224,7 +227,10 @@ const createMergeConfirmation = async ({
     if (!currentTarget || !sourceUser) return null;
 
     type PreviewUser = NonNullable<typeof sourceUser>;
-    const identities = (user: PreviewUser, verifiedIdentity?: { provider: typeof provider; name: string }) => {
+    const identities = (
+        user: PreviewUser,
+        verifiedIdentity?: { provider: typeof provider; name: string },
+    ) => {
         const accounts = new Map(user.oauthAccounts.map((account) => [providerToSlug(account.provider), account]));
         return OAUTH_PROVIDER_SLUGS.flatMap((slug) => {
             const account = accounts.get(slug);
@@ -242,6 +248,7 @@ const createMergeConfirmation = async ({
         provider,
         providerAccountId,
         providerDisplayName,
+        providerProfileImage,
         expectedUserId: targetUser.id,
         sourceUserId,
     });
@@ -253,7 +260,10 @@ const createMergeConfirmation = async ({
             identities: identities(currentTarget),
         },
         accountToMerge: {
-            identities: identities(sourceUser, { provider, name: providerDisplayName }),
+            identities: identities(sourceUser, {
+                provider,
+                name: providerDisplayName,
+            }),
         },
     };
 };
@@ -283,6 +293,7 @@ const completeLink: RequestHandler = async (req, res) => {
                 provider: linkData.provider,
                 providerAccountId: linkData.providerAccountId,
                 providerDisplayName: linkData.providerDisplayName,
+                providerProfileImage: linkData.providerProfileImage,
             });
             if (!confirmation) {
                 return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
@@ -293,12 +304,20 @@ const completeLink: RequestHandler = async (req, res) => {
                 "oauth_merge_required",
             );
         }
+        const refreshedIdentity = await database.oAuthAccount.update({
+            where: identityWhere,
+            data: {
+                displayName: linkData.providerDisplayName,
+                profileImage: linkData.providerProfileImage,
+                lastLoginAt: new Date(),
+            },
+        });
         return res.success(
             req.t("auth.oauthLinked"),
             {
                 kind: "linked" as const,
                 provider: providerToSlug(linkData.provider),
-                linkedAt: existingIdentity.createdAt,
+                linkedAt: refreshedIdentity.createdAt,
             },
             "oauth_account_linked",
         );
@@ -325,6 +344,7 @@ const completeLink: RequestHandler = async (req, res) => {
                     provider: linkData.provider,
                     providerAccountId: linkData.providerAccountId,
                     displayName: linkData.providerDisplayName,
+                    profileImage: linkData.providerProfileImage,
                     userId: req.session.user!.id,
                     lastLoginAt: new Date(),
                 },
@@ -345,12 +365,20 @@ const completeLink: RequestHandler = async (req, res) => {
                 where: identityWhere,
             });
             if (concurrentIdentity?.userId === req.session.user!.id) {
+                const refreshedIdentity = await database.oAuthAccount.update({
+                    where: identityWhere,
+                    data: {
+                        displayName: linkData.providerDisplayName,
+                        profileImage: linkData.providerProfileImage,
+                        lastLoginAt: new Date(),
+                    },
+                });
                 return res.success(
                     req.t("auth.oauthLinked"),
                     {
                         kind: "linked" as const,
                         provider: providerToSlug(concurrentIdentity.provider),
-                        linkedAt: concurrentIdentity.createdAt,
+                        linkedAt: refreshedIdentity.createdAt,
                     },
                     "oauth_account_linked",
                 );
@@ -362,6 +390,7 @@ const completeLink: RequestHandler = async (req, res) => {
                     provider: linkData.provider,
                     providerAccountId: linkData.providerAccountId,
                     providerDisplayName: linkData.providerDisplayName,
+                    providerProfileImage: linkData.providerProfileImage,
                 });
                 if (!confirmation) {
                     return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
@@ -411,6 +440,7 @@ const completeMerge: RequestHandler = async (req, res) => {
             provider: mergeData.provider,
             providerAccountId: mergeData.providerAccountId,
             providerDisplayName: mergeData.providerDisplayName,
+            providerProfileImage: mergeData.providerProfileImage,
         });
         return res.success(
             req.t("auth.oauthMerged"),
@@ -433,6 +463,46 @@ const completeMerge: RequestHandler = async (req, res) => {
     }
 };
 
+const setPrimaryAccount: RequestHandler = async (req, res) => {
+    const providerSlug = parseOAuthProvider(req.body?.provider);
+    if (!providerSlug) {
+        return res.status(400).error(req.t("auth.oauthPrimaryInvalid"), "oauth_primary_profile_invalid");
+    }
+    const provider = getOAuthProvider(providerSlug).provider;
+
+    const profile = await database.$transaction(async (tx) => {
+        await tx.$queryRaw(
+            Prisma.sql`SELECT "id" FROM "User" WHERE "id" = ${req.session.user!.id} FOR UPDATE`,
+        );
+        const account = await tx.oAuthAccount.findUnique({
+            where: { userId_provider: { userId: req.session.user!.id, provider } },
+            include: { user: true },
+        });
+        if (!account) return null;
+
+        const name = account.displayName ?? account.user.name;
+        const profileImage = account.profileImage ?? account.user.profileImage;
+        await tx.user.update({
+            where: { id: account.userId },
+            data: {
+                primaryOAuthProvider: provider,
+                name,
+                profileImage,
+            },
+        });
+        return { provider: providerSlug, name, profileImage };
+    });
+
+    if (!profile) {
+        return res.status(404).error(req.t("auth.oauthAccountNotLinked"), "oauth_account_not_linked");
+    }
+    return res.success(
+        req.t("auth.oauthPrimaryUpdated"),
+        profile,
+        "oauth_primary_profile_updated",
+    );
+};
+
 const unlinkAccount: RequestHandler = async (req, res) => {
     const provider = resolveProvider(req, res);
     if (!provider) return;
@@ -443,7 +513,13 @@ const unlinkAccount: RequestHandler = async (req, res) => {
         );
         const accounts = await tx.oAuthAccount.findMany({
             where: { userId: req.session.user!.id },
-            select: { provider: true, providerAccountId: true },
+            orderBy: { createdAt: "asc" },
+            select: {
+                provider: true,
+                providerAccountId: true,
+                displayName: true,
+                profileImage: true,
+            },
         });
         const target = accounts.find((account) => account.provider === provider.adapter.provider);
         if (!target) return "missing" as const;
@@ -457,6 +533,17 @@ const unlinkAccount: RequestHandler = async (req, res) => {
                 },
             },
         });
+        if (req.session.user!.primaryOAuthProvider === target.provider) {
+            const fallback = accounts.find((account) => account.provider !== target.provider)!;
+            await tx.user.update({
+                where: { id: req.session.user!.id },
+                data: {
+                    primaryOAuthProvider: fallback.provider,
+                    name: fallback.displayName ?? req.session.user!.name,
+                    profileImage: fallback.profileImage ?? req.session.user!.profileImage,
+                },
+            });
+        }
         return "deleted" as const;
     });
 
@@ -500,6 +587,9 @@ const validateLogin: RequestHandler = async (req, res) => {
         authProviders: user.oauthAccounts.map((account) => ({
             provider: providerToSlug(account.provider),
             linkedAt: account.createdAt,
+            name: account.displayName ?? user.name,
+            profileImage: account.profileImage ?? user.profileImage,
+            isPrimary: account.provider === user.primaryOAuthProvider,
         })),
     });
 };
@@ -512,6 +602,7 @@ const loginController = {
     linkRedirect,
     completeLink,
     completeMerge,
+    setPrimaryAccount,
     unlinkAccount,
 };
 

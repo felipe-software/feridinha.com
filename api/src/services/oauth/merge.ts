@@ -17,6 +17,7 @@ interface MergeOAuthUsersInput {
     provider: OAuthProvider;
     providerAccountId: string;
     providerDisplayName: string;
+    providerProfileImage: string;
 }
 
 const rolePriority: Record<UserRole, number> = {
@@ -37,7 +38,14 @@ const isSerializationFailure = (error: unknown) => {
 
 const runMerge = async (
     tx: Prisma.TransactionClient,
-    { targetUserId, sourceUserId, provider, providerAccountId, providerDisplayName }: MergeOAuthUsersInput,
+    {
+        targetUserId,
+        sourceUserId,
+        provider,
+        providerAccountId,
+        providerDisplayName,
+        providerProfileImage,
+    }: MergeOAuthUsersInput,
 ) => {
     await tx.$queryRaw(
         Prisma.sql`SELECT "id" FROM "User" WHERE "id" IN (${targetUserId}, ${sourceUserId}) ORDER BY "id" FOR UPDATE`,
@@ -52,8 +60,20 @@ const runMerge = async (
     if (identity?.userId === targetUserId) {
         await tx.oAuthAccount.update({
             where: { provider_providerAccountId: { provider, providerAccountId } },
-            data: { displayName: providerDisplayName },
+            data: { displayName: providerDisplayName, profileImage: providerProfileImage },
         });
+
+        const target = await tx.user.findUnique({ where: { id: targetUserId } });
+        if (!target) throw new OAuthMergeError("stale");
+        if (target.primaryOAuthProvider === provider) {
+            await tx.user.update({
+                where: { id: targetUserId },
+                data: {
+                    name: providerDisplayName,
+                    profileImage: providerProfileImage,
+                },
+            });
+        }
         return { linkedAt: identity.createdAt, alreadyMerged: true };
     }
     if (!identity || identity.userId !== sourceUserId || targetUserId === sourceUserId) {
@@ -82,7 +102,7 @@ const runMerge = async (
 
     await tx.oAuthAccount.update({
         where: { provider_providerAccountId: { provider, providerAccountId } },
-        data: { displayName: providerDisplayName },
+        data: { displayName: providerDisplayName, profileImage: providerProfileImage },
     });
 
     const transferCounts = {

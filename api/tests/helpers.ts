@@ -14,12 +14,14 @@ export const createTestUser = async (suffix: string = ""): Promise<TestUser> => 
         data: {
             name: `Test User ${suffix}`,
             profileImage: "https://example.com/avatar.png",
+            primaryOAuthProvider: "TWITCH",
             sessions: [],
             oauthAccounts: {
                 create: {
                     provider: "TWITCH",
                     providerAccountId: twitchAccountId,
                     displayName: `Test User ${suffix}`,
+                    profileImage: "https://example.com/avatar.png",
                 },
             },
         },

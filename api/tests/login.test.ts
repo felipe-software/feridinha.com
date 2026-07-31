@@ -587,6 +587,62 @@ describe("Login Routes", () => {
             }
         });
 
+        test("permite escolher uma identidade conectada como perfil principal", async () => {
+            const user = await createTestUser("oauth-primary-profile");
+            const providerAccountId = `google-primary-${crypto.randomUUID()}`;
+            await database.oAuthAccount.create({
+                data: {
+                    provider: "GOOGLE",
+                    providerAccountId,
+                    displayName: "Nome do Google",
+                    profileImage: "https://example.com/google-primary.png",
+                    userId: user.id,
+                },
+            });
+
+            try {
+                const response = await fetch(`${baseURL}/login/accounts/primary`, {
+                    method: "PUT",
+                    headers: { Authorization: user.token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ provider: "google" }),
+                });
+                expect(response.status).toBe(200);
+                expect(((await response.json()) as { code: string }).code).toBe("oauth_primary_profile_updated");
+
+                const updated = await database.user.findUniqueOrThrow({ where: { id: user.id } });
+                expect(updated).toMatchObject({
+                    primaryOAuthProvider: "GOOGLE",
+                    name: "Nome do Google",
+                    profileImage: "https://example.com/google-primary.png",
+                });
+
+                const validate = await fetch(`${baseURL}/login/validate`, {
+                    headers: { Authorization: user.token },
+                });
+                const body = (await validate.json()) as {
+                    data: { authProviders: Array<{ provider: string; isPrimary: boolean }> };
+                };
+                expect(body.data.authProviders).toContainEqual(
+                    expect.objectContaining({ provider: "google", isPrimary: true }),
+                );
+
+                const restore = mockProvider("google", providerAccountId);
+                try {
+                    const login = await finishProviderCallback("google");
+                    expect(login.status).toBe(302);
+                    expect(await database.user.findUniqueOrThrow({ where: { id: user.id } })).toMatchObject({
+                        primaryOAuthProvider: "GOOGLE",
+                        name: "google user",
+                        profileImage: "https://example.com/oauth-avatar.png",
+                    });
+                } finally {
+                    restore();
+                }
+            } finally {
+                await deleteTestUser(user.id);
+            }
+        });
+
         test("solicita confirmação sem alterar identidade que pertence a outro usuário", async () => {
             const otherUser = await createTestUser("oauth-link-owner");
             const providerAccountId = `google-owned-${crypto.randomUUID()}`;
@@ -781,6 +837,8 @@ describe("Login Routes", () => {
                 expect(merged.oauthAccounts.map((account) => account.provider).sort()).toEqual(["GOOGLE", "TWITCH"]);
                 expect(merged.oauthAccounts.find((account) => account.provider === "GOOGLE")?.displayName)
                     .toBe("google user");
+                expect(merged.oauthAccounts.find((account) => account.provider === "GOOGLE")?.profileImage)
+                    .toBe("https://example.com/oauth-avatar.png");
                 expect(merged.achievements.map((achievement) => achievement.id)).toContain("upload-1st");
                 expect(merged.review?.content).toBe("current review");
                 expect(merged.moderatedCommunities.map((community) => community.id)).toContain(communityId);
@@ -878,6 +936,7 @@ describe("Login Routes", () => {
                 provider: "GOOGLE",
                 providerAccountId,
                 providerDisplayName: "Merge owner Google",
+                providerProfileImage: "https://example.com/merge-owner.png",
             });
 
             try {
@@ -912,6 +971,7 @@ describe("Login Routes", () => {
                 provider: "GOOGLE" as const,
                 providerAccountId,
                 providerDisplayName: "Concurrent Google",
+                providerProfileImage: "https://example.com/concurrent.png",
             };
             const tickets = await Promise.all([
                 mergeConfirmationStore.create(ticketData),

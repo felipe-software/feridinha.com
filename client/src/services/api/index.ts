@@ -109,6 +109,13 @@ const completeOAuthMerge = async (
     return response.data
 }
 
+const setPrimaryOAuthAccount = async (
+    provider: OAuthProviderName,
+): Promise<ApiResponse<{ provider: OAuthProviderName; name: string; profileImage: string }>> => {
+    const response = await axiosClient.put("/login/accounts/primary", { provider })
+    return response.data
+}
+
 const unlinkOAuthAccount = async (
     provider: OAuthProviderName,
 ): Promise<ApiResponse<{ provider: OAuthProviderName }>> => {
@@ -245,6 +252,7 @@ const apiService = {
     startOAuthLink,
     completeOAuthLink,
     completeOAuthMerge,
+    setPrimaryOAuthAccount,
     unlinkOAuthAccount,
     fetchApiKeys,
     createApiKey,
