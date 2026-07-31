@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/Button"
+import AccountMergeDialog from "@/components/dashboard/AccountMergeDialog"
 import { BaseBox } from "@/components/dashboard/styles"
 import queryClient from "@/config/queryClient"
 import type {
@@ -8,10 +9,10 @@ import type {
     OAuthProviderName,
 } from "@/hooks/useUserDataStore"
 import apiService from "@/services/api"
+import type { OAuthLinkCompletion } from "@/services/api"
 import {
     getOAuthFragmentValue,
     OAUTH_PROVIDERS,
-    resolveOAuthLinkCompletion,
 } from "@/lib/oauth"
 import { FaDiscord, FaGoogle, FaTwitch } from "react-icons/fa6"
 import { useTranslations } from "next-intl"
@@ -66,10 +67,14 @@ interface LinkedAccountsBoxProps {
     linkedAccounts: LinkedAuthProvider[]
 }
 
+type MergeRequest = Extract<OAuthLinkCompletion, { kind: "merge_required" }>
+
 const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
     const t = useTranslations("Dashboard")
     const [pendingProvider, setPendingProvider] =
         useState<OAuthProviderName | null>(null)
+    const [mergeRequest, setMergeRequest] = useState<MergeRequest | null>(null)
+    const [isMerging, setIsMerging] = useState(false)
     const completionStarted = useRef(false)
     const linked = new Set(linkedAccounts.map((account) => account.provider))
 
@@ -108,36 +113,45 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
                     return
                 }
 
-                const result = await resolveOAuthLinkCompletion(
-                    response.data,
-                    (provider) =>
-                        window.confirm(
-                            t("oauthMergeConfirm", {
-                                provider: t(`oauthProviders.${provider}`),
-                            }),
-                        ),
-                    apiService.completeOAuthMerge,
-                )
-                if (result.kind === "linked") {
+                if (response.data.kind === "linked") {
                     toast.success(t("oauthLinkSuccess"))
                     await refreshUser()
                     return
                 }
-                if (result.kind === "cancelled") {
-                    toast.info(t("oauthMergeCancelled"))
-                    return
-                }
-                if (result.kind === "error") {
-                    toast.error(result.error || t("oauthLinkError"))
-                    return
-                }
-                toast.success(t("oauthMergeSuccess"))
-                await refreshMergedAccount()
+                setMergeRequest(response.data)
             } catch {
                 toast.error(t("oauthLinkError"))
             }
         })()
     }, [t])
+
+    const cancelMerge = () => {
+        if (isMerging) return
+        setMergeRequest(null)
+        toast.info(t("oauthMergeCancelled"))
+    }
+
+    const confirmMerge = async () => {
+        if (!mergeRequest || isMerging) return
+        setIsMerging(true)
+        try {
+            const response = await apiService.completeOAuthMerge(mergeRequest.ticket)
+            if (!response.success) {
+                toast.error(response.error || t("oauthLinkError"))
+                setMergeRequest(null)
+                return
+            }
+            setMergeRequest(null)
+            toast.success(t("oauthMergeSuccess"))
+            await refreshMergedAccount()
+        } catch {
+            setMergeRequest(null)
+            toast.error(t("oauthLinkError"))
+            await refreshUser()
+        } finally {
+            setIsMerging(false)
+        }
+    }
 
     const connect = async (provider: OAuthProviderName) => {
         setPendingProvider(provider)
@@ -175,40 +189,48 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
     }
 
     return (
-        <Container>
-            <h2 className="title">{t("linkedAccountsTitle")}</h2>
-            {OAUTH_PROVIDERS.map((provider) => {
-                const Icon = icons[provider]
-                const isLinked = linked.has(provider)
-                const isLastProvider = isLinked && linked.size === 1
+        <>
+            <Container>
+                <h2 className="title">{t("linkedAccountsTitle")}</h2>
+                {OAUTH_PROVIDERS.map((provider) => {
+                    const Icon = icons[provider]
+                    const isLinked = linked.has(provider)
+                    const isLastProvider = isLinked && linked.size === 1
 
-                return (
-                    <div className="account" key={provider}>
-                        <Icon size={20} aria-hidden="true" />
-                        <div className="provider">
-                            <strong>{t(`oauthProviders.${provider}`)}</strong>
-                            <span className="status">
-                                {t(isLinked ? "oauthConnected" : "oauthNotConnected")}
-                            </span>
+                    return (
+                        <div className="account" key={provider}>
+                            <Icon size={20} aria-hidden="true" />
+                            <div className="provider">
+                                <strong>{t(`oauthProviders.${provider}`)}</strong>
+                                <span className="status">
+                                    {t(isLinked ? "oauthConnected" : "oauthNotConnected")}
+                                </span>
+                            </div>
+                            <Button
+                                variant={isLinked ? "deselect" : "purple"}
+                                size="slim"
+                                isLoading={pendingProvider === provider}
+                                disabled={isLastProvider || pendingProvider !== null}
+                                title={isLastProvider ? t("oauthLastProviderHint") : undefined}
+                                onClick={() =>
+                                    isLinked
+                                        ? void disconnect(provider)
+                                        : void connect(provider)
+                                }
+                            >
+                                {t(isLinked ? "oauthDisconnect" : "oauthConnect")}
+                            </Button>
                         </div>
-                        <Button
-                            variant={isLinked ? "deselect" : "purple"}
-                            size="slim"
-                            isLoading={pendingProvider === provider}
-                            disabled={isLastProvider || pendingProvider !== null}
-                            title={isLastProvider ? t("oauthLastProviderHint") : undefined}
-                            onClick={() =>
-                                isLinked
-                                    ? void disconnect(provider)
-                                    : void connect(provider)
-                            }
-                        >
-                            {t(isLinked ? "oauthDisconnect" : "oauthConnect")}
-                        </Button>
-                    </div>
-                )
-            })}
-        </Container>
+                    )
+                })}
+            </Container>
+            <AccountMergeDialog
+                request={mergeRequest}
+                isLoading={isMerging}
+                onCancel={cancelMerge}
+                onConfirm={() => void confirmMerge()}
+            />
+        </>
     )
 }
 

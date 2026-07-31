@@ -3,7 +3,6 @@ import {
     getOAuthFragmentValue,
     getOAuthLoginUrl,
     OAUTH_PROVIDERS,
-    resolveOAuthLinkCompletion,
     stripOAuthFragmentFromUrl,
 } from "@/lib/oauth"
 
@@ -38,50 +37,5 @@ describe("OAuth client helpers", () => {
         expect(
             stripOAuthFragmentFromUrl("https://feridinha.com/faq#uploads"),
         ).toBe("https://feridinha.com/faq#uploads")
-    })
-
-    test("keeps a regular link completion out of the merge flow", async () => {
-        let mergeCalls = 0
-        const result = await resolveOAuthLinkCompletion(
-            { kind: "linked", provider: "google", linkedAt: new Date().toISOString() },
-            () => true,
-            async () => {
-                mergeCalls += 1
-                return { success: true }
-            },
-        )
-
-        expect(result).toEqual({ kind: "linked" })
-        expect(mergeCalls).toBe(0)
-    })
-
-    test("does not submit the merge when confirmation is cancelled", async () => {
-        let mergeCalls = 0
-        const result = await resolveOAuthLinkCompletion(
-            { kind: "merge_required", provider: "discord", ticket: "memory-only-ticket" },
-            () => false,
-            async () => {
-                mergeCalls += 1
-                return { success: true }
-            },
-        )
-
-        expect(result).toEqual({ kind: "cancelled" })
-        expect(mergeCalls).toBe(0)
-    })
-
-    test("submits only the short-lived ticket after confirmation", async () => {
-        const receivedTickets: string[] = []
-        const result = await resolveOAuthLinkCompletion(
-            { kind: "merge_required", provider: "google", ticket: "memory-only-ticket" },
-            (provider) => provider === "google",
-            async (ticket) => {
-                receivedTickets.push(ticket)
-                return { success: true }
-            },
-        )
-
-        expect(result).toEqual({ kind: "merged" })
-        expect(receivedTickets).toEqual(["memory-only-ticket"])
     })
 })

@@ -33,7 +33,14 @@ export type OAuthLinkCompletion =
           kind: "merge_required"
           provider: OAuthProviderName
           ticket: string
+          accountToKeep: OAuthMergeAccountPreview
+          accountToMerge: OAuthMergeAccountPreview
       }
+
+export interface OAuthMergeAccountPreview {
+    name: string
+    providers: OAuthProviderName[]
+}
 
 export type UploadResponse =
     | { success: false; error: string; code?: string }

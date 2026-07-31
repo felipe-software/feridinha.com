@@ -7,6 +7,7 @@ import { findOrCreateOAuthUser } from "@/services/oauth/accounts";
 import { mergeOAuthUsers, OAuthMergeError } from "@/services/oauth/merge";
 import {
     getOAuthProvider,
+    OAUTH_PROVIDER_SLUGS,
     parseOAuthProvider,
     providerToSlug,
     type OAuthProviderSlug,
@@ -193,6 +194,52 @@ const oauthCallback: RequestHandler = async (req, res) => {
     }
 };
 
+const createMergeConfirmation = async ({
+    targetUser,
+    sourceUserId,
+    provider,
+    providerAccountId,
+}: {
+    targetUser: NonNullable<Request["session"]["user"]>;
+    sourceUserId: string;
+    provider: Parameters<typeof providerToSlug>[0];
+    providerAccountId: string;
+}) => {
+    const sourceUser = await database.user.findUnique({
+        where: { id: sourceUserId },
+        select: {
+            name: true,
+            oauthAccounts: { select: { provider: true } },
+        },
+    });
+    if (!sourceUser) return null;
+
+    const orderedProviders = (accounts: Array<{ provider: Parameters<typeof providerToSlug>[0] }>) => {
+        const linkedProviders = new Set(accounts.map((account) => providerToSlug(account.provider)));
+        return OAUTH_PROVIDER_SLUGS.filter((slug) => linkedProviders.has(slug));
+    };
+
+    const ticket = await mergeConfirmationStore.create({
+        provider,
+        providerAccountId,
+        expectedUserId: targetUser.id,
+        sourceUserId,
+    });
+    return {
+        kind: "merge_required" as const,
+        provider: providerToSlug(provider),
+        ticket,
+        accountToKeep: {
+            name: targetUser.name,
+            providers: orderedProviders(targetUser.oauthAccounts),
+        },
+        accountToMerge: {
+            name: sourceUser.name,
+            providers: orderedProviders(sourceUser.oauthAccounts),
+        },
+    };
+};
+
 const completeLink: RequestHandler = async (req, res) => {
     const ticket = typeof req.body?.ticket === "string" ? req.body.ticket : "";
     const linkData = ticket ? await linkCompletionStore.consume(ticket) : null;
@@ -212,19 +259,18 @@ const completeLink: RequestHandler = async (req, res) => {
     const existingIdentity = await database.oAuthAccount.findUnique({ where: identityWhere });
     if (existingIdentity) {
         if (existingIdentity.userId !== req.session.user!.id) {
-            const mergeTicket = await mergeConfirmationStore.create({
+            const confirmation = await createMergeConfirmation({
+                targetUser: req.session.user!,
+                sourceUserId: existingIdentity.userId,
                 provider: linkData.provider,
                 providerAccountId: linkData.providerAccountId,
-                expectedUserId: req.session.user!.id,
-                sourceUserId: existingIdentity.userId,
             });
+            if (!confirmation) {
+                return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
+            }
             return res.success(
                 req.t("auth.oauthMergeRequired"),
-                {
-                    kind: "merge_required" as const,
-                    provider: providerToSlug(linkData.provider),
-                    ticket: mergeTicket,
-                },
+                confirmation,
                 "oauth_merge_required",
             );
         }
@@ -290,19 +336,18 @@ const completeLink: RequestHandler = async (req, res) => {
                 );
             }
             if (concurrentIdentity) {
-                const mergeTicket = await mergeConfirmationStore.create({
+                const confirmation = await createMergeConfirmation({
+                    targetUser: req.session.user!,
+                    sourceUserId: concurrentIdentity.userId,
                     provider: linkData.provider,
                     providerAccountId: linkData.providerAccountId,
-                    expectedUserId: req.session.user!.id,
-                    sourceUserId: concurrentIdentity.userId,
                 });
+                if (!confirmation) {
+                    return res.status(409).error(req.t("auth.oauthMergeStale"), "oauth_merge_stale");
+                }
                 return res.success(
                     req.t("auth.oauthMergeRequired"),
-                    {
-                        kind: "merge_required" as const,
-                        provider: providerToSlug(linkData.provider),
-                        ticket: mergeTicket,
-                    },
+                    confirmation,
                     "oauth_merge_required",
                 );
             }

@@ -625,10 +625,23 @@ describe("Login Routes", () => {
                 expect(complete.status).toBe(200);
                 const body = (await complete.json()) as {
                     code: string;
-                    data: { kind: string; provider: string; ticket: string };
+                    data: {
+                        kind: string;
+                        provider: string;
+                        ticket: string;
+                        accountToKeep: { name: string; providers: string[] };
+                        accountToMerge: { name: string; providers: string[] };
+                    };
                 };
                 expect(body.code).toBe("oauth_merge_required");
                 expect(body.data).toMatchObject({ kind: "merge_required", provider: "google" });
+                expect(body.data.accountToKeep).toEqual({ name: "Test User login", providers: ["twitch"] });
+                expect(body.data.accountToMerge).toEqual({
+                    name: "Test User oauth-link-owner",
+                    providers: ["twitch", "google"],
+                });
+                expect(JSON.stringify(body.data)).not.toContain(providerAccountId);
+                expect(body.data).not.toHaveProperty("sourceUserId");
                 expect(body.data.ticket).not.toBe("");
                 expect(
                     await database.oAuthAccount.findUniqueOrThrow({
