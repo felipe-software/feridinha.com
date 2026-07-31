@@ -54,8 +54,7 @@ const Nav = styled.nav`
         position: relative;
         z-index: 1000;
         display: flex;
-        margin: 0 1rem;
-        margin-right: 1rem;
+        margin: 0 1rem 0 0.5rem;
         gap: 1.5rem;
         align-items: center;
         height: 100%;
@@ -67,6 +66,7 @@ const Nav = styled.nav`
     }
 
     .locale-selector {
+        position: relative;
         display: flex;
         align-items: center;
         flex: 0 0 auto;
@@ -74,24 +74,128 @@ const Nav = styled.nav`
     }
 
     .language-toggle {
-        padding: 0.65rem 0;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         border: 0;
+        border-radius: var(--border-radius-m);
         background: transparent;
-        color: var(--foreground);
+        color: #a7a9b3;
         cursor: pointer;
-        font-size: 0.8rem;
-        font-weight: 600;
-        letter-spacing: 0.04em;
         line-height: 1;
-        white-space: nowrap;
+        transition: transform 0.2s ease, color 0.2s ease;
 
-        span {
-            color: #696b7b;
+        svg {
+            width: 1.65rem;
+            height: 1.65rem;
+            pointer-events: none;
+            stroke-width: 2;
+            filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.8))
+                drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.06));
+        }
+
+        &:hover {
+            color: #d3d5dc;
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: scale(0.96);
+        }
+
+        &[aria-expanded="true"] {
+            color: #d3d5dc;
         }
 
         &:focus-visible {
-            outline: 2px solid var(--nav-highlight);
+            outline: 2px solid #a7a9b3;
             outline-offset: 0.25rem;
+        }
+    }
+
+    .language-popover {
+        width: clamp(160px, 10.625rem, 190px);
+        border: 1px solid #353745;
+        background-color: var(--base-dark-transparent) !important;
+        box-shadow: 0 12px 32px rgba(8, 8, 14, 0.35);
+
+        .tippy-content {
+            padding: 0.4rem;
+        }
+    }
+
+    .language-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 100%;
+    }
+
+    .language-option {
+        display: grid;
+        grid-template-columns: 24px minmax(0, 1fr) 16px;
+        align-items: center;
+        gap: 0.65rem;
+        width: 100%;
+        min-height: 44px;
+        margin: 0;
+        padding: 0.55rem 0.65rem;
+        border: 1px solid transparent;
+        border-radius: var(--border-radius-s);
+        background: transparent;
+        color: var(--foreground);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.2;
+        text-align: left;
+        transition: color 0.2s ease, background-color 0.2s ease,
+            border-color 0.2s ease, transform 0.2s ease;
+
+        &:hover:not(:disabled) {
+            color: #d3d5dc;
+            background-color: rgba(255, 255, 255, 0.055);
+            border-color: rgba(255, 255, 255, 0.11);
+        }
+
+        &:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        &:focus-visible {
+            outline: 2px solid #a7a9b3;
+            outline-offset: -2px;
+        }
+
+        &:disabled {
+            opacity: 1;
+            color: var(--nav-highlight);
+            background-color: var(--base);
+            cursor: default;
+            font-weight: 600;
+        }
+    }
+
+    .language-flag {
+        display: block;
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+
+    .language-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--nav-highlight);
+
+        svg {
+            width: 16px;
+            height: 16px;
+            stroke-width: 2.5;
         }
     }
 
@@ -240,11 +344,6 @@ const Nav = styled.nav`
             display: none !important;
         }
 
-        .locale-selector {
-            .language-toggle {
-                font-size: 0.76rem;
-            }
-        }
     }
 
 `
