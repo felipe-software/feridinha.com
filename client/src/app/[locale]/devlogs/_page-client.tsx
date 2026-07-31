@@ -6,6 +6,18 @@ import { useLocale } from "next-intl"
 import { useEffect } from "react"
 import styles from "./page.module.css"
 
+const renderHighlightedText = (text: string) =>
+    text.split(/(<0>.*?<\/0>)/g).map((part, index) => {
+        const match = part.match(/^<0>(.*?)<\/0>$/)
+        return match ? (
+            <span className={styles.highlight} key={`${part}-${index}`}>
+                {match[1]}
+            </span>
+        ) : (
+            part
+        )
+    })
+
 export default function DevlogsPageClient() {
     const locale = useLocale() as AppLocale
     const copy = DEVLOG_PAGE_COPY[locale]
@@ -73,7 +85,7 @@ export default function DevlogsPageClient() {
                                 </div>
                                 <ul className={styles.items}>
                                     {entry.items[locale].map((item) => (
-                                        <li key={item}>{item}</li>
+                                        <li key={item}>{renderHighlightedText(item)}</li>
                                     ))}
                                 </ul>
                             </article>

@@ -90,6 +90,11 @@
     color: var(--dracula-red);
 }
 
+.highlight {
+    color: var(--dracula-red);
+    font-weight: 700;
+}
+
 .authors {
     display: flex;
     flex-wrap: wrap;

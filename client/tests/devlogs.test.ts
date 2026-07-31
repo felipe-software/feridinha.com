@@ -20,6 +20,10 @@ describe("devlogs", () => {
 
             for (const locale of SUPPORTED_LOCALES) {
                 expect(entry.items[locale].length).toBeGreaterThan(0)
+                for (const item of entry.items[locale]) {
+                    expect(item).toMatch(/^<0>[^<]+<\/0> /)
+                    expect(item).not.toMatch(/\b(?:we|we've|we're|eu|nós)\b/i)
+                }
                 expect(DEVLOG_PAGE_COPY[locale].title.length).toBeGreaterThan(0)
                 expect(DEVLOG_PAGE_COPY[locale].titlePrefix).toBe("Devlogs:")
             }
