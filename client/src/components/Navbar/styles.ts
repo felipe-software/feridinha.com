@@ -6,8 +6,8 @@ const Nav = styled.nav`
     display: flex;
     flex-direction: row;
     background-color: var(--base-dark);
-    height: 5rem;
-    min-height: 5rem;
+    height: 6.6667rem;
+    min-height: 6.6667rem;
     align-items: center;
     z-index: 6;
     margin: unset;
@@ -43,7 +43,7 @@ const Nav = styled.nav`
                 color: #53576d;
                 transition: .2s;
                 &:hover {
-                    text-shadow: 0 0 0.0625rem var(--dracula-cyan);
+                    text-shadow: 0 0 0.0833rem var(--dracula-cyan);
                     color: var(--dracula-cyan);
                 }
             }
@@ -74,8 +74,8 @@ const Nav = styled.nav`
     }
 
     .language-toggle {
-        width: 2.75rem;
-        height: 2.75rem;
+        width: 3.6667rem;
+        height: 3.6667rem;
         padding: 0;
         display: inline-flex;
         align-items: center;
@@ -93,8 +93,8 @@ const Nav = styled.nav`
             height: 1.65rem;
             pointer-events: none;
             stroke-width: 2;
-            filter: drop-shadow(0 0.0625rem 0 rgba(0, 0, 0, 0.8))
-                drop-shadow(0 -0.0625rem 0 rgba(255, 255, 255, 0.06));
+            filter: drop-shadow(0 0.0833rem 0 rgba(0, 0, 0, 0.8))
+                drop-shadow(0 -0.0833rem 0 rgba(255, 255, 255, 0.06));
         }
 
         &:hover {
@@ -106,16 +106,16 @@ const Nav = styled.nav`
         }
 
         &:focus-visible {
-            outline: 0.125rem solid #a7a9b3;
+            outline: 0.1667rem solid #a7a9b3;
             outline-offset: 0.25rem;
         }
     }
 
     .language-popover {
-        width: clamp(10rem, 10.625rem, 11.875rem);
-        border: 0.0625rem solid #353745;
+        width: 13.3333rem;
+        border: 0.0833rem solid #353745;
         background-color: var(--base-dark-transparent) !important;
-        box-shadow: 0 0.75rem 2rem rgba(8, 8, 14, 0.35);
+        box-shadow: 0 1rem 2.6667rem rgba(8, 8, 14, 0.35);
 
         .tippy-content {
             padding: 0.4rem;
@@ -139,19 +139,19 @@ const Nav = styled.nav`
 
     .language-option {
         display: grid;
-        grid-template-columns: 1.5rem minmax(0, 1fr) 1rem;
+        grid-template-columns: 2rem minmax(0, 1fr) 1.3333rem;
         align-items: center;
         gap: 0.65rem;
         width: 100%;
-        min-height: 2.75rem;
+        min-height: 3.6667rem;
         margin: 0;
         padding: 0.55rem 0.65rem;
-        border: 0.0625rem solid transparent;
+        border: 0.0833rem solid transparent;
         border-radius: var(--border-radius-s);
         background: transparent;
         color: var(--foreground);
         cursor: pointer;
-        font-size: 0.875rem;
+        font-size: 1.1667rem;
         font-weight: 500;
         line-height: 1.2;
         text-align: left;
@@ -165,8 +165,8 @@ const Nav = styled.nav`
         }
 
         &:focus-visible {
-            outline: 0.125rem solid #a7a9b3;
-            outline-offset: -0.125rem;
+            outline: 0.1667rem solid #a7a9b3;
+            outline-offset: -0.1667rem;
         }
 
         &:disabled {
@@ -180,8 +180,8 @@ const Nav = styled.nav`
 
     .language-flag {
         display: block;
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 2rem;
+        height: 2rem;
         object-fit: contain;
     }
 
@@ -192,8 +192,8 @@ const Nav = styled.nav`
         color: var(--nav-highlight);
 
         svg {
-            width: 1rem;
-            height: 1rem;
+            width: 1.3333rem;
+            height: 1.3333rem;
             stroke-width: 2.5;
         }
     }
@@ -212,7 +212,7 @@ const Nav = styled.nav`
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 0.625rem;
+        gap: 0.8333rem;
         margin-left: auto;
 
         a {
@@ -222,7 +222,7 @@ const Nav = styled.nav`
             text-decoration: none;
             border-radius: var(--border-radius-s);
             padding: 0.5rem 1rem;
-            border: 0.0625rem solid transparent;
+            border: 0.0833rem solid transparent;
             text-transform: uppercase;
             text-shadow: 0 0 0 var(--nav-highlight);
             transition: text-shadow 0.5s, color 0.5s, background-color 0.5s,
@@ -234,20 +234,20 @@ const Nav = styled.nav`
 
             &.active {
                 color: var(--nav-highlight);
-                text-shadow: 0 0 0.3125rem var(--nav-highlight);
+                text-shadow: 0 0 0.4167rem var(--nav-highlight);
             }
         }
 
         span.underline_active {
             position: absolute;
             content: "";
-            height: 0.125rem;
+            height: 0.1667rem;
             background-color: var(--nav-highlight);
             width: calc(100% - 3rem);
-            bottom: 0.1875rem;
+            bottom: 0.25rem;
             margin: auto;
-            box-shadow: 0 0 0.3125rem 0.03125rem var(--nav-highlight);
-            border-radius: 0.125rem;
+            box-shadow: 0 0 0.4167rem 0.0417rem var(--nav-highlight);
+            border-radius: 0.1667rem;
             z-index: 4;
             transition: text-shadow 0.5s, color 0.5s, background-color 0.5s,
                 box-shadow 0.5s;
@@ -330,7 +330,7 @@ const Nav = styled.nav`
         }
     }
 
-    @media (max-width: 68.75rem) {
+    @media (max-width: 91.6667rem) {
         & {
             padding: 0 1rem;
         }
