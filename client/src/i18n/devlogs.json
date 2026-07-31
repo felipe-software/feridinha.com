@@ -1,12 +1,12 @@
 {
   "page": {
     "pt-BR": {
-      "title": "Devlogs",
-      "description": "Novidades e notas de desenvolvimento do Feridinha."
+      "titlePrefix": "Devlops:",
+      "title": "Development notes for feridinha.com"
     },
     "en": {
-      "title": "Devlogs",
-      "description": "Updates and development notes from Feridinha."
+      "titlePrefix": "Devlops:",
+      "title": "Development notes for feridinha.com"
     }
   },
   "entries": [
@@ -23,7 +23,14 @@
           "The navbar now lets you know when there is an update you have not read yet.",
           "We made the automated test runs more reliable."
         ]
-      }
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
     },
     {
       "date": "2026-07-24",
@@ -38,7 +45,14 @@
           "We improved search and sharing support with metadata, a sitemap and canonical links.",
           "We improved album loading and compatibility with Instagram links."
         ]
-      }
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
     },
     {
       "date": "2026-07-23",
@@ -49,7 +63,14 @@
         "en": [
           "We fixed link pasting and processing on mobile devices."
         ]
-      }
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
     },
     {
       "date": "2026-07-20",
@@ -62,7 +83,14 @@
           "You can now paste TikTok, Instagram, Reddit and X/Twitter links to import media directly into the uploader.",
           "We improved the home page layout on mobile devices."
         ]
-      }
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
     },
     {
       "date": "2026-07-18",
@@ -77,7 +105,14 @@
           "We made usage metrics more reliable even with content blockers enabled.",
           "We published the terms of service in Portuguese and English."
         ]
-      }
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
     }
   ]
 }

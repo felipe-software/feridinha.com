@@ -5,13 +5,20 @@ export type DevlogDate = `${number}-${number}-${number}`
 
 type LocalizedDevlogCopy = Record<AppLocale, readonly string[]>
 
+export type DevlogAuthor = {
+    name: string
+    avatarUrl: string
+    profileUrl: string
+}
+
 export type DevlogEntry = {
     date: DevlogDate
     items: LocalizedDevlogCopy
+    authors: readonly DevlogAuthor[]
 }
 
 type DevlogsDocument = {
-    page: Record<AppLocale, { title: string; description: string }>
+    page: Record<AppLocale, { titlePrefix: string; title: string }>
     entries: readonly DevlogEntry[]
 }
 

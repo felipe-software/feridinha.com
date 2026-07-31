@@ -24,8 +24,12 @@ export default function DevlogsPageClient() {
         >
             <div className={styles.content}>
                 <header className={styles.header}>
-                    <h1>{copy.title}</h1>
-                    <p>{copy.description}</p>
+                    <span className="notranslate material-icon" aria-hidden="true">
+                        developer_mode
+                    </span>
+                    <h1>
+                        <span>{copy.titlePrefix}</span> {copy.title}
+                    </h1>
                 </header>
 
                 <div className={styles.entries}>
@@ -50,6 +54,26 @@ export default function DevlogsPageClient() {
                                         <li key={item}>{item}</li>
                                     ))}
                                 </ul>
+                                <div className={styles.authors}>
+                                    {entry.authors.map((author) => (
+                                        <a
+                                            href={author.profileUrl}
+                                            key={author.profileUrl}
+                                            rel="noopener noreferrer"
+                                            target="_blank"
+                                        >
+                                            {/* Author avatars are externally configured in devlogs.json. */}
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                alt={author.name}
+                                                height={20}
+                                                src={author.avatarUrl}
+                                                width={20}
+                                            />
+                                            <span>{author.name}</span>
+                                        </a>
+                                    ))}
+                                </div>
                             </article>
                         )
                     })}

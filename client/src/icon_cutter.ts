@@ -13,6 +13,7 @@ const icons = new Set([
     "data_object",
     "delete",
     "delete_history",
+    "developer_mode",
     "dns",
     "edit",
     "electric_bolt",

@@ -21,6 +21,15 @@ describe("devlogs", () => {
             for (const locale of SUPPORTED_LOCALES) {
                 expect(entry.items[locale].length).toBeGreaterThan(0)
                 expect(DEVLOG_PAGE_COPY[locale].title.length).toBeGreaterThan(0)
+                expect(DEVLOG_PAGE_COPY[locale].titlePrefix).toBe("Devlops:")
+            }
+
+            expect(entry.authors.length).toBeGreaterThan(0)
+            for (const author of entry.authors) {
+                expect(author.name.length).toBeGreaterThan(0)
+                expect(author.avatarUrl).toStartWith("https://")
+                expect(author.name).toBe("felipe-software")
+                expect(author.profileUrl).toBe("https://github.com/felipe-software")
             }
         }
 
