@@ -32,7 +32,6 @@ TWITCH_REDIRECT_URL: z.string(), // Twitch App. Fully required for authenticatio
 CLIENT_URL: z.string(), // The front-end URL. Fully required for authentication. Feridinha.com for Production and localhost:5173 for dev (for example)
 JWT_SECRET: z.string(), // Jwt secret. Fully required for authentication
 IMAGE_PREFIX_URL: z.string().endsWith("/"), // The prefix for the image result. For example: "https://f.feridinha.com/" + imageName. The imageName will be appended to the prefix.
-SENTRY_DSN: z.string(), // Sentry stuff. For monitoring errors.
 NODE_ENV: z.enum(["development", "production"]), // Used for changing the logging behavior dependending on the env
 
 S3_REGION: z.string(),  // S3 Credencial. Fully required for uploading

@@ -11,16 +11,10 @@ import LoginCallback from "@/components/LoginCallback"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { LuCheck, LuInfo, LuLoaderCircle, LuTriangleAlert, LuX } from "react-icons/lu"
-import * as Sentry from "@sentry/nextjs"
 import {
     POSTHOG_PROXY_PATH,
     obfuscatePostHogAssetUrl,
 } from "@/config/posthog"
-
-Sentry.init({
-    dsn: "https://9b5ad6af7594366d35e639d20d21dea3@o4504569588809728.ingest.us.sentry.io/4509291703238656",
-    sendDefaultPii: true,
-})
 
 const getIcon = ({ type }: any) => {
     switch (type) {
