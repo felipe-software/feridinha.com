@@ -39,7 +39,15 @@ const getIcon = ({ type }: any) => {
     }
 }
 
-export function Providers({ children, isMuralAvailable }: { children: React.ReactNode; isMuralAvailable: boolean }) {
+export function Providers({
+    children,
+    isMuralAvailable,
+    isOpenSource,
+}: {
+    children: React.ReactNode
+    isMuralAvailable: boolean
+    isOpenSource: boolean
+}) {
     const [client] = useState(() => queryClient)
 
     return (
@@ -56,7 +64,7 @@ export function Providers({ children, isMuralAvailable }: { children: React.Reac
         >
             <QueryClientProvider client={client}>
                 <>
-                    <NavBar isMuralAvailable={isMuralAvailable} />
+                    <NavBar isMuralAvailable={isMuralAvailable} isOpenSource={isOpenSource} />
                     <LoginCallback />
                     {children}
                     <ToastContainer
