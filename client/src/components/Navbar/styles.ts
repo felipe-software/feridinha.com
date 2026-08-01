@@ -197,7 +197,7 @@ const Nav = styled.nav`
         }
     }
 
-    @media (max-width: 91.6667rem) {
+    @media (max-width: 1100px) {
         & {
             padding: 0 1rem;
         }
