@@ -15,6 +15,39 @@ describe("externalPostParser", () => {
             expect(result.title).toBe("@jumoproject");
             expect(result.description).toContain("Paris, c'est le génial");
         });
+
+        test("normaliza URL relativa de vídeo de Story usando o proxy do Instagram", () => {
+            const result = externalPostParser.parseInstagramHtml(`
+                <meta name="twitter:title" content="@vincentlerisson">
+                <meta property="og:video:secure_url" content="/videos/DbecORXjCE3/1">
+                <meta property="og:image" content="/images/DbecORXjCE3/1.jpg">
+            `);
+
+            expect(result).toMatchObject({
+                contentUrl: "https://www.uuinstagram.com/videos/DbecORXjCE3/1",
+                contentType: "VIDEO",
+                title: "@vincentlerisson",
+            });
+        });
+
+        test("normaliza URL relativa de imagem de Story usando o proxy do Instagram", () => {
+            const result = externalPostParser.parseInstagramHtml(
+                '<meta property="og:image" content="/images/story-image.webp">',
+            );
+
+            expect(result).toEqual({
+                contentUrl: "https://www.uuinstagram.com/images/story-image.webp",
+                contentType: "IMAGE",
+            });
+        });
+
+        test("preserva URL absoluta de mídia", () => {
+            const result = externalPostParser.parseInstagramHtml(
+                '<meta property="og:video" content="https://cdn.example.com/video.mp4">',
+            );
+
+            expect(result.contentUrl).toBe("https://cdn.example.com/video.mp4");
+        });
     });
 
     describe("parseTiktokHtml", () => {

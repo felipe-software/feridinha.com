@@ -22,4 +22,25 @@ jobs:
 
       - name: Run API tests with service containers
         working-directory: api
-        run: bun run test
+        run: |
+          set -euo pipefail
+
+          test_status=0
+
+          cleanup() {
+            bun run test:db:down || true
+          }
+
+          trap cleanup EXIT
+
+          bun --env-file=.env.test run test:db:up
+          bun --env-file=.env.test run test:prisma:setup
+          mkdir -p /tmp/feridinha-dot-com/upload /tmp/feridinha-dot-com/preview
+
+          for test_file in tests/*.test.ts; do
+            if ! bun --env-file=.env.test test --max-concurrency 1 "$test_file"; then
+              test_status=1
+            fi
+          done
+
+          exit "$test_status"

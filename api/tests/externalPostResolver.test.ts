@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { PROXY_HOSTS } from "@/services/external-post/constants";
 import { externalPostResolver, fetchHtml, toProxyUrl } from "@/services/external-post/resolver";
 
 const TEST_URLS = {
@@ -6,6 +7,8 @@ const TEST_URLS = {
     instagram: "https://www.instagram.com/reels/DU04xhLCKEr/",
     tiktok: "https://www.tiktok.com/@carlo99992/video/7607681087707417876",
 };
+
+const INSTAGRAM_STORY_URL = "https://www.instagram.com/stories/vincentlerisson/3953721648901529911/";
 
 function looksLikeHtml(str: string): boolean {
     return str.length > 0 && (str.includes("<html") || str.includes("<!DOCTYPE") || str.includes("<HTML"));
@@ -73,6 +76,23 @@ describe("externalPostResolver platform detection", () => {
         expect(externalPostResolver.detectPlatform(url)).toBe(platform);
     });
 
+    test.each([
+        INSTAGRAM_STORY_URL,
+        "https://instagram.com/stories/user_name/3953721648901529911/",
+        "https://instagram.com/stories/user.name/3953721648901529911/?utm_source=test",
+    ])("detecta Story específico do Instagram: %s", (url) => {
+        expect(externalPostResolver.detectPlatform(url)).toBe("instagram");
+    });
+
+    test.each([
+        "https://instagram.com/stories/user.name/",
+        "https://instagram.com/stories/user.name/not-numeric/",
+        "https://instagram.com/stories/user-name/3953721648901529911/",
+        "https://instagram.com.evil.test/stories/user/3953721648901529911/",
+    ])("rejeita Story inválido ou origem semelhante: %s", (url) => {
+        expect(externalPostResolver.detectPlatform(url)).toBeNull();
+    });
+
     test("rejects unsupported origins before fetching", async () => {
         await expect(externalPostResolver.resolveHtml("https://example.com/post/1")).rejects.toThrow(
             "Unsupported external post URL",
@@ -87,6 +107,21 @@ describe("externalPostResolver platform detection", () => {
         expect(toProxyUrl("not a url", "reddit")).toBe("not a url");
     });
 
+    test.each([
+        "https://www.instagram.com/p/ABC123/?utm_source=test#media",
+        "https://www.instagram.com/reel/ABC123/?utm_source=test#media",
+        "https://www.instagram.com/reels/ABC123/?utm_source=test#media",
+        `${INSTAGRAM_STORY_URL}?utm_source=test#media`,
+    ])("converte todo link do Instagram para uuinstagram: %s", (url) => {
+        const original = new URL(url);
+        const result = new URL(toProxyUrl(url, "instagram"));
+
+        expect(result.hostname).toBe("www.uuinstagram.com");
+        expect(result.pathname).toBe(original.pathname);
+        expect(result.search).toBe(original.search);
+        expect(result.hash).toBe(original.hash);
+    });
+
     test("fetchHtml aplica headers/limite da plataforma e decodifica UTF-8", async () => {
         const fakeFetch = async (_url: string, options: { maxBytes: number; headers?: Record<string, string> }) => {
             expect(options.maxBytes).toBe(5 * 1024 * 1024);
@@ -98,6 +133,29 @@ describe("externalPostResolver platform detection", () => {
             };
         };
         expect(await fetchHtml("https://vxreddit.com/post", "reddit", fakeFetch as never)).toBe("olá");
+    });
+
+    test.each([
+        ["instagram", "initial-only"],
+        ["reddit", "every-hop"],
+        ["tiktok", "every-hop"],
+        ["twitter", "every-hop"],
+    ] as const)("fetchHtml usa política correta para %s", async (source, mode) => {
+        const fakeFetch = async (
+            _url: string,
+            options: { hostPolicy: { mode: string; hosts: readonly string[] } },
+        ) => {
+            expect(options.hostPolicy).toEqual({ mode, hosts: PROXY_HOSTS[source] });
+            return {
+                body: Buffer.from("<html></html>"),
+                contentType: "text/html",
+                finalUrl: new URL(`https://${PROXY_HOSTS[source][0]}`),
+            };
+        };
+
+        await expect(fetchHtml(`https://${PROXY_HOSTS[source][0]}/post`, source, fakeFetch as never)).resolves.toBe(
+            "<html></html>",
+        );
     });
 
     test.each(Object.entries(TEST_URLS) as Array<[keyof typeof TEST_URLS, string]>)(
