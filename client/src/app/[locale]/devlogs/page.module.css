@@ -1,7 +1,8 @@
 .page {
     width: 100%;
     min-height: calc(100dvh - var(--navbar-height));
-    padding: clamp(3.5rem, 8vw, 7rem) 1.5rem;
+    padding: 1rem;
+    padding-top: 5rem;
     color: var(--foreground);
     background: var(--base);
 }
@@ -16,7 +17,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 1.5rem 0 2rem;
+    margin: 0 0 2rem;
     text-align: center;
 }
 
@@ -90,11 +91,6 @@
     color: var(--dracula-red);
 }
 
-.highlight {
-    color: var(--dracula-red);
-    font-weight: 700;
-}
-
 .authors {
     display: flex;
     flex-wrap: wrap;
@@ -131,14 +127,6 @@
 }
 
 @media (max-width: 640px) {
-    .page {
-        padding: 3.5rem 1.25rem;
-    }
-
-    .header {
-        margin-top: 0.5rem;
-    }
-
     .entry {
         flex-direction: column;
         gap: 0.75rem;

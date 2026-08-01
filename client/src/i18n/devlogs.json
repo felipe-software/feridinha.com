@@ -14,12 +14,12 @@
       "date": "2026-07-31",
       "items": {
         "pt-BR": [
-          "<0>Adicionada</0> uma página de devlogs para reunir as novidades do site.",
-          "<0>Adicionado</0> um aviso na navbar quando existe uma atualização ainda não lida."
+          "Adicionada uma página de devlogs para reunir as novidades do site.",
+          "Adicionado um aviso na navbar quando existe uma atualização ainda não lida."
         ],
         "en": [
-          "<0>Added</0> a devlogs page to keep the site's updates in one place.",
-          "<0>Added</0> a navbar indicator for unread updates."
+          "Added a devlogs page to keep the site's updates in one place.",
+          "Added a navbar indicator for unread updates."
         ]
       },
       "authors": [
@@ -34,12 +34,12 @@
       "date": "2026-07-24",
       "items": {
         "pt-BR": [
-          "<0>Adicionadas</0> URLs específicas por idioma, com o prefixo /en nas páginas em inglês.",
-          "<0>Melhorados</0> o carregamento de álbuns e a compatibilidade com links do Instagram."
+          "Adicionadas URLs específicas por idioma, com o prefixo /en nas páginas em inglês.",
+          "Melhorados o carregamento de álbuns e a compatibilidade com links do Instagram."
         ],
         "en": [
-          "<0>Added</0> language-specific URLs, with the /en prefix on English pages.",
-          "<0>Improved</0> album loading and Instagram link compatibility."
+          "Added language-specific URLs, with the /en prefix on English pages.",
+          "Improved album loading and Instagram link compatibility."
         ]
       },
       "authors": [
@@ -54,10 +54,10 @@
       "date": "2026-07-23",
       "items": {
         "pt-BR": [
-          "<0>Corrigidos</0> problemas na colagem e no processamento de links em celulares."
+          "Corrigidos problemas na colagem e no processamento de links em celulares."
         ],
         "en": [
-          "<0>Fixed</0> link pasting and processing on mobile devices."
+          "Fixed link pasting and processing on mobile devices."
         ]
       },
       "authors": [
@@ -72,12 +72,12 @@
       "date": "2026-07-20",
       "items": {
         "pt-BR": [
-          "<0>Adicionada</0> a importação direta de mídia por links do TikTok, Instagram, Reddit e X/Twitter.",
-          "<0>Melhorada</0> a responsividade da página inicial em celulares."
+          "Adicionada a importação direta de mídia por links do TikTok, Instagram, Reddit e X/Twitter.",
+          "Melhorada a responsividade da página inicial em celulares."
         ],
         "en": [
-          "<0>Added</0> direct media imports from TikTok, Instagram, Reddit and X/Twitter links.",
-          "<0>Improved</0> the home page layout on mobile devices."
+          "Added direct media imports from TikTok, Instagram, Reddit and X/Twitter links.",
+          "Improved the home page layout on mobile devices."
         ]
       },
       "authors": [
@@ -92,14 +92,14 @@
       "date": "2026-07-18",
       "items": {
         "pt-BR": [
-          "<0>Corrigidas</0> as permissões de acesso aos álbuns.",
-          "<0>Melhorada</0> a confiabilidade das métricas de uso com bloqueadores de conteúdo.",
-          "<0>Publicados</0> os termos de uso em português e inglês."
+          "Corrigidas as permissões de acesso aos álbuns.",
+          "Melhorada a confiabilidade das métricas de uso com bloqueadores de conteúdo.",
+          "Publicados os termos de uso em português e inglês."
         ],
         "en": [
-          "<0>Fixed</0> album access permissions.",
-          "<0>Improved</0> usage metrics reliability with content blockers enabled.",
-          "<0>Published</0> the terms of service in Portuguese and English."
+          "Fixed album access permissions.",
+          "Improved usage metrics reliability with content blockers enabled.",
+          "Published the terms of service in Portuguese and English."
         ]
       },
       "authors": [
