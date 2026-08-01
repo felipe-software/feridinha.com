@@ -1,6 +1,5 @@
 import { myEnv } from "@/config/env";
 import logger from "@/config/logger";
-import "@/config/sentry";
 import app from "./app";
 import tmpUtils from "@/utils/tmp";
 import { redisClient } from "@/services/redis";
