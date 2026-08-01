@@ -25,7 +25,10 @@ export async function fetchHtml(
     fetcher: ExternalFetcher = safeFetchExternal,
 ): Promise<string> {
     const result = await fetcher(url, {
-        hostPolicy: { mode: "every-hop", hosts: PROXY_HOSTS[source] },
+        hostPolicy:
+            source === "instagram"
+                ? { mode: "initial-only", hosts: PROXY_HOSTS[source] }
+                : { mode: "every-hop", hosts: PROXY_HOSTS[source] },
         trustedPrivateHosts: source === "reddit" ? [new URL(PROXY_DOMAINS.reddit).hostname] : undefined,
         maxBytes: MAX_HTML_BYTES,
         headers: { "User-Agent": PROXY_USER_AGENTS[source] },

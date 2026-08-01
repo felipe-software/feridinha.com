@@ -3,14 +3,15 @@ import logger from "@/config/logger";
 
 export const externalPostRegexes = {
     reddit: /https?:\/\/(?:www\.)?(?:vx)?reddit\.com\/r\/[\w]+\/comments\/[\w]+/i,
-    instagram: /https?:\/\/(?:www\.)?(?:zz)?instagram\.com\/(?:reels?|p)\/[\w-]+/i,
+    instagram:
+        /https?:\/\/(?:www\.)?(?:zz|uu)?instagram\.com\/(?:(?:reels?|p)\/[\w-]+|stories\/[\w.]+\/\d+)(?:[/?#]|$)/i,
     tiktok: /https?:\/\/(?:www\.)?(?:ti|tn)ktok\.com\/@[\w.]+\/video\/\d+/i,
     twitter: /https?:\/\/(?:www\.)?(?:twitter|x)\.com\/\w+\/status\/\d+/i,
 } as const;
 
 const _PROXY_DOMAINS = {
     reddit: env.MURAL_VXREDDIT_URL,
-    instagram: "https://www.zzinstagram.com",
+    instagram: "https://www.uuinstagram.com",
     tiktok: "https://www.tnktok.com",
     twitter: "https://vxtwitter.com",
 } as const;
@@ -42,7 +43,7 @@ export const PROXY_HOSTS: Record<keyof typeof PROXY_DOMAINS, readonly string[]> 
         "redditmedia.com",
         "redditstatic.com",
     ],
-    instagram: ["zzinstagram.com"],
+    instagram: ["uuinstagram.com"],
     tiktok: ["tnktok.com"],
     twitter: ["vxtwitter.com"],
 };
