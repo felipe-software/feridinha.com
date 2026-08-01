@@ -511,6 +511,15 @@ const unlinkAccount: RequestHandler = async (req, res) => {
         await tx.$queryRaw(
             Prisma.sql`SELECT "id" FROM "User" WHERE "id" = ${req.session.user!.id} FOR UPDATE`,
         );
+        const lockedUser = await tx.user.findUnique({
+            where: { id: req.session.user!.id },
+            select: {
+                primaryOAuthProvider: true,
+                name: true,
+                profileImage: true,
+            },
+        });
+        if (!lockedUser) return "missing" as const;
         const accounts = await tx.oAuthAccount.findMany({
             where: { userId: req.session.user!.id },
             orderBy: { createdAt: "asc" },
@@ -533,14 +542,14 @@ const unlinkAccount: RequestHandler = async (req, res) => {
                 },
             },
         });
-        if (req.session.user!.primaryOAuthProvider === target.provider) {
+        if (lockedUser.primaryOAuthProvider === target.provider) {
             const fallback = accounts.find((account) => account.provider !== target.provider)!;
             await tx.user.update({
                 where: { id: req.session.user!.id },
                 data: {
                     primaryOAuthProvider: fallback.provider,
-                    name: fallback.displayName ?? req.session.user!.name,
-                    profileImage: fallback.profileImage ?? req.session.user!.profileImage,
+                    name: fallback.displayName ?? lockedUser.name,
+                    profileImage: fallback.profileImage ?? lockedUser.profileImage,
                 },
             });
         }
