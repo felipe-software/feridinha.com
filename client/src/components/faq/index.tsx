@@ -1,4 +1,5 @@
 import { ExpandableCard } from "@/components/ExpandableCard"
+import { GITHUB_PROFILE_URL } from "@/lib/links"
 import { motion } from "motion/react"
 import { useEffect } from "react"
 import styled from "styled-components"
@@ -185,7 +186,7 @@ export const FaqPage = () => {
                     <a target="blank" href="https://tipa.ai/Feridinha">
                         <FaPix /> Doações
                     </a>
-                    <a target="blank" href="https://github.com/Feridinha">
+                    <a target="blank" href={GITHUB_PROFILE_URL}>
                         <FaGithub /> Github
                     </a>
                     <a target="blank" href="https://twitter.com/FeridinhaDev">
@@ -218,7 +219,7 @@ export const FaqPage = () => {
                                 </span>{" "}
                                 foi criado pelo dev{" "}
                                 <a
-                                    href="https://github.com/Feridinha"
+                                    href={GITHUB_PROFILE_URL}
                                     target="_blank"
                                     className="highlight"
                                 >

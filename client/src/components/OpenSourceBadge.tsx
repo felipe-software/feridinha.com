@@ -1,3 +1,4 @@
+import { GITHUB_REPOSITORY_URL } from "@/lib/links"
 import { FaGithub } from "react-icons/fa6"
 import styled from "styled-components"
 
@@ -19,7 +20,7 @@ const Container = styled.a`
 export const OpenSourceBadge = () => {
     if((process.env.NEXT_PUBLIC_IS_OPEN_SOURCE_ALREADY)?.toLowerCase() !== 'true') return null;
     return (
-        <Container className="base" href="https://github.com/Feridinha/feridinha.com" target="_blank">
+        <Container className="base" href={GITHUB_REPOSITORY_URL} target="_blank">
             <FaGithub />
             Agora open source!
         </Container>
