@@ -3,10 +3,10 @@
 import { AppLocale } from "@/i18n/config"
 import { Link, usePathname, useRouter } from "@/i18n/navigation"
 import { getLocaleSwitchHref } from "@/i18n/switchLocale"
+import { LocaleSelector } from "@/components/LocaleSelector"
 import LoginButton from "@/components/LoginButton"
 import { LogoText } from "@/components/LogoText"
 import { BrainMadeIcon } from "@/components/Navbar/BrainMadeIcon"
-import { LocaleSelector } from "@/components/Navbar/LocaleSelector"
 import Nav from "@/components/Navbar/styles"
 import { OpenSourceBadge } from "@/components/OpenSourceBadge"
 import Tooltip from "@/components/Tooltip"
@@ -137,9 +137,7 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
 
     return (
         <Nav>
-            <div className="locale-selector">
-                <LocaleSelector locale={locale} onChange={handleLocaleChange} />
-            </div>
+            <LocaleSelector locale={locale} onChange={handleLocaleChange} />
             <Link href="/" className="logo" aria-label="Feridinha.com">
                 <LogoText
                     aria-hidden="true"

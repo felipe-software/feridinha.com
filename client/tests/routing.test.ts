@@ -9,7 +9,6 @@ import {
     getRequestLocale,
     isSupportedLocale,
     LOCALE_COOKIE,
-    NEXT_LOCALE,
     SUPPORTED_LOCALES,
     type AppLocale,
 } from "@/i18n/config"
@@ -380,10 +379,6 @@ describe("locale URL routing", () => {
     test("uses an as-needed prefix with Portuguese as the default locale", () => {
         expect(routing.localePrefix).toBe("as-needed")
         expect(routing.defaultLocale).toBe("pt-BR")
-    })
-
-    test("cycles through Portuguese, English and Spanish", () => {
-        expect(NEXT_LOCALE).toEqual({ "pt-BR": "en", en: "es", es: "pt-BR" })
     })
 
     test("redirects an English preference from an unprefixed URL to /en", () => {

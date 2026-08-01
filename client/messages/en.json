@@ -29,6 +29,9 @@
     "dashboard": "Dashboard",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
+    "selectLanguage": "Select language",
+    "languageMenu": "Available languages",
+    "currentLanguage": "Current language",
     "brainMade": "This project was created by a human being like you"
   },
   "Auth": {

@@ -6,7 +6,7 @@
 
 The most overengineered file hosting service for Twitch Users
 
-[![Deploy Production IRIS](https://github.com/Feridinha/feridinha.com/actions/workflows/deploy.yaml/badge.svg?branch=main)](https://github.com/Feridinha/feridinha.com/actions/workflows/deploy.yaml)
+[![Deploy Production IRIS](https://github.com/felipe-software/feridinha.com/actions/workflows/deploy.yaml/badge.svg?branch=main)](https://github.com/felipe-software/feridinha.com/actions/workflows/deploy.yaml)
 
 ## Features
 

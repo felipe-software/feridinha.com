@@ -12,12 +12,6 @@ export const DAYJS_LOCALES: Record<AppLocale, string> = {
     es: "es",
 }
 
-export const NEXT_LOCALE: Record<AppLocale, AppLocale> = {
-    "pt-BR": "en",
-    en: "es",
-    es: "pt-BR",
-}
-
 export const isSupportedLocale = (value: string | undefined | null): value is AppLocale => {
     return SUPPORTED_LOCALES.includes(value as AppLocale)
 }

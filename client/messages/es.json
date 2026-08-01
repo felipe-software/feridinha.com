@@ -29,6 +29,9 @@
     "dashboard": "Panel",
     "openMenu": "Abrir menú",
     "closeMenu": "Cerrar menú",
+    "selectLanguage": "Seleccionar idioma",
+    "languageMenu": "Idiomas disponibles",
+    "currentLanguage": "Idioma actual",
     "brainMade": "Este proyecto fue creado por un ser humano como tú"
   },
   "Auth": {

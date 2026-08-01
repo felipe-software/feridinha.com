@@ -20,10 +20,17 @@ function getMeta($: cheerio.CheerioAPI, property: string | string[]): string | u
     return undefined;
 }
 
+function normalizeInstagramMediaUrl(url: string | undefined): string | undefined {
+    if (!url) return undefined;
+    return new URL(url, PROXY_DOMAINS.instagram).toString();
+}
+
 export function parseInstagramHtml(html: string) {
     const $ = cheerio.load(html);
-    const videoUrl = getMeta($, "og:video:secure_url") ?? getMeta($, "og:video") ?? getMeta($, "twitter:player:stream");
-    const imageUrl = getMeta($, "og:image");
+    const videoUrl = normalizeInstagramMediaUrl(
+        getMeta($, "og:video:secure_url") ?? getMeta($, "og:video") ?? getMeta($, "twitter:player:stream"),
+    );
+    const imageUrl = normalizeInstagramMediaUrl(getMeta($, "og:image"));
     const title = getMeta($, "og:title") ?? getMeta($, "twitter:title");
     const description = getMeta($, "og:description");
 
