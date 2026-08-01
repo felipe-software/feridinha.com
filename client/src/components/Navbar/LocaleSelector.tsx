@@ -15,7 +15,6 @@ type LocaleSelectorProps = {
 
 export function LocaleSelector({ locale, onChange }: LocaleSelectorProps) {
     const currentLanguage = languages[locale]
-    const nextLanguage = languages[currentLanguage.next]
 
     return (
         <button
@@ -24,8 +23,15 @@ export function LocaleSelector({ locale, onChange }: LocaleSelectorProps) {
             onClick={() => onChange(currentLanguage.next)}
             type="button"
         >
-            {currentLanguage.code}
-            <span aria-hidden="true">/{nextLanguage.code}</span>
+            {(Object.keys(languages) as AppLocale[]).map((language, index) => (
+                <span
+                    aria-hidden="true"
+                    className={language === locale ? "current" : undefined}
+                    key={language}
+                >
+                    {index > 0 ? "/" : ""}{languages[language].code}
+                </span>
+            ))}
         </button>
     )
 }

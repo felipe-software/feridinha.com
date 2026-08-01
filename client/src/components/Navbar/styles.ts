@@ -87,6 +87,10 @@ const Nav = styled.nav`
 
         span {
             color: #696b7b;
+
+            &.current {
+                color: var(--foreground);
+            }
         }
 
         &:focus-visible {
