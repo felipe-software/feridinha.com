@@ -6,8 +6,8 @@ const Nav = styled.nav`
     display: flex;
     flex-direction: row;
     background-color: var(--base-dark);
-    height: 6.6667rem;
-    min-height: 6.6667rem;
+    height: 80px;
+    min-height: 80px;
     align-items: center;
     z-index: 6;
     margin: unset;
