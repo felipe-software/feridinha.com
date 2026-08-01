@@ -1,7 +1,33 @@
 import Tooltip from "@/components/Tooltip"
 import { ApiAchievement } from "@/hooks/useUserDataStore"
-import { useTranslations } from "next-intl"
+import { useMessages, useTranslations } from "next-intl"
 import styled from "styled-components"
+
+const LOCALIZED_ACHIEVEMENT_IDS = [
+    "upload-1st",
+    "upload-100",
+    "upload-1000",
+    "upload-5000",
+    "upload-15000",
+    "og",
+    "limit",
+    "bug-reporter",
+    "feature-suggester",
+    "png-master",
+    "video",
+    "audio",
+] as const
+
+type LocalizedAchievementId = (typeof LOCALIZED_ACHIEVEMENT_IDS)[number]
+type LocalizedAchievementCopy = {
+    name: string
+    description: string
+    hiddenDescription: string
+}
+
+const isLocalizedAchievementId = (id: string): id is LocalizedAchievementId =>
+    LOCALIZED_ACHIEVEMENT_IDS.includes(id as LocalizedAchievementId)
+
 const Info = styled.div`
     width: 100%;
     display: flex;
@@ -94,6 +120,17 @@ const Card = styled.div`
 const Achievement = ({ achievement }: { achievement: ApiAchievement }) => {
     const isUnlocked = Boolean(achievement.secretUrl)
     const t = useTranslations("Dashboard")
+    const achievementMessages = useMessages().Achievements as Record<
+        LocalizedAchievementId,
+        LocalizedAchievementCopy
+    >
+    const achievementId = achievement.id
+    const localizedCopy = isLocalizedAchievementId(achievementId)
+        ? achievementMessages[achievementId]
+        : null
+    const localizedName = localizedCopy?.name ?? achievement.name
+    const localizedDescription = localizedCopy?.description ?? achievement.description
+    const localizedHiddenDescription = localizedCopy?.hiddenDescription ?? achievement.hiddenDescription
 
     return (
         <Tooltip
@@ -106,12 +143,12 @@ const Achievement = ({ achievement }: { achievement: ApiAchievement }) => {
                             (isUnlocked ? "pretty-text-animated" : "locked")
                         }
                     >
-                        {isUnlocked ? achievement.name : t("achievementsLocked")}
+                        {isUnlocked ? localizedName : t("achievementsLocked")}
                     </p>
                     <p className="description">
                         {isUnlocked
-                            ? achievement.description
-                            : achievement.hiddenDescription}
+                            ? localizedDescription
+                            : localizedHiddenDescription}
                     </p>
                 </Info>
             }

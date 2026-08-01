@@ -9,6 +9,7 @@ import {
     getRequestLocale,
     isSupportedLocale,
     LOCALE_COOKIE,
+    NEXT_LOCALE,
     SUPPORTED_LOCALES,
     type AppLocale,
 } from "@/i18n/config"
@@ -51,7 +52,7 @@ const requestWithLocaleHeaders = ({
 
 describe("automatic locale detection", () => {
     test("locale constants and cookie validation are intentionally strict", () => {
-        expect(SUPPORTED_LOCALES).toEqual(["pt-BR", "en"])
+        expect(SUPPORTED_LOCALES).toEqual(["pt-BR", "en", "es"])
         expect(DEFAULT_LOCALE).toBe("pt-BR")
 
         for (const locale of SUPPORTED_LOCALES) {
@@ -66,7 +67,9 @@ describe("automatic locale detection", () => {
             "pt-br",
             "PT-BR",
             "en-US",
+            "es-ES",
             "EN",
+            "ES",
             " en",
             "en ",
             "invalid",
@@ -95,7 +98,8 @@ describe("automatic locale detection", () => {
             },
             { name: "English", value: "en-US,en;q=0.9", expected: "en" },
             { name: "French", value: "fr-FR,fr;q=0.9", expected: "en" },
-            { name: "Spanish", value: "es-ES,es;q=0.9", expected: "en" },
+            { name: "Spanish", value: "es-ES,es;q=0.9", expected: "es" },
+            { name: "Mexican Spanish", value: "es-MX,es;q=0.9", expected: "es" },
             { name: "German", value: "de-DE,de;q=0.9", expected: "en" },
             { name: "Japanese", value: "ja-JP,ja;q=0.9", expected: "en" },
             {
@@ -158,6 +162,12 @@ describe("automatic locale detection", () => {
                 countryCode: "FR",
                 acceptLanguage: "fr-FR",
                 expected: "en",
+            },
+            {
+                name: "Spanish browser is used outside Brazil",
+                countryCode: "MX",
+                acceptLanguage: "es-MX,es;q=0.9",
+                expected: "es",
             },
             {
                 name: "Cloudflare unknown country delegates to a Portuguese browser",
@@ -249,6 +259,7 @@ describe("automatic locale detection", () => {
             { acceptLanguage: "pt-BR", expected: "pt-BR" as const },
             { acceptLanguage: "pt-PT", expected: "pt-BR" as const },
             { acceptLanguage: "en-US", expected: "en" as const },
+            { acceptLanguage: "es-MX", expected: "es" as const },
             { acceptLanguage: "fr-FR", expected: "en" as const },
             { acceptLanguage: null, expected: "pt-BR" as const },
             { acceptLanguage: undefined, expected: "pt-BR" as const },
@@ -265,7 +276,7 @@ describe("automatic locale detection", () => {
     })
 
     test("invalid cookie spellings fall through instead of being normalized", () => {
-        const invalidCookies = ["pt", "pt-br", "PT-BR", "en-US", "EN", " en", "en ", "invalid"]
+        const invalidCookies = ["pt", "pt-br", "PT-BR", "en-US", "EN", "es-ES", "ES", " en", "en ", "invalid"]
 
         for (const localeCookie of invalidCookies) {
             expect(
@@ -306,6 +317,12 @@ describe("locale proxy persistence", () => {
                 countryCode: "XX",
                 acceptLanguage: "en-US",
                 expected: "en",
+            },
+            {
+                name: "Mexico with a Spanish browser",
+                countryCode: "MX",
+                acceptLanguage: "es-MX",
+                expected: "es",
             },
             {
                 name: "missing country with a Portuguese browser",
@@ -365,6 +382,10 @@ describe("locale URL routing", () => {
         expect(routing.defaultLocale).toBe("pt-BR")
     })
 
+    test("cycles through Portuguese, English and Spanish", () => {
+        expect(NEXT_LOCALE).toEqual({ "pt-BR": "en", en: "es", es: "pt-BR" })
+    })
+
     test("redirects an English preference from an unprefixed URL to /en", () => {
         const response = proxy(
             requestWithLocaleHeaders({
@@ -375,6 +396,18 @@ describe("locale URL routing", () => {
 
         expect(response.status).toBe(307)
         expect(response.headers.get("location")).toBe("https://feridinha.com/en/faq")
+    })
+
+    test("redirects a Spanish preference from an unprefixed URL to /es", () => {
+        const response = proxy(
+            requestWithLocaleHeaders({
+                pathname: "/faq",
+                localeCookie: "es",
+            }),
+        )
+
+        expect(response.status).toBe(307)
+        expect(response.headers.get("location")).toBe("https://feridinha.com/es/faq")
     })
 
     test("keeps Portuguese public URLs unprefixed", () => {
@@ -414,18 +447,33 @@ describe("locale URL routing", () => {
         expect(response.headers.get("link")).toBeNull()
     })
 
-    test("publishes Portuguese and English sitemap alternates", () => {
+    test("serves Spanish URLs and updates the preference", () => {
+        const response = proxy(
+            requestWithLocaleHeaders({
+                pathname: "/es/faq",
+                localeCookie: "en",
+            }),
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.cookies.get(LOCALE_COOKIE)?.value).toBe("es")
+        expect(response.headers.get("link")).toBeNull()
+    })
+
+    test("publishes Portuguese, English and Spanish sitemap alternates", () => {
         const entries = sitemap()
         const faq = entries.find((entry) => entry.url === "https://feridinha.com/faq")
 
         expect(faq?.alternates?.languages).toEqual({
             "pt-BR": "https://feridinha.com/faq",
             en: "https://feridinha.com/en/faq",
+            es: "https://feridinha.com/es/faq",
             "x-default": "https://feridinha.com/faq",
         })
         expect(entries.find((entry) => entry.url === "https://feridinha.com/")?.alternates?.languages).toEqual({
             "pt-BR": "https://feridinha.com/",
             en: "https://feridinha.com/en",
+            es: "https://feridinha.com/es",
             "x-default": "https://feridinha.com/",
         })
     })

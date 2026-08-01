@@ -28,6 +28,9 @@ describe("API i18n", () => {
         ["en", "Route not found"],
         ["en-US", "Route not found"],
         ["en-GB", "Route not found"],
+        ["es", "Ruta no encontrada"],
+        ["es-ES", "Ruta no encontrada"],
+        ["es-MX", "Ruta no encontrada"],
         ["pt", "Rota não encontrada"],
         ["pt-BR", "Rota não encontrada"],
         ["fr", "Rota não encontrada"],
@@ -37,6 +40,7 @@ describe("API i18n", () => {
 
     test("catálogos possuem os mesmos caminhos", () => {
         expect(paths(resources.en.translation).sort()).toEqual(paths(resources["pt-BR"].translation).sort());
+        expect(paths(resources.es.translation).sort()).toEqual(paths(resources["pt-BR"].translation).sort());
     });
 
     test("x-locale tem precedência sobre Accept-Language", async () => {
@@ -44,6 +48,16 @@ describe("API i18n", () => {
             headers: { "x-locale": "en-US", "accept-language": "pt-BR" },
         });
         expect(((await response.json()) as { message: string }).message).toBe("Route not found");
+    });
+
+    test("x-locale e Accept-Language negociam espanhol", async () => {
+        const explicit = await fetch(baseUrl, {
+            headers: { "x-locale": "es", "accept-language": "en-US" },
+        });
+        expect(((await explicit.json()) as { message: string }).message).toBe("Ruta no encontrada");
+
+        const regional = await fetch(baseUrl, { headers: { "accept-language": "es-MX" } });
+        expect(((await regional.json()) as { message: string }).message).toBe("Ruta no encontrada");
     });
 
     test("Accept-Language é usado sem x-locale e locale desconhecido cai em pt-BR", async () => {

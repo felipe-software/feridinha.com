@@ -1,10 +1,11 @@
 "use client"
 
-import { AppLocale } from "@/i18n/config"
+import { AppLocale, NEXT_LOCALE } from "@/i18n/config"
 
-const languages: Record<AppLocale, { code: string; next: AppLocale }> = {
-    "pt-BR": { code: "PT", next: "en" },
-    en: { code: "EN", next: "pt-BR" },
+export const languages: Record<AppLocale, { code: string; next: AppLocale; label: string }> = {
+    "pt-BR": { code: "PT", next: NEXT_LOCALE["pt-BR"], label: "Mudar idioma para inglês" },
+    en: { code: "EN", next: NEXT_LOCALE.en, label: "Switch language to Spanish" },
+    es: { code: "ES", next: NEXT_LOCALE.es, label: "Cambiar idioma a portugués" },
 }
 
 type LocaleSelectorProps = {
@@ -15,11 +16,10 @@ type LocaleSelectorProps = {
 export function LocaleSelector({ locale, onChange }: LocaleSelectorProps) {
     const currentLanguage = languages[locale]
     const nextLanguage = languages[currentLanguage.next]
-    const label = locale === "pt-BR" ? "Mudar idioma para inglês" : "Switch language to Portuguese"
 
     return (
         <button
-            aria-label={label}
+            aria-label={currentLanguage.label}
             className="language-toggle"
             onClick={() => onChange(currentLanguage.next)}
             type="button"

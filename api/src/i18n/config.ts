@@ -1,4 +1,4 @@
-export const SUPPORTED_LOCALES = ["pt-BR", "en"] as const;
+export const SUPPORTED_LOCALES = ["pt-BR", "en", "es"] as const;
 
 export type ApiLocale = (typeof SUPPORTED_LOCALES)[number];
 
