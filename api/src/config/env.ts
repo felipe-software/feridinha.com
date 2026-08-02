@@ -11,7 +11,6 @@ const envSchema = z.object({
     CLIENT_URL: z.string(),
     JWT_SECRET: z.string(),
     IMAGE_PREFIX_URL: z.string().endsWith("/"),
-    SENTRY_DSN: z.string(),
     NODE_ENV: z.enum(["development", "production", "test"]),
     LOG_LEVEL: z.enum(["error", "info"]).optional().default("info"),
 

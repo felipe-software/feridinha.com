@@ -34,7 +34,6 @@
         "@ffmpeg-installer/ffmpeg": "^1.1.0",
         "@ffprobe-installer/ffprobe": "^2.1.2",
         "@prisma/client": "^6.19.2",
-        "@sentry/bun": "^10.66.0",
         "axios": "^1.18.1",
         "body-parser": "^2.2.2",
         "cheerio": "^1.2.0",
