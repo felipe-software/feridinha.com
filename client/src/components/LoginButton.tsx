@@ -2,56 +2,119 @@ import { useModalStore } from "@/hooks/useModalStore"
 import { useLocale, useTranslations } from "next-intl"
 import { ModalBase } from "@/components/ViewFileModal"
 import { FaDiscord, FaGoogle, FaTwitch } from "react-icons/fa6"
-import { LuLogIn } from "react-icons/lu"
 import styled from "styled-components"
 import type { AppLocale } from "@/i18n/config"
 import { getTermsUrl } from "@/lib/seo"
 import type { OAuthProviderName } from "@/hooks/useUserDataStore"
 import { getOAuthLoginUrl, OAUTH_PROVIDERS } from "@/lib/oauth"
-import type { ComponentType } from "react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
+import { useEffect, useState, type ComponentType } from "react"
 
-const NavbarButton = styled.button`
+const LOGIN_THEMES = [
+    {
+        provider: "twitch",
+        background: "var(--oauth-twitch)",
+        foreground: "var(--foreground)",
+    },
+    {
+        provider: "google",
+        background: "var(--oauth-google)",
+        foreground: "var(--base-dark)",
+    },
+    {
+        provider: "discord",
+        background: "var(--oauth-discord)",
+        foreground: "var(--foreground)",
+    },
+] as const
+
+const shuffleThemes = () => {
+    const themes = [...LOGIN_THEMES]
+
+    for (let index = themes.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1))
+        ;[themes[index], themes[randomIndex]] = [themes[randomIndex], themes[index]]
+    }
+
+    return themes
+}
+
+const NavbarButton = styled(motion.button)<{
+    $accent: string
+    $foreground: string
+}>`
+    --login-accent: ${({ $accent }) => $accent};
+    --login-foreground: ${({ $foreground }) => $foreground};
+
     position: relative;
-    background-color: rgb(144, 72, 249);
+    isolation: isolate;
+    overflow: hidden;
+    min-width: 6.9rem;
+    min-height: 2.5rem;
+    background-color: var(--login-accent);
     border: none;
     border-radius: var(--border-radius-ss);
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 0.6rem;
-    box-shadow: 0 0 5px 2px rgb(144 72 249 / 25%);
-    transition: 0.2s ease;
-    padding: 0.5rem 0.75rem;
+    gap: 0.7rem;
+    box-shadow: 0 0.25rem 1rem color-mix(in srgb, var(--login-accent) 24%, transparent);
+    transition:
+        background-color 0.65s ease-in-out,
+        box-shadow 0.65s ease-in-out;
+    padding: 0.5rem 0.85rem;
     cursor: pointer;
-    color: #f8f8f8;
+    color: var(--login-foreground);
 
     &:hover {
-        background-color: #6724ca;
-        box-shadow: 0 0 15px 5px rgb(144 72 249 / 25%);
+        box-shadow: 0 0.4rem 1.35rem color-mix(in srgb, var(--login-accent) 38%, transparent);
     }
 
-    span {
-        font-size: 1rem;
-        font-weight: 600;
-        text-shadow: 0 0 2px #000;
+    &:focus-visible {
+        outline: 0.15rem solid var(--foreground);
+        outline-offset: 0.2rem;
+    }
+
+    .provider-icon-slot {
+        position: relative;
+        overflow: hidden;
+        flex: 0 0 1rem;
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .provider-icon {
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .label {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .label {
+        font-size: 0.9rem;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
     }
 `
 
 const ProviderButton = styled.button<{ $provider: OAuthProviderName }>`
     width: min(100%, 21rem);
-    border: 1px solid
-        ${({ $provider }) =>
-            $provider === "twitch"
-                ? "#9146ff"
-                : $provider === "discord"
-                  ? "#5865f2"
-                  : "#dadce0"};
+    border: none;
     background: ${({ $provider }) =>
-        $provider === "twitch"
-            ? "#9146ff"
-            : $provider === "discord"
-              ? "#5865f2"
-              : "#ffffff"};
+        $provider === "twitch" ? "var(--oauth-twitch)" : $provider === "discord" ? "var(--oauth-discord)" : "#ffffff"};
     color: ${({ $provider }) => ($provider === "google" ? "#202124" : "#fff")};
     border-radius: 0.6rem;
     padding: 0.75rem 1rem;
@@ -62,13 +125,16 @@ const ProviderButton = styled.button<{ $provider: OAuthProviderName }>`
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
-    transition:
-        transform 0.15s ease,
-        filter 0.15s ease;
+    transition: 0.2s ease-in-out;
 
     &:hover {
-        transform: translateY(-1px);
+        transform: scale(1.02);
         filter: brightness(0.94);
+    }
+
+    &:active {
+        transform: scale(0.96);
+        filter: brightness(0.8);
     }
 `
 
@@ -107,12 +173,7 @@ export const LoginModal = () => {
     const locale = useLocale() as AppLocale
 
     const handleLogin = (provider: OAuthProviderName) => {
-        window.location.assign(
-            getOAuthLoginUrl(
-                process.env.NEXT_PUBLIC_API_URL as string,
-                provider,
-            ),
-        )
+        window.location.assign(getOAuthLoginUrl(process.env.NEXT_PUBLIC_API_URL as string, provider))
     }
 
     return (
@@ -149,15 +210,69 @@ export const LoginModal = () => {
 
 const LoginButton = () => {
     const t = useTranslations("Auth")
-    const modal = useModalStore()
+    const setModalPage = useModalStore((state) => state.setPage)
+    const [themeOrder, setThemeOrder] = useState<readonly (typeof LOGIN_THEMES)[number][]>(LOGIN_THEMES)
+    const [themeIndex, setThemeIndex] = useState(0)
+
+    useEffect(() => {
+        setThemeOrder(shuffleThemes())
+    }, [])
+
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            setThemeIndex((currentIndex) => (currentIndex + 1) % themeOrder.length)
+        }, 2200)
+
+        return () => window.clearInterval(interval)
+    }, [themeOrder.length])
+
+    const currentActive = themeOrder[themeIndex] ?? LOGIN_THEMES[0]
+    const ActiveProviderIcon = providerIcons[currentActive.provider]
+
+    const openLoginModal = () => {
+        setModalPage({ jsx: <LoginModal /> })
+    }
+
+    const handleClick = () => {
+        openLoginModal()
+    }
 
     return (
         <NavbarButton
             type="button"
-            onClick={() => modal.setPage({ jsx: <LoginModal /> })}
+            $accent={currentActive.background}
+            $foreground={currentActive.foreground}
+            data-provider={currentActive.provider}
+            // aria-busy={isExiting}
+            // disabled={isExiting}
+            initial={false}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.96 }}
+            onClick={handleClick}
         >
-            <LuLogIn size={18} aria-hidden="true" />
-            <span>{t("loginButton")}</span>
+            <AnimatePresence initial={false} mode="sync">
+                <div className="relative w-4  overflow-visible">
+                    <motion.span
+                        className="provider-icon"
+                        key={currentActive.provider}
+                        initial={{
+                            y: "100%",
+                            opacity: 0,
+                            scale: 1.5,
+                        }}
+                        animate={{ y: 0, opacity: 1, scale: 1.5 }}
+                        exit={{
+                            y: "-100%",
+                            opacity: 0,
+                            scale: 1.5,
+                        }}
+                        style={{ width: "1rem" }}
+                    >
+                        <ActiveProviderIcon />
+                    </motion.span>
+                </div>
+            </AnimatePresence>
+            <span className="label">{t("loginButton")}</span>
         </NavbarButton>
     )
 }

@@ -36,6 +36,9 @@
     --dracula-gray: #44475a;
     --dracula-base: #282a36;
     --dracula-orange: #FFB86C;
+    --oauth-twitch: #9146ff;
+    --oauth-google: #f8f8f8;
+    --oauth-discord: #5865f2;
     --nav-highlight: rgb(189, 147, 249);
     --global-font-size: 16px;
 }
