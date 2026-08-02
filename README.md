@@ -6,8 +6,8 @@
 
 The most overengineered file hosting service
 
-[![Deploy Production IRIS](https://github.com/Feridinha/feridinha.com/actions/workflows/deploy.yaml/badge.svg?branch=main)](https://github.com/Feridinha/feridinha.com/actions/workflows/deploy.yaml)
-
+[![Deploy Production IRIS](https://github.com/felipe-software/feridinha.com/actions/workflows/deploy.yaml/badge.svg?branch=main)](https://github.com/felipe-software/feridinha.com/actions/workflows/deploy.yaml)
+[![Run project test](https://github.com/felipe-software/feridinha.com/actions/workflows/test.yaml/badge.svg)](https://github.com/felipe-software/feridinha.com/actions/workflows/test.yaml)
 ## Features
 
 - Twitch, Google and Discord account support

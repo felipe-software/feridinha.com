@@ -5,6 +5,9 @@ import { SEO_REDIRECTS } from "./src/config/seoRedirects"
 
 const nextConfig: NextConfig = {
     reactStrictMode: true,
+    // PostHog ingestion paths include a trailing slash. Avoid redirecting replay
+    // payloads before the reverse proxy forwards them upstream.
+    skipTrailingSlashRedirect: true,
     typescript: {
         ignoreBuildErrors: true,
     },

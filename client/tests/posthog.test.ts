@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test"
+import nextConfig from "../next.config"
 import {
     POSTHOG_ASSET_PROXY_PATH,
     obfuscatePostHogAssetUrl,
@@ -21,5 +22,11 @@ describe("PostHog asset aliases", () => {
         expect(new URL(alias).pathname).toStartWith(`${POSTHOG_ASSET_PROXY_PATH}/`)
         expect(alias).not.toContain(path.split("/").at(-1)!.split("?")[0])
         expect(decodeAlias(alias)).toBe(path)
+    })
+})
+
+describe("PostHog ingestion proxy", () => {
+    test("preserves trailing slashes used by ingestion endpoints", () => {
+        expect(nextConfig.skipTrailingSlashRedirect).toBe(true)
     })
 })

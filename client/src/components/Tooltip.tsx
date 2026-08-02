@@ -8,15 +8,14 @@ const StyledTooltip = styled(Tippy)`
     position: relative;
     --background: var(--base);
     background-color: var(--background) !important;
-    /* box-shadow: 0px 0px 5px 1px rgba(255, 255, 255, 0.075); */
-    border: 2px solid #292a32;
+    border: 0.1667rem solid #292a32;
 
     p {
         cursor: pointer;
     }
 
     &.purple {
-        border: 2px solid #ff80bf;
+        border: 0.1667rem solid #ff80bf;
 
         .tippy-arrow {
             color: #ff80bf;
@@ -24,25 +23,34 @@ const StyledTooltip = styled(Tippy)`
     }
 
     .tippy-arrow {
-        /* color: var(--background) !important; */
         color: #292a32;
-        /* background-color: red; */
 
         svg {
             stroke: #ff80bf;
-            stroke-width: 2px;
+            stroke-width: 0.1667rem;
         }
     }
 
+    &[data-placement^="bottom"] .tippy-arrow {
+        translate: 0 -1px;
+    }
+
+    &[data-placement^="top"] .tippy-arrow {
+        translate: 0 1px;
+    }
+
+    &[data-placement^="left"] .tippy-arrow {
+        translate: 1px 0;
+    }
+
+    &[data-placement^="right"] .tippy-arrow {
+        translate: -1px 0;
+    }
 
 `
 
 const Tooltip = (props: TippyProps) => {
-    return (
-        // <Styless>
-        <StyledTooltip  animation={"shift-away"} {...props}  />
-        // </Styless>
-    )
+    return <StyledTooltip animation="shift-away" {...props} />
 }
 
 const TooltipImage = styled(Tooltip)`
@@ -66,7 +74,7 @@ const TooltipConfirmBox = styled(Tooltip)`
         display: flex;
         width: fit-content;
         flex-direction: column;
-        max-width: 230px;
+        max-width: 19.1667rem;
         padding: 0.2rem;
         gap: 0.7rem;
 
@@ -84,7 +92,7 @@ const TooltipConfirmBox = styled(Tooltip)`
                 padding: 0.2rem;
                 cursor: pointer;
                 background: none;
-                border: 2px solid #f8f8f878;
+                border: 0.1667rem solid #f8f8f878;
                 color: #f8f8f8;
                 border-radius: var(--border-radius-ss);
             }

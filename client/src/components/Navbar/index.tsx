@@ -3,10 +3,10 @@
 import { AppLocale } from "@/i18n/config"
 import { Link, usePathname, useRouter } from "@/i18n/navigation"
 import { getLocaleSwitchHref } from "@/i18n/switchLocale"
+import { LocaleSelector } from "@/components/LocaleSelector"
 import LoginButton from "@/components/LoginButton"
 import { LogoText } from "@/components/LogoText"
 import { BrainMadeIcon } from "@/components/Navbar/BrainMadeIcon"
-import { LocaleSelector } from "@/components/Navbar/LocaleSelector"
 import Nav from "@/components/Navbar/styles"
 import { OpenSourceBadge } from "@/components/OpenSourceBadge"
 import Tooltip from "@/components/Tooltip"
@@ -98,7 +98,13 @@ const BrainMadeWrapper = styled.a`
     }
 `
 
-function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
+function NavBar_({
+    isMuralAvailable,
+    isOpenSource = false,
+}: {
+    isMuralAvailable?: boolean
+    isOpenSource?: boolean
+}) {
     const [isMenuActive, setMenuActive] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const pathname = usePathname()
@@ -137,9 +143,7 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
 
     return (
         <Nav>
-            <div className="locale-selector">
-                <LocaleSelector locale={locale} onChange={handleLocaleChange} />
-            </div>
+            <LocaleSelector locale={locale} onChange={handleLocaleChange} />
             <Link href="/" className="logo" aria-label="Feridinha.com">
                 <LogoText
                     aria-hidden="true"
@@ -152,25 +156,21 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
                 </LogoText>
             </Link>
             <div className="description-container">
-                <OpenSourceBadge />
-                <Tooltip content={t("brainMade")} arrow={false} maxWidth={400}>
-                    <BrainMadeWrapper
-                        className="brain-made"
-                        style={{ display: "flex" }}
-                        href="https://brainmade.org/"
-                        target="_blank"
-                        rel="external noopener noreferrer"
-                        aria-label={`Brainmade.org — ${t("brainMade")}`}
-                    >
-                        <BrainMadeIcon />
-                        {/* <img
-                            src="/brain-made.svg"
-                            style={{ height: "1.5rem" }}
-                            height={24}
-                            alt="Brain made project"
-                        ></img> */}
-                    </BrainMadeWrapper>
-                </Tooltip>
+                <OpenSourceBadge isOpenSource={isOpenSource} username={user.data?.name} />
+                {!isOpenSource && (
+                    <Tooltip content={t("brainMade")} arrow={false} maxWidth={400}>
+                        <BrainMadeWrapper
+                            className="brain-made"
+                            style={{ display: "flex" }}
+                            href="https://brainmade.org/"
+                            target="_blank"
+                            rel="external noopener noreferrer"
+                            aria-label={`Brainmade.org — ${t("brainMade")}`}
+                        >
+                            <BrainMadeIcon />
+                        </BrainMadeWrapper>
+                    </Tooltip>
+                )}
             </div>
             {isMobile && (
                 <button

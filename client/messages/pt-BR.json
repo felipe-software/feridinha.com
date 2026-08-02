@@ -29,6 +29,11 @@
     "dashboard": "Dashboard",
     "openMenu": "Abrir menu",
     "closeMenu": "Fechar menu",
+    "selectLanguage": "Selecionar idioma",
+    "languageMenu": "Idiomas disponíveis",
+    "currentLanguage": "Idioma atual",
+    "openSource": "Agora open source!",
+    "openSourceSpotlight": "Dê uma estrela!",
     "brainMade": "Esse projeto foi criado por um ser humano como você"
   },
   "Auth": {
