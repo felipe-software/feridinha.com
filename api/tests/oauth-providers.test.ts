@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { getOAuthProvider } from "@/services/oauth";
+import { envSchema } from "@/config/env";
+import {
+    getOAuthProvider,
+    hasCompleteOAuthProviderConfig,
+    isOAuthProviderEnabled,
+} from "@/services/oauth";
 import { ExternalServiceError } from "@/utils/httpErrors";
 import axios, { AxiosHeaders, type AxiosAdapter, type AxiosResponse } from "axios";
 
@@ -15,6 +20,41 @@ const response = (config: Parameters<AxiosAdapter>[0], data: unknown, status = 2
 
 afterEach(() => {
     axios.defaults.adapter = originalAdapter;
+});
+
+describe("Optional OAuth provider configuration", () => {
+    test("accepts missing Google and Discord variables", () => {
+        const parsed = envSchema.parse({
+            ...process.env,
+            GOOGLE_CLIENT_ID: "",
+            GOOGLE_CLIENT_SECRET: undefined,
+            GOOGLE_REDIRECT_URL: "",
+            DISCORD_CLIENT_ID: undefined,
+            DISCORD_CLIENT_SECRET: "",
+            DISCORD_REDIRECT_URL: undefined,
+        });
+
+        expect(parsed.GOOGLE_CLIENT_ID).toBeUndefined();
+        expect(parsed.GOOGLE_CLIENT_SECRET).toBeUndefined();
+        expect(parsed.GOOGLE_REDIRECT_URL).toBeUndefined();
+        expect(parsed.DISCORD_CLIENT_ID).toBeUndefined();
+        expect(parsed.DISCORD_CLIENT_SECRET).toBeUndefined();
+        expect(parsed.DISCORD_REDIRECT_URL).toBeUndefined();
+    });
+
+    test("only enables a provider with complete configuration", () => {
+        expect(hasCompleteOAuthProviderConfig({
+            clientId: "client",
+            clientSecret: "secret",
+        })).toBe(false);
+        expect(hasCompleteOAuthProviderConfig({
+            clientId: "client",
+            clientSecret: "secret",
+            redirectUri: "https://example.com/callback",
+        })).toBe(true);
+        expect(isOAuthProviderEnabled("google")).toBe(true);
+        expect(isOAuthProviderEnabled("discord")).toBe(true);
+    });
 });
 
 describe("Google OAuth adapter", () => {

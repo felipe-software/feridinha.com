@@ -7,8 +7,10 @@ import { findOrCreateOAuthUser } from "@/services/oauth/accounts";
 import { mergeOAuthUsers, OAuthMergeError } from "@/services/oauth/merge";
 import {
     getOAuthProvider,
+    isOAuthProviderEnabled,
     OAUTH_PROVIDER_SLUGS,
     parseOAuthProvider,
+    providerFromSlug,
     providerToSlug,
     type OAuthProviderSlug,
 } from "@/services/oauth";
@@ -46,7 +48,20 @@ const resolveProvider = (req: Request, res: Response) => {
         res.status(404).error(req.t("auth.oauthProviderInvalid"), "oauth_provider_invalid");
         return null;
     }
+    if (!isOAuthProviderEnabled(slug)) {
+        res.status(503).error(req.t("auth.oauthProviderDisabled"), "oauth_provider_disabled");
+        return null;
+    }
     return { slug, adapter: getOAuthProvider(slug) };
+};
+
+const resolveProviderName = (req: Request, res: Response) => {
+    const slug = parseOAuthProvider(req.params.provider);
+    if (!slug) {
+        res.status(404).error(req.t("auth.oauthProviderInvalid"), "oauth_provider_invalid");
+        return null;
+    }
+    return { slug, provider: providerFromSlug(slug) };
 };
 
 const sendProviderError = (req: Request, res: Response, error: unknown) => {
@@ -468,7 +483,7 @@ const setPrimaryAccount: RequestHandler = async (req, res) => {
     if (!providerSlug) {
         return res.status(400).error(req.t("auth.oauthPrimaryInvalid"), "oauth_primary_profile_invalid");
     }
-    const provider = getOAuthProvider(providerSlug).provider;
+    const provider = providerFromSlug(providerSlug);
 
     const profile = await database.$transaction(async (tx) => {
         await tx.$queryRaw(
@@ -504,7 +519,7 @@ const setPrimaryAccount: RequestHandler = async (req, res) => {
 };
 
 const unlinkAccount: RequestHandler = async (req, res) => {
-    const provider = resolveProvider(req, res);
+    const provider = resolveProviderName(req, res);
     if (!provider) return;
 
     const result = await database.$transaction(async (tx) => {
@@ -530,7 +545,7 @@ const unlinkAccount: RequestHandler = async (req, res) => {
                 profileImage: true,
             },
         });
-        const target = accounts.find((account) => account.provider === provider.adapter.provider);
+        const target = accounts.find((account) => account.provider === provider.provider);
         if (!target) return "missing" as const;
         if (accounts.length <= 1) return "last" as const;
 

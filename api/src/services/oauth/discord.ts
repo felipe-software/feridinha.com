@@ -6,6 +6,12 @@ import axios from "axios";
 import { z } from "zod";
 import type { OAuthProviderAdapter } from "./types";
 
+interface DiscordOAuthConfig {
+    clientId: string;
+    clientSecret: string;
+    redirectUri: string;
+}
+
 const tokenSchema = z.object({
     access_token: z.string().min(1),
 });
@@ -20,15 +26,19 @@ const profileSchema = z.object({
 
 const fallbackImage = () => new URL("/icon.png", env.CLIENT_URL).toString();
 
-const discord: OAuthProviderAdapter = {
+const createDiscordOAuthProvider = ({
+    clientId,
+    clientSecret,
+    redirectUri,
+}: DiscordOAuthConfig): OAuthProviderAdapter => ({
     provider: OAuthProvider.DISCORD,
-    redirectUri: env.DISCORD_REDIRECT_URL,
+    redirectUri,
 
     getAuthorizationUrl(state) {
         const url = new URL("https://discord.com/oauth2/authorize");
         url.search = new URLSearchParams({
-            client_id: env.DISCORD_CLIENT_ID,
-            redirect_uri: env.DISCORD_REDIRECT_URL,
+            client_id: clientId,
+            redirect_uri: redirectUri,
             response_type: "code",
             scope: "identify",
             state,
@@ -42,9 +52,9 @@ const discord: OAuthProviderAdapter = {
                 "https://discord.com/api/v10/oauth2/token",
                 new URLSearchParams({
                     code,
-                    client_id: env.DISCORD_CLIENT_ID,
-                    client_secret: env.DISCORD_CLIENT_SECRET,
-                    redirect_uri: env.DISCORD_REDIRECT_URL,
+                    client_id: clientId,
+                    client_secret: clientSecret,
+                    redirect_uri: redirectUri,
                     grant_type: "authorization_code",
                 }),
                 {
@@ -88,6 +98,6 @@ const discord: OAuthProviderAdapter = {
             throw new ExternalServiceError("discord_profile_failed", upstreamStatus);
         }
     },
-};
+});
 
-export default discord;
+export default createDiscordOAuthProvider;

@@ -29,12 +29,12 @@ TWITCH_SECRET: z.string(), // Twitch App. Fully required for authentication
 TMI_ACCESS_TOKEN: z.string(), // Twitch Bot. Fully required for authentication
 TMI_CLIENT_ID: z.string(), // Twitch Bot. Fully required for authentication
 TWITCH_REDIRECT_URL: z.string(), // Twitch App. Fully required for authentication
-GOOGLE_CLIENT_ID: z.string(), // Google OAuth Web Client
-GOOGLE_CLIENT_SECRET: z.string(), // Google OAuth Web Client secret
-GOOGLE_REDIRECT_URL: z.string(), // Google OAuth callback URL
-DISCORD_CLIENT_ID: z.string(), // Discord Application client id
-DISCORD_CLIENT_SECRET: z.string(), // Discord Application client secret
-DISCORD_REDIRECT_URL: z.string(), // Discord OAuth callback URL
+GOOGLE_CLIENT_ID: z.string().optional(), // Optional; Google OAuth is disabled when its configuration is incomplete
+GOOGLE_CLIENT_SECRET: z.string().optional(),
+GOOGLE_REDIRECT_URL: z.string().url().optional(),
+DISCORD_CLIENT_ID: z.string().optional(), // Optional; Discord OAuth is disabled when its configuration is incomplete
+DISCORD_CLIENT_SECRET: z.string().optional(),
+DISCORD_REDIRECT_URL: z.string().url().optional(),
 CLIENT_URL: z.string(), // The front-end URL. Fully required for authentication. Feridinha.com for Production and localhost:5173 for dev (for example)
 JWT_SECRET: z.string(), // Jwt secret. Fully required for authentication
 IMAGE_PREFIX_URL: z.string().endsWith("/"), // The prefix for the image result. For example: "https://f.feridinha.com/" + imageName. The imageName will be appended to the prefix.
