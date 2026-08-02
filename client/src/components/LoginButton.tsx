@@ -221,7 +221,7 @@ const LoginButton = () => {
     useEffect(() => {
         const interval = window.setInterval(() => {
             setThemeIndex((currentIndex) => (currentIndex + 1) % themeOrder.length)
-        }, 2200)
+        }, 4000)
 
         return () => window.clearInterval(interval)
     }, [themeOrder.length])
@@ -250,28 +250,29 @@ const LoginButton = () => {
             whileTap={{ scale: 0.96 }}
             onClick={handleClick}
         >
-            <AnimatePresence initial={false} mode="sync">
-                <div className="relative w-4  overflow-visible">
+            <div className="w-4 relative  h-4">
+                <AnimatePresence initial={false} mode="sync">
                     <motion.span
-                        className="provider-icon"
+                        className="provider-icon absolute"
                         key={currentActive.provider}
                         initial={{
-                            y: "100%",
+                            y: 15,
                             opacity: 0,
                             scale: 1.5,
                         }}
                         animate={{ y: 0, opacity: 1, scale: 1.5 }}
                         exit={{
-                            y: "-100%",
+                            y: -15,
                             opacity: 0,
                             scale: 1.5,
                         }}
-                        style={{ width: "1rem" }}
+                        // transition={{ duration: 1 }}
+                        // style={{ width: "1rem" }}
                     >
                         <ActiveProviderIcon />
                     </motion.span>
-                </div>
-            </AnimatePresence>
+                </AnimatePresence>
+            </div>
             <span className="label">{t("loginButton")}</span>
         </NavbarButton>
     )
