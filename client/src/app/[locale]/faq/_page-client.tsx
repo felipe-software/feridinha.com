@@ -1,6 +1,7 @@
 "use client"
 
 import { ExpandableCard } from "@/components/ExpandableCard"
+import { GITHUB_PROFILE_URL } from "@/lib/links"
 import { motion } from "motion/react"
 import { useTranslations } from "next-intl"
 import { useEffect, useMemo } from "react"
@@ -190,7 +191,7 @@ export default function FaqPageClient() {
                                 ),
                                 author: (chunks) => (
                                     <a
-                                        href="https://github.com/Feridinha"
+                                        href={GITHUB_PROFILE_URL}
                                         target="_blank"
                                         className="highlight"
                                     >
@@ -369,7 +370,7 @@ export default function FaqPageClient() {
                     <a target="_blank" href="https://tipa.ai/Feridinha">
                         <FaPix /> {t("donations")}
                     </a>
-                    <a target="_blank" href="https://github.com/Feridinha">
+                    <a target="_blank" href={GITHUB_PROFILE_URL}>
                         <FaGithub /> Github
                     </a>
                     <a target="_blank" href="https://twitter.com/FeridinhaDev">

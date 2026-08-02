@@ -1,6 +1,5 @@
 import { myEnv } from "@/config/env";
 import logger from "@/config/logger";
-import "@/config/sentry";
 import achievements from "@/handlers/achievements";
 import { i18nMiddleware } from "@/i18n";
 import { ensureGeralCommunity } from "@/services/muralCommunity";
