@@ -11,16 +11,10 @@ import LoginCallback from "@/components/LoginCallback"
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import { LuCheck, LuInfo, LuLoaderCircle, LuTriangleAlert, LuX } from "react-icons/lu"
-import * as Sentry from "@sentry/nextjs"
 import {
     POSTHOG_PROXY_PATH,
     obfuscatePostHogAssetUrl,
 } from "@/config/posthog"
-
-Sentry.init({
-    dsn: "https://9b5ad6af7594366d35e639d20d21dea3@o4504569588809728.ingest.us.sentry.io/4509291703238656",
-    sendDefaultPii: true,
-})
 
 const getIcon = ({ type }: any) => {
     switch (type) {
@@ -39,7 +33,15 @@ const getIcon = ({ type }: any) => {
     }
 }
 
-export function Providers({ children, isMuralAvailable }: { children: React.ReactNode; isMuralAvailable: boolean }) {
+export function Providers({
+    children,
+    isMuralAvailable,
+    isOpenSource,
+}: {
+    children: React.ReactNode
+    isMuralAvailable: boolean
+    isOpenSource: boolean
+}) {
     const [client] = useState(() => queryClient)
 
     return (
@@ -56,7 +58,7 @@ export function Providers({ children, isMuralAvailable }: { children: React.Reac
         >
             <QueryClientProvider client={client}>
                 <>
-                    <NavBar isMuralAvailable={isMuralAvailable} />
+                    <NavBar isMuralAvailable={isMuralAvailable} isOpenSource={isOpenSource} />
                     <LoginCallback />
                     {children}
                     <ToastContainer

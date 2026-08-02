@@ -98,7 +98,13 @@ const BrainMadeWrapper = styled.a`
     }
 `
 
-function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
+function NavBar_({
+    isMuralAvailable,
+    isOpenSource = false,
+}: {
+    isMuralAvailable?: boolean
+    isOpenSource?: boolean
+}) {
     const [isMenuActive, setMenuActive] = useState(false)
     const [isMobile, setIsMobile] = useState(false)
     const pathname = usePathname()
@@ -150,25 +156,21 @@ function NavBar_({ isMuralAvailable }: { isMuralAvailable?: boolean }) {
                 </LogoText>
             </Link>
             <div className="description-container">
-                <OpenSourceBadge />
-                <Tooltip content={t("brainMade")} arrow={false} maxWidth={400}>
-                    <BrainMadeWrapper
-                        className="brain-made"
-                        style={{ display: "flex" }}
-                        href="https://brainmade.org/"
-                        target="_blank"
-                        rel="external noopener noreferrer"
-                        aria-label={`Brainmade.org — ${t("brainMade")}`}
-                    >
-                        <BrainMadeIcon />
-                        {/* <img
-                            src="/brain-made.svg"
-                            style={{ height: "1.5rem" }}
-                            height={24}
-                            alt="Brain made project"
-                        ></img> */}
-                    </BrainMadeWrapper>
-                </Tooltip>
+                <OpenSourceBadge isOpenSource={isOpenSource} username={user.data?.name} />
+                {!isOpenSource && (
+                    <Tooltip content={t("brainMade")} arrow={false} maxWidth={400}>
+                        <BrainMadeWrapper
+                            className="brain-made"
+                            style={{ display: "flex" }}
+                            href="https://brainmade.org/"
+                            target="_blank"
+                            rel="external noopener noreferrer"
+                            aria-label={`Brainmade.org — ${t("brainMade")}`}
+                        >
+                            <BrainMadeIcon />
+                        </BrainMadeWrapper>
+                    </Tooltip>
+                )}
             </div>
             {isMobile && (
                 <button
