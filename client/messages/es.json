@@ -1,0 +1,379 @@
+{
+  "Metadata": {
+    "title": "Feridinha.com",
+    "description": "Sube archivos gratis en Feridinha.",
+    "keywords": "subir archivos, compartir archivos, alojamiento de archivos, subir archivos gratis, compartir archivos en línea, almacenamiento en la nube, subir imágenes, subir archivos twitch, subir archivos chatterino, subir archivos sharex, feridinha",
+    "openGraphTitle": "Feridinha - Sube archivos gratis",
+    "openGraphDescription": "Sube archivos gratis. Un servicio rápido, seguro y gratuito."
+  },
+  "Common": {
+    "loading": "Cargando...",
+    "back": "Volver",
+    "visit": "Visitar",
+    "viewAlbum": "Ver álbum",
+    "dashboard": "Panel",
+    "copy": "Copiar",
+    "copied": "¡Copiado!",
+    "close": "Cerrar",
+    "create": "Crear",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "terms": "términos de servicio"
+  },
+  "Nav": {
+    "mural": "Mural",
+    "upload": "Subir",
+    "tutorial": "Integraciones",
+    "faq": "Preguntas",
+    "dashboard": "Panel",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "selectLanguage": "Seleccionar idioma",
+    "languageMenu": "Idiomas disponibles",
+    "currentLanguage": "Idioma actual",
+    "brainMade": "Este proyecto fue creado por un ser humano como tú"
+  },
+  "Auth": {
+    "login": "Iniciar sesión",
+    "loginWithTwitch": "Iniciar sesión con Twitch",
+    "loginAgreement": "Al iniciar sesión, aceptas nuestros <terms>términos de servicio</terms>",
+    "loginButton": "INICIAR SESIÓN",
+    "mustLogin": "Debes iniciar sesión para acceder a esta página",
+    "sessionEnded": "Tu sesión terminó. Vuelve a iniciar sesión",
+    "sessionExpired": "Tu sesión expiró. Vuelve a iniciar sesión",
+    "sessionLoadError": "Ocurrió un error inesperado al cargar tu sesión"
+  },
+  "Errors": {
+    "sessionExpired": "Tu sesión expiró",
+    "createPost": "No se pudo crear la publicación",
+    "upvote": "No se pudo registrar el voto",
+    "addModerator": "No se pudo agregar al moderador",
+    "removeModerator": "No se pudo eliminar al moderador",
+    "invalidDeleteCode": "Código de eliminación no válido"
+  },
+  "Landing": {
+    "heroTitle": "El único servicio para subir archivos creado para el resto de nosotros.",
+    "featureAccount": "Crea una cuenta para subir archivos de hasta 100 MB",
+    "featureUptime": "Ofrecemos un 99.99999999 % de disponibilidad anual en nuestros servidores",
+    "featureApi": "¡Crea claves de API y usa nuestros servicios donde quieras!",
+    "featureAchievements": "¡Desbloquea logros y muéstralos en tu perfil!",
+    "cards": {
+      "fast": {
+        "title": "Rápido",
+        "description": "Alojados en Brasil, nuestros servidores ofrecen <highlight>baja latencia</highlight> y altas velocidades de transferencia"
+      },
+      "private": {
+        "title": "Privado",
+        "description": "Eliminamos todos los <highlight>metadatos</highlight> de tus archivos, incluidas las etiquetas de GPS y fabricante"
+      },
+      "robust": {
+        "title": "Robusto",
+        "description": "En línea desde hace {years} años, <highlight>extremadamente estable</highlight> y siempre atento a las <highlight>sugerencias</highlight> de los usuarios"
+      },
+      "reliable": {
+        "title": "Confiable",
+        "description": "Procesamos <highlight>más de 4 millones</highlight> de solicitudes al mes. <highlight>Más de 25 mil</highlight> visitantes únicos mensuales. Con <highlight>más de 200 mil</highlight> archivos almacenados"
+      }
+    },
+    "banner": {
+      "title": "¿Qué esperas para <break></break> empezar a usar Feridinha?",
+      "ctaLogged": "Abrir el panel",
+      "ctaGuest": "Crear una cuenta",
+      "tutorial": "Cómo usarlo"
+    }
+  },
+  "UploadBox": {
+    "yourAlbum": "Tu álbum ({count})",
+    "yourUploads": "Tus archivos ({count})",
+    "createAlbumTooltip": "Crear un álbum con estos archivos",
+    "groupIntoAlbum": "Agrupar en un álbum",
+    "alreadyGrouped": "Ya están agrupados",
+    "viewAlbum": "Ver álbum",
+    "fileNumber": "Archivo n.º {count}",
+    "optimizedUpload": "Este archivo se mantuvo en memoria para acelerar la subida. Tiempo de procesamiento: {time}",
+    "copyLink": "Copiar enlace",
+    "deleteFile": "Eliminar archivo",
+    "anonymousLimitUpsell": "¡Crea una cuenta para aumentar tu límite!",
+    "createAccountForAlbum": "Crea una cuenta para agrupar tus archivos en álbumes",
+    "albumCreated": "Álbum creado correctamente",
+    "updatingAlbum": "Actualizando tu álbum...",
+    "albumUpdated": "Álbum actualizado correctamente",
+    "dropFileHere": "Suelta un archivo aquí o",
+    "clickToChoose": "haz clic para elegirlo",
+    "toUpload": "y subirlo.",
+    "continueUploading": "Puedes seguir subiendo archivos",
+    "continueUploadingToUpdateAlbum": "Puedes seguir subiendo archivos para actualizar el álbum",
+    "uploadAgreement": "Al subir un archivo, aceptas nuestros <terms>términos de servicio</terms>",
+    "maxFileSize": "Cada archivo puede tener un tamaño máximo de {limit}.",
+    "increaseLimitUpsell": "Crea una cuenta para aumentar tu límite a 100 MB.",
+    "limitOf": "Límite: {limit}",
+    "socialLinkLabel": "O importa desde una red social",
+    "socialLinkPlaceholder": "Pega un enlace de TikTok, Instagram, Reddit o X",
+    "socialLinkInputLabel": "Enlace de una publicación en una red social",
+    "newBadge": "Nuevo",
+    "newTag": "¡¡¡¡Nuevo!!!!",
+    "socialLinkTooltipLabel": "Más información sobre la importación mediante enlaces",
+    "socialLinkTooltip": "Novedad: pega un enlace de TikTok, Instagram, Reddit o X/Twitter. Feridinha descarga el contenido multimedia y crea un enlace para ti.",
+    "invalidSocialLink": "Pega una URL válida para importar.",
+    "importingSocialLink": "Importando contenido multimedia del enlace…",
+    "socialLinkNetworkError": "No se pudo importar este enlace. Inténtalo de nuevo."
+  },
+  "Tutorial": {
+    "integrationKeyGuestWarning": "Necesitas crear una cuenta para usar claves de integración. Aún puedes subir archivos de forma anónima.",
+    "integrationKeyCreateError": "No se pudo crear el token de integración",
+    "title": "Integración con aplicaciones de <highlight>terceros</highlight>",
+    "thirdPartyTooltip": "Sí, pero BTTV es un servicio de terceros y no puedo integrarlo directamente.",
+    "chatterino": "Chatterino",
+    "sharex": "ShareX",
+    "dankchat": "Dankchat",
+    "others": "Otros",
+    "dankchatUseBase": "Usa la configuración de Chatterino como base.",
+    "dankchatVideo": "Video que muestra cómo configurar Dankchat",
+    "chatsenUnsupported": "Chatsen no admite subidas personalizadas por el momento (6 de mayo de 2025).",
+    "lightshotUnsupported": "Lightshot no admite cargadores personalizados. Usa la función para copiar el archivo automáticamente y pégalo en Chatterino.",
+    "autoTokenNotice": "Tu token de integración se creará automáticamente. Solo haz clic en el campo \"token\" o descarga el archivo de ShareX.",
+    "guestNotice": "Crea una cuenta para conservar tu historial de archivos y obtener un límite de 100 MB.",
+    "creatingIntegrationToken": "Estamos creando un token de integración",
+    "anonymousUser": "anónimo",
+    "loggedInAs": "sesión iniciada como {name}",
+    "copyHint": "Haz clic para copiar",
+    "integrationTokenTooltip": "Este es tu token de integración\nHaz clic para copiar",
+    "sharexIntro": "Para usarlo con ShareX, descarga el archivo siguiente y ábrelo con ShareX.",
+    "sharexTokenNotice": "Este archivo incluirá tu token de integración si iniciaste sesión.",
+    "sharexDownload": "Haz clic aquí para descargar el archivo de configuración de ShareX",
+    "sharexLoading": "Generando tu archivo de ShareX",
+    "tableItem": "Elemento",
+    "tableValue": "Valor",
+    "tutorialVideo": "Video tutorial",
+    "configurePath": "Introduce estos valores en: Chatterino -> Settings -> External Tools -> Image Uploader",
+    "requestUrl": "URL de la solicitud",
+    "formField": "Campo del formulario",
+    "extraHeaders": "Encabezados adicionales",
+    "imageLink": "Enlace de la imagen",
+    "deletionLink": "Enlace de eliminación"
+  },
+  "Reviews": {
+    "sectionTitle": "Reseñas",
+    "writeReview": "Escribir una reseña",
+    "pending": "Tu reseña está pendiente de aprobación",
+    "pendingInfo": "El desarrollador todavía está evaluando tu reseña",
+    "rejected": "¡Tu reseña fue rechazada!",
+    "clickForDetails": "Haz clic para ver los detalles.",
+    "rejectionReason": "Motivo del rechazo",
+    "notProvided": "No proporcionado",
+    "approved": "Tu reseña fue aprobada",
+    "approvedInfo": "¡Tu reseña fue aprobada! Gracias por tus comentarios.",
+    "userSince": "Usuario desde {date}, {count} archivos subidos en total.",
+    "noneFound": "No se encontraron reseñas",
+    "loading": "Cargando reseñas",
+    "userImageAlt": "Imagen del usuario"
+  },
+  "CreateReview": {
+    "minLength": "Debe contener al menos 3 caracteres",
+    "maxLength": "Debe contener como máximo 300 caracteres",
+    "error": "Ocurrió un error al crear tu reseña",
+    "title": "Escribir una reseña del proyecto",
+    "reviewPlaceholder": "Escribe tu reseña... (pública)",
+    "suggestionPlaceholder": "Sugerencias y mejoras (privadas) (opcional)",
+    "submit": "Enviar",
+    "notice": "Tu reseña será evaluada antes de publicarse."
+  },
+  "Delete": {
+    "success": "Archivo eliminado correctamente",
+    "invalidCode": "Código de eliminación no válido",
+    "title": "Eliminar archivo permanentemente",
+    "button": "Eliminar",
+    "description": "Al eliminar una imagen, se quitará de tu historial y se reemplazará por un"
+  },
+  "Mural": {
+    "invalidTitle": "El título es demasiado largo (<120)",
+    "invalidDescription": "La descripción es demasiado larga",
+    "moderatorQueryMin": "Escribe al menos 3 caracteres",
+    "createPostTitle": "Crear una publicación",
+    "titlePlaceholder": "Título",
+    "contentPlaceholder": "Contenido: enlace de Feridinha, Twitter, Reddit, Instagram o YouTube",
+    "descriptionPlaceholder": "Descripción (opcional)",
+    "createPostAgreement": "Al crear una publicación, aceptas nuestros <terms>términos de servicio</terms>",
+    "createPostButton": "Crear publicación",
+    "communityPosts": "{count} publicaciones",
+    "communityUsers": "{count} usuarios",
+    "communityMods": "{count} moderadores",
+    "visit": "Visitar",
+    "createdAgo": "Creada {time}",
+    "youAreModerator": "eres moderador",
+    "manageCommunity": "Administrar comunidad",
+    "myPosts": "Mis publicaciones",
+    "showingOnlyUserPosts": "Mostrando solo publicaciones de @{user}",
+    "filterApproved": "Aprobadas",
+    "filterPending": "Pendientes",
+    "filterRejected": "Rechazadas",
+    "sortPopular": "Populares",
+    "sortRecent": "Recientes",
+    "approvePost": "Aprobar publicación",
+    "rejectPost": "Rechazar publicación",
+    "approvedBy": "Aprobada por {user}",
+    "approvalApproved": "Aprobada",
+    "approvalPending": "Pendiente",
+    "approvalRejected": "Rechazada",
+    "agoSuffix": "atrás",
+    "managingCommunity": "Administrando comunidad: {id}",
+    "moderators": "Moderadores ({count})",
+    "addModerator": "Agregar moderador",
+    "noModerators": "Aún no hay moderadores.",
+    "searchingUsers": "Buscando...",
+    "noUsersFound": "No se encontraron usuarios",
+    "addNewModerator": "Agregar nuevo moderador",
+    "moderatorQueryPlaceholder": "Nombre del usuario (mín. 3 caracteres)",
+    "addingUserAsModerator": "Agregando a <user></user> como moderador",
+    "nameColumn": "Nombre",
+    "actionColumn": "Acción",
+    "postCreated": "Publicación creada correctamente",
+    "moderatorAdded": "Moderador agregado correctamente",
+    "moderatorRemoved": "Moderador eliminado correctamente",
+    "loadingPosts": "Cargando...",
+    "noPostsFound": "No se encontraron publicaciones",
+    "loadingMore": "Cargando más..."
+  },
+  "Dashboard": {
+    "loading": "Cargando",
+    "achievements": "Logros",
+    "achievementsLocked": "Aún no desbloqueaste este logro",
+    "yourUploads": "Tus archivos ({count})",
+    "yourAlbums": "Tus álbumes ({count})",
+    "albumsWip": "Esta sección todavía está en desarrollo =)",
+    "viewMyAlbums": "Ver mis álbumes",
+    "viewMyUploads": "Ver mis archivos",
+    "viewGrid": "Ver como cuadrícula",
+    "viewTable": "Ver como tabla",
+    "pageOf": "Página {current} de {total}",
+    "showPerPage": "Mostrar {count} por página",
+    "fileDeleted": "Archivo eliminado correctamente",
+    "startingDelete": "Iniciando eliminación... ({count} archivos)",
+    "deletingFileProgress": "Eliminando {filename} ({current}/{total})",
+    "batchDeleteSuccess": "Se eliminaron correctamente {count} archivos",
+    "albumCreated": "Álbum creado correctamente",
+    "selectionHint": "Mantén presionado y arrastra para seleccionar archivos",
+    "selectionEmpty": "Selecciona al menos 1 archivo",
+    "selectionHelp": "Mantén presionado y arrastra el mouse para seleccionar varios archivos",
+    "selectFile": "Haz clic para seleccionar este archivo",
+    "selectedCount": "{count} seleccionados",
+    "deleteSelected": "Eliminar seleccionados",
+    "groupSelected": "Agrupar seleccionados",
+    "deselectAll": "Anular selección",
+    "createKey": "Crear una clave de API",
+    "createKeyTitle": "Crear clave",
+    "apiKeyNamePlaceholder": "Nombre de la clave",
+    "apiKeyNameMin": "El nombre de la clave debe tener al menos 3 caracteres",
+    "apiKeyNameMax": "El nombre de la clave debe tener como máximo 30 caracteres",
+    "secretValue": "Valor secreto:",
+    "deleteKey": "Eliminar clave",
+    "clipboardCopying": "Copiando al portapapeles",
+    "clipboardUnavailable": "No se pudo copiar al portapapeles",
+    "apiKeysTitle": "Claves de API",
+    "apiKeyAutoCreatedTooltip": "Esta clave se creó automáticamente desde la página \"Cómo usarlo\"",
+    "noApiKeys": "Aún no tienes claves de integración, <link>aprende a usarlas aquí</link>",
+    "nameColumn": "Nombre",
+    "sizeColumn": "Tamaño",
+    "dateColumn": "Fecha"
+  },
+  "Achievements": {
+    "upload-1st": { "name": "El primero de muchos", "description": "Completa tu primera subida", "hiddenDescription": "" },
+    "upload-100": { "name": "Todavía no es suficiente", "description": "Completa 100 subidas", "hiddenDescription": "Completa ??? subidas" },
+    "upload-1000": { "name": "Adicto a compartir", "description": "¿¡1.000 subidas!? Esto empieza a dar miedo...", "hiddenDescription": "Completa ???? subidas" },
+    "upload-5000": { "name": "No puedo parar, no voy a parar, más, más, más...", "description": "Completa 5.000 subidas. ¡Esto se convirtió en una adicción!", "hiddenDescription": "Completa ???? subidas" },
+    "upload-15000": { "name": "¿¿¿¿¿¿QUÉEEEEEEEEEEEEEEEE??????", "description": "Completa 15.000 subidas. ¿Es posible???", "hiddenDescription": "Completa ???? subidas" },
+    "og": { "name": "Apoyando desde el principio", "description": "Sé usuario desde los comienzos del proyecto (cuenta creada antes de 2023).", "hiddenDescription": "" },
+    "limit": { "name": "Al borde del antiguo límite", "description": "Sube un archivo de más de 80 MB", "hiddenDescription": "Sube un archivo de más de ?? MB" },
+    "bug-reporter": { "name": "A diferencia de Cyberpunk...", "description": "Reporta un error", "hiddenDescription": "" },
+    "feature-suggester": { "name": "Quien lo usa lo entiende", "description": "Sugiere una función", "hiddenDescription": "" },
+    "png-master": { "name": "Maestro del PNG", "description": "Sube más de 5.000 archivos PNG", "hiddenDescription": "Sube más de ???? archivos PNG" },
+    "video": { "name": "Maestro de los videos", "description": "Sube más de 1.000 videos", "hiddenDescription": "Sube más de ???? videos" },
+    "audio": { "name": "Maestro del sonido", "description": "Sube más de 1.000 archivos de audio", "hiddenDescription": "Sube más de ???? archivos de audio" }
+  },
+  "Album": {
+    "previewUnavailable": "Vista previa no disponible. Abre el enlace de arriba.",
+    "previewUnavailableInline": "Vista previa no disponible.",
+    "openLink": "Abrir el enlace.",
+    "openLinkAbove": "Abrir el enlace de arriba.",
+    "createdBy": "Creado por <author>@{name}</author> {time}. {count, plural, one {# archivo en total.} other {# archivos en total.}} {views, plural, one {# visualización.} other {# visualizaciones.}}"
+  },
+  "Faq": {
+    "title": "<highlight>Preguntas</highlight> sobre el proyecto",
+    "donations": "Donaciones",
+    "email": "Correo electrónico",
+    "storyTitle": "¿Por qué el sitio se llama Feridinha?",
+    "storyBody1": "El sitio <site>Feridinha.com</site> fue creado por el desarrollador <author>@Feridinha</author> en 2021; por eso lleva ese nombre.",
+    "storyBody2": "El objetivo inicial era ofrecer un sitio estable para subir archivos, ya que Imgur e Inuuls se desconectaban constantemente en aquella época. Con el tiempo, la comunidad del streamer <ghiletofar>@ghiletofar</ghiletofar> apoyó el proyecto y este se extendió a otras comunidades brasileñas.",
+    "storyBody3": "Con los años surgió <sync>FeridinhaSync</sync>, que llegó a más comunidades. Todos los proyectos de la marca <brand>Feridinha™</brand> se crearon sin ningún interés económico y <strong>siempre serán gratuitos para todos.</strong>",
+    "storyBody4": "Sin embargo, si quieres apoyarlo <strong>directamente</strong>, puedes <donate>hacer una donación mediante PIX aquí</donate>",
+    "contactTitle": "¿Cómo puedo ponerme en contacto?",
+    "contactBody": "Puedes enviarme un mensaje por Discord (<discord>@Feridinha</discord>), Twitter (<twitter>@FeridinhaDev</twitter>) o correo electrónico (<email>faq@feridinha.com</email>)",
+    "supportTitle": "¿Cómo puedo apoyar el proyecto?",
+    "supportBody": "Si quieres apoyar el proyecto <strong>directamente</strong>, <donate>puedes hacer una donación mediante PIX aquí</donate>",
+    "deletedTitle": "Eliminé un archivo. ¿Por qué todavía aparece?",
+    "deletedBody1": "Cuando subes un archivo, se crea una caché automáticamente. Esta caché puede tardar entre 2 minutos y 2 horas en actualizarse, según el tráfico del sitio.",
+    "deletedBody2": "Con la nueva versión del sitio, esta caché se limpia automáticamente, aunque todavía puede permanecer durante algunos minutos.",
+    "deletedBody3": "Si subiste un archivo personal y necesitas eliminarlo <urgent>URGENTEMENTE</urgent>, envíame un mensaje por Discord: <discord>@Feridinha</discord>",
+    "reportTitle": "¿Cómo denuncio un archivo que infringe los Términos de uso?",
+    "reportBody": "Si encontraste un archivo que no cumple los Términos de uso del sitio, escribe a <email>tos@feridinha.com</email> o comunícate directamente mediante <discord>Discord</discord>."
+  },
+  "Terms": {
+    "title": "Términos de servicio y Política de privacidad",
+    "intro": "Estos Términos de servicio regulan el uso de Feridinha.com y explican nuestros compromisos de privacidad.",
+    "accept": "Al usar el servicio, aceptas los términos siguientes.",
+    "tosTitle": "Términos de servicio",
+    "privacyTitle": "Política de privacidad",
+    "lastUpdated": "Última actualización: 13 de abril de 2025",
+    "sections": {
+      "ugc": {
+        "title": "Contenido generado por usuarios",
+        "body": "Eres responsable del contenido que subes. Feridinha solo aloja este material y no respalda automáticamente el contenido publicado."
+      },
+      "opinions": {
+        "title": "Opiniones de los autores",
+        "body": "El contenido enviado refleja únicamente la opinión de su autor."
+      },
+      "prohibited": {
+        "title": "Contenido prohibido",
+        "body": "Está prohibido subir malware, virus, doxxing, pornografía ilegal, material que infrinja derechos de autor, exposición no autorizada de datos privados o cualquier otro contenido ilegal o perjudicial."
+      },
+      "reports": {
+        "title": "Denuncias",
+        "body": "Para denunciar infracciones, envía un correo a <email>tos@feridinha.com</email> o usa los medios de contacto públicos que aparecen en la página de <faq>Preguntas</faq>."
+      },
+      "review": {
+        "title": "Revisión de contenido",
+        "body": "El contenido solo se revisa manualmente cuando existe una denuncia. Podemos eliminar o bloquear material que infrinja estos términos."
+      },
+      "commercial": {
+        "title": "Uso comercial",
+        "body": "El uso comercial por parte de terceros requiere aprobación previa."
+      },
+      "termination": {
+        "title": "Finalización",
+        "body": "Podemos finalizar o restringir el acceso al servicio en cualquier momento en casos de abuso, incumplimiento de las reglas o necesidad operativa."
+      },
+      "collection": {
+        "title": "Recopilación de datos",
+        "body": "Recopilamos datos operativos mínimos, incluidas la dirección IP y la información del agente de usuario."
+      },
+      "usage": {
+        "title": "Uso de los datos",
+        "body": "Estos datos se usan para seguridad, prevención de abusos e identificación de los responsables de contenido que infrinja los términos."
+      },
+      "sharing": {
+        "title": "Uso compartido de datos",
+        "body": "No compartimos tus datos con terceros, excepto cuando sea necesario para cumplir obligaciones legales."
+      },
+      "security": {
+        "title": "Seguridad",
+        "body": "Adoptamos medidas razonables para proteger los datos contra accesos no autorizados."
+      },
+      "rights": {
+        "title": "Derechos del usuario",
+        "body": "Puedes solicitar información sobre tus datos y pedir que se eliminen cuando corresponda."
+      }
+    }
+  }
+}

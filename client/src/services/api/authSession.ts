@@ -5,6 +5,7 @@ import useApiKeysStore from "@/hooks/useApiKeysStore"
 import { useModalStore } from "@/hooks/useModalStore"
 import { cancelPendingApiRequests } from "@/services/api/axiosClient"
 import { getStoredLocale } from "@/i18n/client"
+import type { AppLocale } from "@/i18n/config"
 import { toast } from "react-toastify"
 
 export const AUTH_SESSION_ERROR_CODES = [
@@ -19,6 +20,11 @@ export const AUTH_SESSION_ERROR_CODES = [
 export type AuthSessionErrorCode = (typeof AUTH_SESSION_ERROR_CODES)[number]
 
 const SESSION_EXPIRED_TOAST_ID = "session-expired"
+const SESSION_EXPIRED_MESSAGES: Record<AppLocale, string> = {
+    "pt-BR": "Sua sessão expirou",
+    en: "Your session expired",
+    es: "Tu sesión expiró",
+}
 
 export const isAuthSessionError = (code: unknown, message?: unknown) => {
     return (
@@ -39,7 +45,7 @@ export const clearAuthSession = async ({ notifyExpired = false } = {}) => {
     await useTokenStore.persist.clearStorage()
 
     if (notifyExpired && !toast.isActive(SESSION_EXPIRED_TOAST_ID)) {
-        const message = getStoredLocale() === "pt-BR" ? "Sua sessão expirou" : "Your session expired"
+        const message = SESSION_EXPIRED_MESSAGES[getStoredLocale()]
         toast.error(message, { toastId: SESSION_EXPIRED_TOAST_ID })
     }
 }

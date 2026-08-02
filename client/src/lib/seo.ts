@@ -57,31 +57,62 @@ const PAGE_CONFIG: Record<SeoLocale, Record<PublicSeoPage, SeoPageConfig>> = {
             pathname: "/en/tutorial",
         },
     },
+    es: {
+        home: {
+            title: "Feridinha - Sube archivos gratis",
+            description: "Sube archivos gratis con Feridinha, un servicio rápido y seguro.",
+            pathname: "/es",
+        },
+        faq: {
+            title: "Preguntas sobre subir archivos | Feridinha",
+            description: "Respuestas sobre archivos, eliminación, privacidad y el funcionamiento de Feridinha.",
+            pathname: "/es/faq",
+        },
+        tutorial: {
+            title: "Configura Chatterino y ShareX | Feridinha",
+            description: "Aprende a configurar la subida de archivos en Chatterino, ShareX, DankChat y otras aplicaciones.",
+            pathname: "/es/tutorial",
+        },
+    },
 }
 
 const PAGE_PATHS: Record<PublicSeoPage, Record<SeoLocale, string>> = {
-    home: { "pt-BR": "/", en: "/en" },
-    faq: { "pt-BR": "/faq", en: "/en/faq" },
-    tutorial: { "pt-BR": "/tutorial", en: "/en/tutorial" },
+    home: { "pt-BR": "/", en: "/en", es: "/es" },
+    faq: { "pt-BR": "/faq", en: "/en/faq", es: "/es/faq" },
+    tutorial: { "pt-BR": "/tutorial", en: "/en/tutorial", es: "/es/tutorial" },
+}
+
+const OPEN_GRAPH_LOCALES: Record<SeoLocale, string> = {
+    "pt-BR": "pt_BR",
+    en: "en_US",
+    es: "es_ES",
+}
+
+const SOCIAL_IMAGE_ALTS: Record<SeoLocale, string> = {
+    "pt-BR": "Feridinha — upload de arquivos grátis",
+    en: "Feridinha — free file upload",
+    es: "Feridinha — sube archivos gratis",
 }
 
 const absoluteUrl = (pathname: string) => new URL(pathname, SITE_URL).toString()
 
-export const getTermsUrl = (locale: SeoLocale) =>
-    locale === "en" ? "/termos-de-servico-en.html" : "/termos-de-servico.html"
+export const getTermsUrl = (locale: SeoLocale) => ({
+    "pt-BR": "/termos-de-servico.html",
+    en: "/termos-de-servico-en.html",
+    es: "/termos-de-servico-es.html",
+})[locale]
 
 export const buildPageMetadata = (page: PublicSeoPage, locale: SeoLocale): Metadata => {
     const config = PAGE_CONFIG[locale][page]
     const canonical = absoluteUrl(config.pathname)
     const ptUrl = absoluteUrl(PAGE_PATHS[page]["pt-BR"])
     const enUrl = absoluteUrl(PAGE_PATHS[page].en)
+    const esUrl = absoluteUrl(PAGE_PATHS[page].es)
     const image = {
         url: SOCIAL_IMAGE_PATH,
         width: 620,
         height: 349,
-        alt: locale === "pt-BR"
-            ? "Feridinha — upload de arquivos grátis"
-            : "Feridinha — free file upload",
+        alt: SOCIAL_IMAGE_ALTS[locale],
     }
 
     return {
@@ -92,6 +123,7 @@ export const buildPageMetadata = (page: PublicSeoPage, locale: SeoLocale): Metad
             languages: {
                 "pt-BR": ptUrl,
                 en: enUrl,
+                es: esUrl,
                 "x-default": ptUrl,
             },
         },
@@ -109,8 +141,10 @@ export const buildPageMetadata = (page: PublicSeoPage, locale: SeoLocale): Metad
             siteName: "Feridinha",
             title: config.title,
             description: config.description,
-            locale: locale === "pt-BR" ? "pt_BR" : "en_US",
-            alternateLocale: locale === "pt-BR" ? ["en_US"] : ["pt_BR"],
+            locale: OPEN_GRAPH_LOCALES[locale],
+            alternateLocale: Object.entries(OPEN_GRAPH_LOCALES)
+                .filter(([candidate]) => candidate !== locale)
+                .map(([, openGraphLocale]) => openGraphLocale),
             images: [image],
         },
         twitter: {
@@ -144,16 +178,16 @@ export const buildRootMetadata = (locale: SeoLocale): Metadata => {
             siteName: "Feridinha",
             title: "Feridinha",
             description,
-            locale: locale === "pt-BR" ? "pt_BR" : "en_US",
-            alternateLocale: locale === "pt-BR" ? ["en_US"] : ["pt_BR"],
+            locale: OPEN_GRAPH_LOCALES[locale],
+            alternateLocale: Object.entries(OPEN_GRAPH_LOCALES)
+                .filter(([candidate]) => candidate !== locale)
+                .map(([, openGraphLocale]) => openGraphLocale),
             images: [
                 {
                     url: SOCIAL_IMAGE_PATH,
                     width: 620,
                     height: 349,
-                    alt: locale === "pt-BR"
-                        ? "Feridinha — upload de arquivos grátis"
-                        : "Feridinha — free file upload",
+                    alt: SOCIAL_IMAGE_ALTS[locale],
                 },
             ],
         },
@@ -173,8 +207,8 @@ export const buildSiteJsonLd = (locale: SeoLocale) => ({
             "@type": "WebSite",
             "@id": absoluteUrl("/#website"),
             name: "Feridinha",
-            url: absoluteUrl(locale === "en" ? "/en" : "/"),
-            inLanguage: ["pt-BR", "en"],
+            url: absoluteUrl(PAGE_PATHS.home[locale]),
+            inLanguage: ["pt-BR", "en", "es"],
             publisher: { "@id": absoluteUrl("/#organization") },
         },
         {

@@ -279,6 +279,20 @@
     "sizeColumn": "Size",
     "dateColumn": "Date"
   },
+  "Achievements": {
+    "upload-1st": { "name": "The first of many", "description": "Complete your first upload", "hiddenDescription": "" },
+    "upload-100": { "name": "Still not enough", "description": "Complete 100 uploads", "hiddenDescription": "Complete ??? uploads" },
+    "upload-1000": { "name": "Addicted to sharing", "description": "1,000 uploads?! This is starting to get scary...", "hiddenDescription": "Complete ???? uploads" },
+    "upload-5000": { "name": "Can't stop, won't stop, more more more...", "description": "Complete 5,000 uploads. This has become an addiction!", "hiddenDescription": "Complete ???? uploads" },
+    "upload-15000": { "name": "WHAAAAAAAAAAAAAAAAAT??????", "description": "Complete 15,000 uploads. Is that even possible???", "hiddenDescription": "Complete ???? uploads" },
+    "og": { "name": "Supporting from the start", "description": "Be a user from the early days of the project (account created before 2023).", "hiddenDescription": "" },
+    "limit": { "name": "At the edge of the old limit", "description": "Upload a file larger than 80 MB", "hiddenDescription": "Upload a file larger than ?? MB" },
+    "bug-reporter": { "name": "Unlike Cyberpunk...", "description": "Report a bug", "hiddenDescription": "" },
+    "feature-suggester": { "name": "Users know best", "description": "Suggest a feature", "hiddenDescription": "" },
+    "png-master": { "name": "PNG master", "description": "Upload more than 5,000 PNG files", "hiddenDescription": "Upload more than ???? PNG files" },
+    "video": { "name": "Video master", "description": "Upload more than 1,000 videos", "hiddenDescription": "Upload more than ???? videos" },
+    "audio": { "name": "Sound master", "description": "Upload more than 1,000 audio files", "hiddenDescription": "Upload more than ???? audio files" }
+  },
   "Album": {
     "previewUnavailable": "Preview unavailable. Open the link above.",
     "previewUnavailableInline": "Preview unavailable.",

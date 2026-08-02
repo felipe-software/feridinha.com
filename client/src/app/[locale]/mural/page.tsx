@@ -5,10 +5,12 @@ import { useCommunitiesQuery } from "@/hooks/queries/useCommunitiesQuery"
 import { toTitleCase } from "@/utils"
 import dayjs from "dayjs"
 import "dayjs/locale/en"
+import "dayjs/locale/es"
 import "dayjs/locale/pt-br"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useLocale, useTranslations } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { DAYJS_LOCALES, type AppLocale } from "@/i18n/config"
 dayjs.extend(relativeTime)
 
 import { useEffect } from "react"
@@ -18,7 +20,7 @@ export default function MuralPage() {
     // const postsQuery = usePostListQuery()
     const communitiesQuery = useCommunitiesQuery()
     const router = useRouter()
-    const locale = useLocale()
+    const locale = useLocale() as AppLocale
     const t = useTranslations("Mural")
 
     useEffect(() => {
@@ -26,7 +28,7 @@ export default function MuralPage() {
     }, [])
 
     useEffect(() => {
-        dayjs.locale(locale === "pt-BR" ? "pt-br" : "en")
+        dayjs.locale(DAYJS_LOCALES[locale])
     }, [locale])
 
     return (

@@ -6,11 +6,13 @@ import { usePostModerationMutation } from "@/hooks/mutations/usePostModerationMu
 import { $ApiMuralListItem } from "api-types"
 import dayjs from "dayjs"
 import "dayjs/locale/en"
+import "dayjs/locale/es"
 import "dayjs/locale/pt-br"
 import relativeTime from "dayjs/plugin/relativeTime"
 import { useLocale, useTranslations } from "next-intl"
 import { LuBan, LuCircleCheck, LuExternalLink, LuSword } from "react-icons/lu"
 import styled from "styled-components"
+import { DAYJS_LOCALES, type AppLocale } from "@/i18n/config"
 dayjs.extend(relativeTime)
 
 const PostWrapper = styled.div`
@@ -76,9 +78,9 @@ const approvalStatusToText = (status: string) => {
 
 export const MuralPostItem = ({ item, isModerator }: { item: $ApiMuralListItem; isModerator: boolean }) => {
     const moderateMutation = usePostModerationMutation()
-    const locale = useLocale()
+    const locale = useLocale() as AppLocale
     const t = useTranslations("Mural")
-    dayjs.locale(locale === "pt-BR" ? "pt-br" : "en")
+    dayjs.locale(DAYJS_LOCALES[locale])
 
     return (
         <PostWrapper className="gap-4 rounded-2xl">

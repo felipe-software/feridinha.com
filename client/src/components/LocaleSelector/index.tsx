@@ -2,6 +2,7 @@
 
 import type { AppLocale } from "@/i18n/config"
 import brazilFlag from "@discordapp/twemoji/dist/svg/1f1e7-1f1f7.svg"
+import spainFlag from "@discordapp/twemoji/dist/svg/1f1ea-1f1f8.svg"
 import unitedStatesFlag from "@discordapp/twemoji/dist/svg/1f1fa-1f1f8.svg"
 import type { StaticImageData } from "next/image"
 import { useTranslations } from "next-intl"
@@ -24,9 +25,10 @@ import {
 const languages: Record<AppLocale, { label: string; flag: StaticImageData }> = {
     "pt-BR": { label: "Português", flag: brazilFlag },
     en: { label: "English", flag: unitedStatesFlag },
+    es: { label: "Español", flag: spainFlag },
 }
 
-const languageOrder = ["pt-BR", "en"] as const satisfies readonly AppLocale[]
+const languageOrder = ["pt-BR", "en", "es"] as const satisfies readonly AppLocale[]
 
 export type LocaleSelectorProps = {
     locale: AppLocale

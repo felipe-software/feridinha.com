@@ -279,6 +279,20 @@
     "sizeColumn": "Tamanho",
     "dateColumn": "Data"
   },
+  "Achievements": {
+    "upload-1st": { "name": "O primeiro de muitos", "description": "Faça seu primeiro upload", "hiddenDescription": "" },
+    "upload-100": { "name": "Ainda não é o suficiente", "description": "Complete 100 uploads", "hiddenDescription": "Complete ??? uploads" },
+    "upload-1000": { "name": "Viciado em compartilhar", "description": "1.000 uploads?! Tá começando a ficar assustador...", "hiddenDescription": "Faça ???? uploads" },
+    "upload-5000": { "name": "Não consigo parar, não posso parar, mais mais mais...", "description": "Faça 5.000 uploads. Isso se tornou um vício!", "hiddenDescription": "Faça ???? uploads" },
+    "upload-15000": { "name": "O QUEEEEEEEEEEEEEEEEEEEEE??????", "description": "Faça 15.000 uploads. Isso é possível???", "hiddenDescription": "Faça ???? uploads" },
+    "og": { "name": "Apoiando desde o começo", "description": "Seja um usuário desde o começo do projeto (conta criada antes de 2023).", "hiddenDescription": "" },
+    "limit": { "name": "Na borda do antigo limite", "description": "Faça um upload maior que 80 MB", "hiddenDescription": "Faça um upload maior que ?? MB" },
+    "bug-reporter": { "name": "Diferente de Cyberpunk...", "description": "Reporte um bug", "hiddenDescription": "" },
+    "feature-suggester": { "name": "Quem usa entende", "description": "Sugira uma feature", "hiddenDescription": "" },
+    "png-master": { "name": "Mestre do PNG", "description": "Faça upload de mais de 5.000 PNG", "hiddenDescription": "Faça upload de mais de ???? arquivos PNG" },
+    "video": { "name": "Mestre dos vídeos", "description": "Faça upload de mais de 1.000 vídeos", "hiddenDescription": "Faça upload de mais de ???? vídeos" },
+    "audio": { "name": "Mestre sonoplasta", "description": "Faça upload de mais de 1.000 áudios", "hiddenDescription": "Faça upload de mais de ???? áudios" }
+  },
   "Album": {
     "previewUnavailable": "Preview não disponível. Acesse o link acima.",
     "previewUnavailableInline": "Preview não disponível.",

@@ -74,7 +74,7 @@ export const Option = styled.button`
     align-items: center;
     gap: 0.5rem;
     width: 100%;
-    
+
     margin: 0;
     padding: 0.4rem 0.45rem;
     border: 0.0833rem solid transparent;
@@ -102,11 +102,9 @@ export const Option = styled.button`
     &:disabled {
         opacity: 1;
         color: var(--nav-highlight);
-        
+
         cursor: default;
     }
-
-    
 `
 
 export const FlagContainer = styled.span`

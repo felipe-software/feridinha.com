@@ -11,9 +11,11 @@ import styled from "styled-components"
 import relativeTime from "dayjs/plugin/relativeTime"
 import dayjs from "dayjs"
 import "dayjs/locale/en"
+import "dayjs/locale/es"
 import "dayjs/locale/pt-br"
 import { Upload } from "@/hooks/useUserDataStore"
 import { getFileType } from "@/components/FilePreviewGrid"
+import { DAYJS_LOCALES, type AppLocale } from "@/i18n/config"
 dayjs.extend(relativeTime)
 
 const Container = styled(PageContainer)`
@@ -149,12 +151,12 @@ export default function AlbumPageClient() {
     const params = useParams()
     const albumId = params.albumId as string
     const album = useAlbumQuery(albumId)
-    const locale = useLocale()
+    const locale = useLocale() as AppLocale
     const t = useTranslations("Album")
     const albumData = album.data
 
     const uploads = albumData?.uploads
-    dayjs.locale(locale === "pt-BR" ? "pt-br" : "en")
+    dayjs.locale(DAYJS_LOCALES[locale])
 
     return (
         <Container>
