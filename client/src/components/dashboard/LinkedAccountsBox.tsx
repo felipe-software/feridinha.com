@@ -16,7 +16,7 @@ import {
 } from "@/lib/oauth"
 import { FaDiscord, FaGoogle, FaTwitch } from "react-icons/fa6"
 import { useTranslations } from "next-intl"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import styled from "styled-components"
 
@@ -55,20 +55,6 @@ const Container = styled(BaseBox)`
     button {
         flex-shrink: 0;
     }
-
-    .link-retry {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
-        padding: 0.6rem 0.7rem;
-        border-radius: var(--border-radius-s);
-        background: var(--base);
-    }
-
-    .link-retry span {
-        font-size: 0.8rem;
-    }
 `
 
 const icons = {
@@ -89,16 +75,12 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
         useState<OAuthProviderName | null>(null)
     const [mergeRequest, setMergeRequest] = useState<MergeRequest | null>(null)
     const [isMerging, setIsMerging] = useState(false)
-    const [isCompletingLink, setIsCompletingLink] = useState(false)
-    const [canRetryLink, setCanRetryLink] = useState(false)
     const completionStarted = useRef(false)
-    const completionInFlight = useRef(false)
-    const completionTicket = useRef<string | null>(null)
     const linked = new Set(linkedAccounts.map((account) => account.provider))
 
-    const refreshUser = useCallback(async () => {
+    const refreshUser = async () => {
         await queryClient.invalidateQueries({ queryKey: ["userData"] })
-    }, [])
+    }
 
     const refreshMergedAccount = async () => {
         await Promise.all([
@@ -108,36 +90,6 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
         ])
     }
 
-    const completePendingLink = useCallback(async () => {
-        const ticket = completionTicket.current
-        if (!ticket || completionInFlight.current) return
-
-        completionInFlight.current = true
-        setIsCompletingLink(true)
-        try {
-            const response = await apiService.completeOAuthLink(ticket)
-            completionTicket.current = null
-            setCanRetryLink(false)
-            if (!response.success || !response.data) {
-                toast.error(response.success ? t("oauthLinkError") : response.error)
-                return
-            }
-
-            if (response.data.kind === "linked") {
-                toast.success(t("oauthLinkSuccess"))
-                await refreshUser()
-                return
-            }
-            setMergeRequest(response.data)
-        } catch {
-            setCanRetryLink(true)
-            toast.error(t("oauthLinkRetryError"))
-        } finally {
-            completionInFlight.current = false
-            setIsCompletingLink(false)
-        }
-    }, [refreshUser, t])
-
     useEffect(() => {
         if (completionStarted.current) return
         const ticket = getOAuthFragmentValue(
@@ -146,7 +98,6 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
         )
         if (!ticket) return
         completionStarted.current = true
-        completionTicket.current = ticket
 
         window.history.replaceState(
             null,
@@ -154,8 +105,25 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
             `${window.location.pathname}${window.location.search}`,
         )
 
-        void completePendingLink()
-    }, [completePendingLink])
+        void (async () => {
+            try {
+                const response = await apiService.completeOAuthLink(ticket)
+                if (!response.success || !response.data) {
+                    toast.error(response.success ? t("oauthLinkError") : response.error)
+                    return
+                }
+
+                if (response.data.kind === "linked") {
+                    toast.success(t("oauthLinkSuccess"))
+                    await refreshUser()
+                    return
+                }
+                setMergeRequest(response.data)
+            } catch {
+                toast.error(t("oauthLinkError"))
+            }
+        })()
+    }, [t])
 
     const cancelMerge = () => {
         if (isMerging) return
@@ -224,20 +192,6 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
         <>
             <Container>
                 <h2 className="title">{t("linkedAccountsTitle")}</h2>
-                {canRetryLink && (
-                    <div className="link-retry" role="alert">
-                        <span>{t("oauthLinkRetryDescription")}</span>
-                        <Button
-                            variant="purple"
-                            size="slim"
-                            isLoading={isCompletingLink}
-                            disabled={isCompletingLink}
-                            onClick={() => void completePendingLink()}
-                        >
-                            {t("oauthLinkRetry")}
-                        </Button>
-                    </div>
-                )}
                 {OAUTH_PROVIDERS.map((provider) => {
                     const Icon = icons[provider]
                     const isLinked = linked.has(provider)
