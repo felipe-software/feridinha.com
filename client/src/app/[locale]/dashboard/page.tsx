@@ -7,6 +7,8 @@ import useUserData from "@/hooks/useUserData"
 import Achievement from "@/components/dashboard/Achievement"
 import { AlbunsView } from "@/components/dashboard/AlbunsView"
 import Integrations from "@/components/dashboard/IntegrationsBox"
+import LinkedAccountsBox from "@/components/dashboard/LinkedAccountsBox"
+import ProfileIdentityPicker from "@/components/dashboard/ProfileIdentityPicker"
 import { UploadsView } from "@/components/dashboard/UploadsView"
 import { AnimatePresence } from "motion/react"
 import { useFormatter, useTranslations } from "next-intl"
@@ -60,7 +62,12 @@ function DashboardPage() {
         <PageContainer id="uploads-view-box" style={{ viewTransitionName: "page-content" }}>
             <div className="content-wrapper">
                 <IdentityCard>
-                    <img className="userPhoto" src={user.data?.profileImage} />
+                    <div className="profile-photo">
+                        {/* OAuth profile images use provider-controlled hosts. */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className="userPhoto" src={user.data.profileImage} alt="" />
+                        <ProfileIdentityPicker accounts={user.data.authProviders} />
+                    </div>
                     <div className="column">
                         <h1 className="userName">{user.data.name}</h1>
                         <div className="userStats">
@@ -102,6 +109,9 @@ function DashboardPage() {
                             ))}
                         </div>
                     </AchievementsBox>
+                    <LinkedAccountsBox
+                        linkedAccounts={user.data.authProviders}
+                    />
                     <Integrations />
                 </IdentityCard>
 

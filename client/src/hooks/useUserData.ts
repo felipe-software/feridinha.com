@@ -1,61 +1,18 @@
 import useTokenStore from "@/hooks/useToken"
 import useUserDataStore from "@/hooks/useUserDataStore"
-import apiService from "@/services/api"
-import { useQuery } from "@tanstack/react-query"
-import type { AuthSessionErrorCode } from "@/services/api/authSession"
-
-export type ErrorName = AuthSessionErrorCode
-
-export class ApiError extends Error {
-    name: ErrorName
-    message: string
-    cause?: any
-    code?: string
-
-    constructor({
-        name,
-        message,
-        cause,
-        code,
-    }: {
-        name: ErrorName
-        message: string
-        cause?: any
-        code?: string
-    }) {
-        super()
-        this.name = name
-        this.message = message
-        this.cause = cause
-        this.code = code
-    }
-}
+import { useUserDataQuery } from "@/hooks/queries/useUserDataQuery"
+import { useEffect } from "react"
 
 const useUserData = () => {
     const { token } = useTokenStore()
     const { setUserData } = useUserDataStore()
-    // console.log(token, !!token, _hasHydrated)
-    const { data, isLoading, error } = useQuery({
-        queryKey: ["userData"],
-        queryFn: async () => {
-            const response = await apiService.fetchUserData()
-            if (response.success) {
-                if (response.data) setUserData(response.data!)
+    const query = useUserDataQuery({ enabled: Boolean(token) })
 
-                return response.data
-            }
-            throw new ApiError({
-                message: response.error,
-                name: response.code as ErrorName,
-            })
-        },
-        enabled: !!token,
+    useEffect(() => {
+        if (query.data) setUserData(query.data)
+    }, [query.data, setUserData])
 
-
-        refetchOnMount: "always"
-    })
-
-    return { data, isLoading, error }
+    return query
 }
 
 export default useUserData

@@ -2,6 +2,7 @@ import session from "@/handlers/session";
 import database from "@/services/database";
 import { RequestHandler } from "express";
 import asyncHandler from "@/utils/asyncHandler";
+import { AUTHENTICATED_USER_INCLUDE } from "@/models/userModel";
 
 const authMiddleware =
     (options: { strict: boolean }): RequestHandler =>
@@ -28,12 +29,7 @@ const authMiddleware =
                 },
                 include: {
                     user: {
-                        include: {
-                            uploads: true,
-                            achievements: true,
-                            albums: true,
-                            moderatedCommunities: { select: { name: true, id: true } },
-                        },
+                        include: AUTHENTICATED_USER_INCLUDE,
                     },
                 },
             });

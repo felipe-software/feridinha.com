@@ -63,10 +63,18 @@ export const IdentityCard = styled(BaseBox)`
         font-weight: 600;
     }
 
-    .userPhoto {
-        max-width: 10rem;
-        border-radius: 10rem;
+    .profile-photo {
+        position: relative;
+        width: fit-content;
         margin-bottom: 1rem;
+    }
+
+    .userPhoto {
+        display: block;
+        width: 10rem;
+        height: 10rem;
+        object-fit: cover;
+        border-radius: 10rem;
     }
     .userName {
     }
@@ -134,6 +142,136 @@ export const IdentityCard = styled(BaseBox)`
             }
         }
     }
+`
+
+export const ProfilePicker = styled.div`
+    position: absolute;
+    right: 0.15rem;
+    bottom: 0.15rem;
+    z-index: 5;
+
+    .profile-trigger {
+        display: grid;
+        place-items: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        border: 3px solid var(--base-dark);
+        border-radius: 50%;
+        background: var(--purple-gradient);
+        color: var(--foreground);
+        box-shadow: 0 0.45rem 1.2rem rgba(0, 0, 0, 0.45);
+        cursor: pointer;
+        transition: transform 0.15s ease, filter 0.15s ease;
+    }
+
+    .profile-trigger:hover,
+    .profile-trigger[aria-expanded="true"] {
+        transform: scale(1.08);
+        filter: brightness(1.15);
+    }
+`
+
+export const ProfileMenu = styled.div`
+    width: min(18rem, calc(100vw - 3rem));
+    padding: 0.25rem;
+    color: var(--foreground);
+    text-align: left;
+
+    > strong {
+        display: block;
+        font-size: 0.9rem;
+    }
+
+    > p {
+        margin: 0.2rem 0 0.75rem;
+        color: var(--dracula-gray);
+        font-size: 0.85rem;
+        line-height: 1.45;
+    }
+
+    .profile-options {
+        display: grid;
+        gap: 0.4rem;
+    }
+
+    .profile-options button {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.65rem;
+        width: 100%;
+        padding: 0.6rem;
+        border: 0;
+        border-radius: 0.55rem;
+        background: var(--base);
+        color: var(--foreground);
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .profile-options button:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.075);
+    }
+
+    .profile-options button:disabled {
+        cursor: default;
+    }
+
+    .option-avatar {
+        position: relative;
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    .option-avatar > img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .provider-icon {
+        position: absolute;
+        right: -0.15rem;
+        bottom: -0.1rem;
+        display: grid;
+        place-items: center;
+        width: 1.1rem;
+        height: 1.1rem;
+        border-radius: 50%;
+        background: var(--base-dark);
+    }
+
+    .option-copy {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+    }
+
+    .provider-name {
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .identity-name {
+        overflow: hidden;
+        font-size: 0.82rem;
+        font-weight: 650;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .option-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+        color: var(--dracula-gray);
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
 `
 
 export const AchievementsBox = styled(BaseBox)`

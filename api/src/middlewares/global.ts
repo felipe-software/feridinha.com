@@ -5,7 +5,7 @@ import type {
     CommunityWithModeratorsFull,
     PostWithCommunity,
 } from "@/models/communityModel";
-import { Prisma } from "@prisma/client";
+import type { AuthenticatedUser } from "@/models/userModel";
 import { Request, RequestHandler, Response } from "express";
 import ms from "ms";
 
@@ -22,9 +22,7 @@ declare global {
             perfomanceStart: number;
             perfomanceEnd?: number;
             session: {
-                user?: Prisma.UserGetPayload<{
-                    include: { uploads: true; achievements: true };
-                }>;
+                user?: AuthenticatedUser;
             };
             getIdentity: (req: ExpressRequest) => string;
             muralCommunity?: CommunityWithModeratorsId | CommunityWithModeratorsFull;

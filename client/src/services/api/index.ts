@@ -1,6 +1,11 @@
 import { ApiKey } from "@/hooks/useApiKeysStore"
 import useTokenStore from "@/hooks/useToken"
-import { Upload, UserData } from "@/hooks/useUserDataStore"
+import {
+    LinkedAuthProvider,
+    OAuthProviderName,
+    Upload,
+    UserData,
+} from "@/hooks/useUserDataStore"
 import { axiosClient } from "@/services/api/axiosClient"
 import { handleAuthSessionError } from "@/services/api/authSession"
 import { AxiosError, AxiosProgressEvent, AxiosResponse } from "axios"
@@ -15,7 +20,31 @@ export type ApiResponse<T = undefined> =
           success: true
           data?: T
           message?: string
+          code?: string
       }
+
+export type OAuthLinkCompletion =
+    | {
+          kind: "linked"
+          provider: OAuthProviderName
+          linkedAt: string
+      }
+    | {
+          kind: "merge_required"
+          provider: OAuthProviderName
+          ticket: string
+          accountToKeep: OAuthMergeAccountPreview
+          accountToMerge: OAuthMergeAccountPreview
+      }
+
+export interface OAuthMergeAccountPreview {
+    identities: OAuthMergeIdentityPreview[]
+}
+
+export interface OAuthMergeIdentityPreview {
+    provider: OAuthProviderName
+    name: string
+}
 
 export type UploadResponse =
     | { success: false; error: string; code?: string }
@@ -52,6 +81,45 @@ const uploadSocialLink = async (link: string): Promise<UploadResponse> => {
 const fetchUserData = async (): Promise<ApiResponse<UserData>> => {
     const response = await axiosClient.get("/login/validate")
 
+    return response.data
+}
+
+const startOAuthLink = async (
+    provider: OAuthProviderName,
+): Promise<ApiResponse<{ redirectUrl: string }>> => {
+    const response = await axiosClient.post(`/login/${provider}/link`)
+    return response.data
+}
+
+const completeOAuthLink = async (
+    ticket: string,
+): Promise<ApiResponse<OAuthLinkCompletion>> => {
+    const response = await axiosClient.post("/login/accounts/link/complete", {
+        ticket,
+    })
+    return response.data
+}
+
+const completeOAuthMerge = async (
+    ticket: string,
+): Promise<ApiResponse<LinkedAuthProvider>> => {
+    const response = await axiosClient.post("/login/accounts/merge/complete", {
+        ticket,
+    })
+    return response.data
+}
+
+const setPrimaryOAuthAccount = async (
+    provider: OAuthProviderName,
+): Promise<ApiResponse<{ provider: OAuthProviderName; name: string; profileImage: string }>> => {
+    const response = await axiosClient.put("/login/accounts/primary", { provider })
+    return response.data
+}
+
+const unlinkOAuthAccount = async (
+    provider: OAuthProviderName,
+): Promise<ApiResponse<{ provider: OAuthProviderName }>> => {
+    const response = await axiosClient.delete(`/login/accounts/${provider}`)
     return response.data
 }
 
@@ -181,6 +249,11 @@ const apiService = {
     uploadFile,
     uploadSocialLink,
     fetchUserData,
+    startOAuthLink,
+    completeOAuthLink,
+    completeOAuthMerge,
+    setPrimaryOAuthAccount,
+    unlinkOAuthAccount,
     fetchApiKeys,
     createApiKey,
     deleteApiKey,

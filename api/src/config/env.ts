@@ -1,13 +1,29 @@
 import path from "path";
 import { z } from "zod";
 
-const envSchema = z.object({
+const optionalEnvString = z.preprocess(
+    (value) => typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().min(1).optional(),
+);
+
+const optionalEnvUrl = z.preprocess(
+    (value) => typeof value === "string" && value.trim() === "" ? undefined : value,
+    z.string().url().optional(),
+);
+
+export const envSchema = z.object({
     DATABASE_URL: z.string(),
     TWITCH_CLIENT_ID: z.string(),
     TWITCH_SECRET: z.string(),
     TMI_ACCESS_TOKEN: z.string(),
     TMI_CLIENT_ID: z.string(),
     TWITCH_REDIRECT_URL: z.string(),
+    GOOGLE_CLIENT_ID: optionalEnvString,
+    GOOGLE_CLIENT_SECRET: optionalEnvString,
+    GOOGLE_REDIRECT_URL: optionalEnvUrl,
+    DISCORD_CLIENT_ID: optionalEnvString,
+    DISCORD_CLIENT_SECRET: optionalEnvString,
+    DISCORD_REDIRECT_URL: optionalEnvUrl,
     CLIENT_URL: z.string(),
     JWT_SECRET: z.string(),
     IMAGE_PREFIX_URL: z.string().endsWith("/"),

@@ -15,6 +15,7 @@ import {
     POSTHOG_PROXY_PATH,
     obfuscatePostHogAssetUrl,
 } from "@/config/posthog"
+import { stripOAuthFragmentFromUrl } from "@/lib/oauth"
 
 const getIcon = ({ type }: any) => {
     switch (type) {
@@ -53,6 +54,21 @@ export function Providers({
                 prepare_external_dependency_script: (script) => {
                     script.src = obfuscatePostHogAssetUrl(script.src)
                     return script
+                },
+                before_send: (event) => {
+                    if (!event) return null
+                    for (const [key, value] of Object.entries(
+                        event.properties ?? {},
+                    )) {
+                        if (
+                            typeof value === "string" &&
+                            (key.includes("url") || key.includes("referrer"))
+                        ) {
+                            event.properties[key] =
+                                stripOAuthFragmentFromUrl(value)
+                        }
+                    }
+                    return event
                 },
             }}
         >
