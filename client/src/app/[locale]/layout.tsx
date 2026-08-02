@@ -11,7 +11,7 @@ import { inter } from "@/lib/fonts"
 import ViewTransitionFix from "@/app/_polyfill"
 // import ViewTransitionsPolyfill from "@/app/_polyfill"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
-import { IS_MURAL_AVAILABLE } from "@/config/features"
+import { IS_MURAL_AVAILABLE, IS_OPEN_SOURCE_ALREADY } from "@/config/features"
 import { routing } from "@/i18n/routing"
 import { buildRootMetadata, buildSiteJsonLd, serializeJsonLd } from "@/lib/seo"
 import type { AppLocale } from "@/i18n/config"
@@ -54,7 +54,12 @@ export default async function RootLayout({ children, params }: LocaleLayoutProps
                     <NextIntlClientProvider>
                         <NuqsAdapter>
                             <StyledComponentsRegistry>
-                                <Providers isMuralAvailable={IS_MURAL_AVAILABLE}>{children}</Providers>
+                                <Providers
+                                    isMuralAvailable={IS_MURAL_AVAILABLE}
+                                    isOpenSource={IS_OPEN_SOURCE_ALREADY}
+                                >
+                                    {children}
+                                </Providers>
                             </StyledComponentsRegistry>
                         </NuqsAdapter>
                     </NextIntlClientProvider>
