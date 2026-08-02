@@ -4,12 +4,20 @@ import { GITHUB_REPOSITORY_URL } from "@/lib/links"
 import { Container, Content, Spotlight } from "@/components/OpenSourceBadge/styles"
 import { animate, useMotionTemplate, useMotionValue, useReducedMotion } from "motion/react"
 import { useTranslations } from "next-intl"
+import { usePostHog } from "posthog-js/react"
 import { useRef } from "react"
 import type { FocusEventHandler, PointerEventHandler } from "react"
 import { FaGithub } from "react-icons/fa6"
 
-export const OpenSourceBadge = ({ isOpenSource }: { isOpenSource: boolean }) => {
+export const OpenSourceBadge = ({
+    isOpenSource,
+    username,
+}: {
+    isOpenSource: boolean
+    username?: string
+}) => {
     const t = useTranslations("Nav")
+    const posthog = usePostHog()
     const spotlightX = useMotionValue(0)
     const spotlightY = useMotionValue(0)
     const spotlightRadius = useMotionValue(0)
@@ -83,6 +91,12 @@ export const OpenSourceBadge = ({ isOpenSource }: { isOpenSource: boolean }) => 
             onPointerLeave={closeSpotlight}
             onFocus={handleFocus}
             onBlur={closeSpotlight}
+            onClick={() => {
+                posthog.capture("open_source_clicked", {
+                    url: GITHUB_REPOSITORY_URL,
+                    ...(username ? { username } : {}),
+                })
+            }}
         >
             <Content>
                 <FaGithub />

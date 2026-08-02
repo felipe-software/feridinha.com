@@ -156,7 +156,7 @@ function NavBar_({
                 </LogoText>
             </Link>
             <div className="description-container">
-                <OpenSourceBadge isOpenSource={isOpenSource} />
+                <OpenSourceBadge isOpenSource={isOpenSource} username={user.data?.name} />
                 {!isOpenSource && (
                     <Tooltip content={t("brainMade")} arrow={false} maxWidth={400}>
                         <BrainMadeWrapper
