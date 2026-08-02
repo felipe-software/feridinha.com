@@ -19,7 +19,7 @@ const safePreviewMediaTypes = ["mp4", "mkv", "webm", "avif"];
 export const waitForCacheRelease = async (
     rawName: string,
     context: { contentType: string | false; isChatterinoResolver: boolean },
-    timeoutMs = 4000,
+    timeoutMs = 30_000,
     pollMs = 50,
 ) => {
     let totalTime = 0;
