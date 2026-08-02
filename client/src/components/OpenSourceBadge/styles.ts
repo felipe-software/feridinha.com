@@ -28,6 +28,10 @@ export const Container = styled.a`
     @media (prefers-reduced-motion: reduce) {
         transition: none;
     }
+
+    @media (max-width: 68.75rem) {
+        display: none;
+    }
 `
 
 export const Content = styled.span`
