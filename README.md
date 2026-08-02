@@ -7,7 +7,7 @@
 The most overengineered file hosting service for Twitch Users
 
 [![Deploy Production IRIS](https://github.com/felipe-software/feridinha.com/actions/workflows/deploy.yaml/badge.svg?branch=main)](https://github.com/felipe-software/feridinha.com/actions/workflows/deploy.yaml)
-
+[![Run project test](https://github.com/felipe-software/feridinha.com/actions/workflows/test.yaml/badge.svg)](https://github.com/felipe-software/feridinha.com/actions/workflows/test.yaml)
 ## Features
 
 - Twitch Account support
