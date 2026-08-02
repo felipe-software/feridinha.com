@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import cryptography from "@/config/cryptography";
 import { cacheService } from "@/services/cache";
+import database from "@/services/database";
 import fileUtils from "@/utils/file";
 import { ExternalServiceError, getUpstreamStatus, publicErrorDetails } from "@/utils/httpErrors";
 import { readCookie } from "@/utils/cookies";
@@ -92,21 +93,48 @@ describe("validação e nomes de upload", () => {
     });
 
     test("gera nomes com extensão e comprimentos esperados", async () => {
-        const upload = await uploadUtils.generateUploadName("photo.png");
-        expect(upload.filename).toMatch(/^[A-Za-z0-9]{5}\.png$/);
-        expect(upload.filenameWithPath).toEndWith(upload.filename);
-        expect(await uploadUtils.generateAlbumName()).toMatch(/^[A-Za-z0-9]{12}$/);
+        const originalFindUnique = database.upload.findUnique;
+        let calls = 0;
+        database.upload.findUnique = (async () => {
+            calls += 1;
+            return null;
+        }) as never;
+        try {
+            const upload = await uploadUtils.generateUploadName("photo.png");
+            expect(upload.filename).toMatch(/^[A-Za-z0-9]{5}\.png$/);
+            expect(upload.filenameWithPath).toEndWith(upload.filename);
+            expect(calls).toBe(1);
+            expect(await uploadUtils.generateAlbumName()).toMatch(/^[A-Za-z0-9]{12}$/);
+        } finally {
+            database.upload.findUnique = originalFindUnique;
+        }
     });
 
     test("tenta novamente quando há colisão de nome", async () => {
-        const originalCheck = fileUtils.checkIfFileExists;
+        const originalFindUnique = database.upload.findUnique;
         let calls = 0;
-        fileUtils.checkIfFileExists = async () => ++calls === 1;
+        database.upload.findUnique = (async ({ where }: { where: { name: string } }) => {
+            calls += 1;
+            return calls === 1 ? { name: where.name } : null;
+        }) as never;
         try {
             expect((await uploadUtils.generateUploadName("photo.jpg")).filename).toEndWith(".jpg");
             expect(calls).toBe(2);
         } finally {
-            fileUtils.checkIfFileExists = originalCheck;
+            database.upload.findUnique = originalFindUnique;
+        }
+    });
+
+    test("propaga falha ao consultar colisões no banco", async () => {
+        const originalFindUnique = database.upload.findUnique;
+        const databaseError = new Error("database unavailable");
+        database.upload.findUnique = (async () => {
+            throw databaseError;
+        }) as never;
+        try {
+            await expect(uploadUtils.generateUploadName("photo.png")).rejects.toBe(databaseError);
+        } finally {
+            database.upload.findUnique = originalFindUnique;
         }
     });
 
