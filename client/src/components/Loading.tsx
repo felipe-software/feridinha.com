@@ -31,6 +31,14 @@ const Container = styled(motion.div)`
 
         z-index: 6;
     }
+
+    .loader {
+        line-height: 0;
+    }
+
+    .loader svg {
+        display: block;
+    }
 `
 
 const Loading = ({
@@ -69,7 +77,7 @@ const Loading = ({
                     >
                         <LuLoaderCircle size={size ?? 52} color="#f8f8f8c8" />
                     </motion.div>
-                    <p>{message}</p>
+                    {message && <p>{message}</p>}
                 </Container>
             )}
         </AnimatePresence>

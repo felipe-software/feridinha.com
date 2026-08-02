@@ -15,4 +15,4 @@ if (import.meta.main) {
     }, 5 * 60 * 1000); // Fixes pm2 memory leak issues with custom interpreter xdddd GOD PLEASE HELP ME BECAUSE I SINNED
 }
 
-export default app; 
+export default app;

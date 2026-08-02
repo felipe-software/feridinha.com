@@ -28,6 +28,16 @@ export interface ApiAlbums {
     updatedAt: Date
 }
 
+export type OAuthProviderName = "twitch" | "google" | "discord"
+
+export interface LinkedAuthProvider {
+    provider: OAuthProviderName
+    linkedAt: string
+    name: string
+    profileImage: string
+    isPrimary: boolean
+}
+
 export interface UserData {
     id: string
     name: string
@@ -42,6 +52,7 @@ export interface UserData {
     uploadCount: number
     readableLimit: number
     moderatedCommunities: { id: string; name: string }[]
+    authProviders: LinkedAuthProvider[]
 }
 
 interface UserDataState {

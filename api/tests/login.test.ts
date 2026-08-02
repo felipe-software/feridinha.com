@@ -10,9 +10,20 @@ import twitch from "@/services/twitch";
 import { createOAuthState, oauthStatesMatch } from "@/controllers/login";
 import { ExternalServiceError } from "@/utils/httpErrors";
 import achievements from "@/handlers/achievements";
+import { getOAuthProvider, type OAuthProviderSlug } from "@/services/oauth";
+import { mergeConfirmationStore } from "@/services/oauth/state";
 
 let testUser: TestUser;
 const oauthUserIds: string[] = [];
+
+const startOAuth = async (provider = "twitch") => {
+    const response = await fetch(`${baseURL}/login/${provider}/redirect`, { redirect: "manual" });
+    const location = response.headers.get("location")!;
+    const state = new URL(location).searchParams.get("state")!;
+    const setCookie = response.headers.get("set-cookie") ?? "";
+    const cookie = setCookie.match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+    return { response, state, cookie, location };
+};
 
 beforeAll(async () => {
     testUser = await createTestUser("login");
@@ -98,6 +109,19 @@ describe("Login Routes", () => {
             expect(Array.isArray(json.data.achievements)).toBe(true);
         });
 
+        test("retorna provedores sem expor campos internos", async () => {
+            const res = await fetch(`${baseURL}/login/validate`, {
+                headers: { Authorization: testUser.token },
+            });
+            expect(res.status).toBe(200);
+            const json = (await res.json()) as { data: Record<string, unknown> & { authProviders: unknown[] } };
+            expect(json.data.authProviders).toEqual([
+                expect.objectContaining({ provider: "twitch", linkedAt: expect.any(String) }),
+            ]);
+            expect(json.data).not.toHaveProperty("sessions");
+            expect(json.data).not.toHaveProperty("oauthAccounts");
+        });
+
         test("retorna readableLimit → 200", async () => {
             const res = await fetch(`${baseURL}/login/validate`, {
                 headers: { Authorization: testUser.token },
@@ -173,14 +197,15 @@ describe("Login Routes", () => {
         });
 
         test("erro assíncrono não expõe stack ou objeto interno", async () => {
-            const res = await fetch(`${baseURL}/login/twitch/callback?state=expected`, {
-                headers: { Cookie: "fd_oauth_state=expected" },
+            const oauth = await startOAuth();
+            const res = await fetch(`${baseURL}/login/twitch/callback?state=${oauth.state}`, {
+                headers: { Cookie: oauth.cookie },
                 redirect: "manual",
             });
-            expect(res.status).toBe(500);
+            expect(res.status).toBe(400);
             const body = await res.text();
             const json = JSON.parse(body) as { code: string };
-            expect(json.code).toBe("internal_error");
+            expect(json.code).toBe("oauth_code_invalid");
             expect(body).not.toContain("ZodError");
             expect(body).not.toContain("stack");
             expect(body).not.toContain("client_secret");
@@ -216,11 +241,11 @@ describe("Login Routes", () => {
             twitch.fetchUserData = async () => ({ profile_image_url: "https://example.com/avatar.png" }) as never;
 
             try {
-                const state = createOAuthState();
+                const oauth = await startOAuth();
                 const res = await fetch(
-                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(state)}`,
+                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(oauth.state)}`,
                     {
-                        headers: { Cookie: `fd_oauth_state=${encodeURIComponent(state)}` },
+                        headers: { Cookie: oauth.cookie },
                         redirect: "manual",
                     },
                 );
@@ -231,7 +256,16 @@ describe("Login Routes", () => {
                 expect(cookies).toContain("SameSite=Lax");
                 expect(cookies).toContain("Max-Age=120");
 
-                const user = await database.user.findUniqueOrThrow({ where: { twitchId: `oauth-${suffix}` } });
+                const account = await database.oAuthAccount.findUniqueOrThrow({
+                    where: {
+                        provider_providerAccountId: {
+                            provider: "TWITCH",
+                            providerAccountId: `oauth-${suffix}`,
+                        },
+                    },
+                    include: { user: true },
+                });
+                const user = account.user;
                 oauthUserIds.push(user.id);
                 expect(user.name).toBe(`Login-${suffix}`);
                 expect(user.color).toBe("#123456");
@@ -272,10 +306,10 @@ describe("Login Routes", () => {
             twitch[stage === "auth" ? "fetchAuthDataFromCallback" : stage === "token" ? "fetchTokenData" : stage === "color" ? "fetchUserColor" : "fetchUserData"] = failure as never;
 
             try {
-                const state = createOAuthState();
+                const oauth = await startOAuth();
                 const res = await fetch(
-                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(state)}`,
-                    { headers: { Cookie: `fd_oauth_state=${state}` }, redirect: "manual" },
+                    `${baseURL}/login/twitch/callback?code=valid&scope=&state=${encodeURIComponent(oauth.state)}`,
+                    { headers: { Cookie: oauth.cookie }, redirect: "manual" },
                 );
                 expect(res.status).toBe(418);
                 const body = await res.text();
@@ -287,6 +321,686 @@ describe("Login Routes", () => {
                 twitch.fetchTokenData = originals.token;
                 twitch.fetchUserColor = originals.color;
                 twitch.fetchUserData = originals.user;
+            }
+        });
+    });
+
+    describe("OAuth multi-provider", () => {
+        const mockProvider = (provider: OAuthProviderSlug, providerAccountId: string) => {
+            const adapter = getOAuthProvider(provider);
+            const originals = {
+                exchangeCode: adapter.exchangeCode,
+                fetchProfile: adapter.fetchProfile,
+            };
+            adapter.exchangeCode = async () => ({ accessToken: "sentinel-access-token" });
+            adapter.fetchProfile = async () => ({
+                providerAccountId,
+                displayName: `${provider} user`,
+                profileImage: "https://example.com/oauth-avatar.png",
+                color: "#abcdef",
+            });
+            return () => {
+                adapter.exchangeCode = originals.exchangeCode;
+                adapter.fetchProfile = originals.fetchProfile;
+            };
+        };
+
+        const finishProviderCallback = async (provider: OAuthProviderSlug) => {
+            const oauth = await startOAuth(provider);
+            return fetch(
+                `${baseURL}/login/${provider}/callback?code=valid&state=${encodeURIComponent(oauth.state)}&ignored=value`,
+                {
+                    headers: { Cookie: oauth.cookie },
+                    redirect: "manual",
+                },
+            );
+        };
+
+        const finishProviderLink = async (provider: OAuthProviderSlug, token: string) => {
+            const start = await fetch(`${baseURL}/login/${provider}/link`, {
+                method: "POST",
+                headers: { Authorization: token },
+            });
+            const redirectUrl = ((await start.json()) as { data: { redirectUrl: string } }).data.redirectUrl;
+            const redirectPath = new URL(redirectUrl);
+            const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                redirect: "manual",
+            });
+            const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+            const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+            const callback = await fetch(
+                `${baseURL}/login/${provider}/callback?code=valid&state=${encodeURIComponent(state)}`,
+                { headers: { Cookie: cookie }, redirect: "manual" },
+            );
+            const ticket = decodeURIComponent(
+                new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+            );
+            return fetch(`${baseURL}/login/accounts/link/complete`, {
+                method: "POST",
+                headers: { Authorization: token, "Content-Type": "application/json" },
+                body: JSON.stringify({ ticket }),
+            });
+        };
+
+        test.each(["google", "discord"] as const)("cria e reutiliza usuário com %s", async (provider) => {
+            const providerAccountId = `${provider}-${crypto.randomUUID()}`;
+            const restore = mockProvider(provider, providerAccountId);
+            try {
+                const first = await finishProviderCallback(provider);
+                expect(first.status).toBe(302);
+                expect(first.headers.get("set-cookie")).toContain("Token=");
+
+                const account = await database.oAuthAccount.findUniqueOrThrow({
+                    where: {
+                        provider_providerAccountId: {
+                            provider: provider.toUpperCase() as "GOOGLE" | "DISCORD",
+                            providerAccountId,
+                        },
+                    },
+                    include: { user: true },
+                });
+                oauthUserIds.push(account.userId);
+                expect(account.user.name).toBe(`${provider} user`);
+
+                const second = await finishProviderCallback(provider);
+                expect(second.status).toBe(302);
+                const users = await database.user.count({
+                    where: {
+                        oauthAccounts: {
+                            some: {
+                                provider: provider.toUpperCase() as "GOOGLE" | "DISCORD",
+                                providerAccountId,
+                            },
+                        },
+                    },
+                });
+                expect(users).toBe(1);
+            } finally {
+                restore();
+            }
+        });
+
+        test("callback concorrente reutiliza a identidade sem criar usuário órfão", async () => {
+            const providerAccountId = `google-concurrent-${crypto.randomUUID()}`;
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const responses = await Promise.all([
+                    finishProviderCallback("google"),
+                    finishProviderCallback("google"),
+                ]);
+                expect(responses.map((response) => response.status)).toEqual([302, 302]);
+
+                const accounts = await database.oAuthAccount.findMany({
+                    where: { provider: "GOOGLE", providerAccountId },
+                });
+                expect(accounts).toHaveLength(1);
+                oauthUserIds.push(accounts[0]!.userId);
+
+                const orphanedUsers = await database.user.count({
+                    where: {
+                        name: "google user",
+                        oauthAccounts: { none: {} },
+                    },
+                });
+                expect(orphanedUsers).toBe(0);
+            } finally {
+                restore();
+            }
+        });
+
+        test("vincula, confirma com JWT e permite desvincular sem remover o último provedor", async () => {
+            const providerAccountId = `google-link-${crypto.randomUUID()}`;
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const start = await fetch(`${baseURL}/login/google/link`, {
+                    method: "POST",
+                    headers: { Authorization: testUser.token },
+                });
+                expect(start.status).toBe(200);
+                const startBody = (await start.json()) as { data: { redirectUrl: string } };
+                const redirectPath = new URL(startBody.data.redirectUrl);
+                const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                    redirect: "manual",
+                });
+                expect(intermediate.status).toBe(302);
+                const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+                const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+
+                const callback = await fetch(
+                    `${baseURL}/login/google/callback?code=valid&state=${encodeURIComponent(state)}&scope=profile`,
+                    { headers: { Cookie: cookie }, redirect: "manual" },
+                );
+                expect(callback.status).toBe(302);
+                const completionTicket = decodeURIComponent(
+                    new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+                );
+                expect(completionTicket).not.toBe("");
+                expect(
+                    await database.oAuthAccount.findUnique({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: "GOOGLE",
+                                providerAccountId,
+                            },
+                        },
+                    }),
+                ).toBeNull();
+
+                const complete = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: testUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket: completionTicket }),
+                });
+                expect(complete.status).toBe(200);
+                expect(
+                    await database.oAuthAccount.findUniqueOrThrow({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: "GOOGLE",
+                                providerAccountId,
+                            },
+                        },
+                    }),
+                ).toMatchObject({
+                    userId: testUser.id,
+                    displayName: "google user",
+                });
+
+                const replay = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: testUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket: completionTicket }),
+                });
+                expect(replay.status).toBe(400);
+                expect(((await replay.json()) as { code: string }).code).toBe("oauth_link_ticket_invalid");
+
+                const unlinkGoogle = await fetch(`${baseURL}/login/accounts/google`, {
+                    method: "DELETE",
+                    headers: { Authorization: testUser.token },
+                });
+                expect(unlinkGoogle.status).toBe(200);
+
+                const unlinkLast = await fetch(`${baseURL}/login/accounts/twitch`, {
+                    method: "DELETE",
+                    headers: { Authorization: testUser.token },
+                });
+                expect(unlinkLast.status).toBe(409);
+                expect(((await unlinkLast.json()) as { code: string }).code).toBe("last_login_provider");
+            } finally {
+                restore();
+            }
+        });
+
+        test("impede que outro usuário conclua uma vinculação compartilhada", async () => {
+            const otherUser = await createTestUser("oauth-link-other");
+            const providerAccountId = `discord-link-${crypto.randomUUID()}`;
+            const restore = mockProvider("discord", providerAccountId);
+            try {
+                const start = await fetch(`${baseURL}/login/discord/link`, {
+                    method: "POST",
+                    headers: { Authorization: testUser.token },
+                });
+                const redirectUrl = ((await start.json()) as { data: { redirectUrl: string } }).data.redirectUrl;
+                const redirectPath = new URL(redirectUrl);
+                const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                    redirect: "manual",
+                });
+                const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+                const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+                const callback = await fetch(
+                    `${baseURL}/login/discord/callback?code=valid&state=${encodeURIComponent(state)}`,
+                    { headers: { Cookie: cookie }, redirect: "manual" },
+                );
+                const ticket = decodeURIComponent(
+                    new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+                );
+
+                const wrongUser = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: otherUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket }),
+                });
+                expect(wrongUser.status).toBe(403);
+                expect(((await wrongUser.json()) as { code: string }).code).toBe("oauth_link_user_mismatch");
+                expect(
+                    await database.oAuthAccount.findUnique({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: "DISCORD",
+                                providerAccountId,
+                            },
+                        },
+                    }),
+                ).toBeNull();
+            } finally {
+                restore();
+                await deleteTestUser(otherUser.id);
+            }
+        });
+
+        test("permite escolher uma identidade conectada como perfil principal", async () => {
+            const user = await createTestUser("oauth-primary-profile");
+            const providerAccountId = `google-primary-${crypto.randomUUID()}`;
+            await database.oAuthAccount.create({
+                data: {
+                    provider: "GOOGLE",
+                    providerAccountId,
+                    displayName: "Nome do Google",
+                    profileImage: "https://example.com/google-primary.png",
+                    userId: user.id,
+                },
+            });
+
+            try {
+                const response = await fetch(`${baseURL}/login/accounts/primary`, {
+                    method: "PUT",
+                    headers: { Authorization: user.token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ provider: "google" }),
+                });
+                expect(response.status).toBe(200);
+                expect(((await response.json()) as { code: string }).code).toBe("oauth_primary_profile_updated");
+
+                const updated = await database.user.findUniqueOrThrow({ where: { id: user.id } });
+                expect(updated).toMatchObject({
+                    primaryOAuthProvider: "GOOGLE",
+                    name: "Nome do Google",
+                    profileImage: "https://example.com/google-primary.png",
+                });
+
+                const validate = await fetch(`${baseURL}/login/validate`, {
+                    headers: { Authorization: user.token },
+                });
+                const body = (await validate.json()) as {
+                    data: { authProviders: Array<{ provider: string; isPrimary: boolean }> };
+                };
+                expect(body.data.authProviders).toContainEqual(
+                    expect.objectContaining({ provider: "google", isPrimary: true }),
+                );
+
+                const restore = mockProvider("google", providerAccountId);
+                try {
+                    const login = await finishProviderCallback("google");
+                    expect(login.status).toBe(302);
+                    expect(await database.user.findUniqueOrThrow({ where: { id: user.id } })).toMatchObject({
+                        primaryOAuthProvider: "GOOGLE",
+                        name: "google user",
+                        profileImage: "https://example.com/oauth-avatar.png",
+                    });
+                } finally {
+                    restore();
+                }
+            } finally {
+                await deleteTestUser(user.id);
+            }
+        });
+
+        test("solicita confirmação sem alterar identidade que pertence a outro usuário", async () => {
+            const otherUser = await createTestUser("oauth-link-owner");
+            const providerAccountId = `google-owned-${crypto.randomUUID()}`;
+            await database.oAuthAccount.create({
+                data: {
+                    provider: "GOOGLE",
+                    providerAccountId,
+                    userId: otherUser.id,
+                },
+            });
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const start = await fetch(`${baseURL}/login/google/link`, {
+                    method: "POST",
+                    headers: { Authorization: testUser.token },
+                });
+                const redirectUrl = ((await start.json()) as { data: { redirectUrl: string } }).data.redirectUrl;
+                const redirectPath = new URL(redirectUrl);
+                const intermediate = await fetch(`${baseURL}${redirectPath.pathname}${redirectPath.search}`, {
+                    redirect: "manual",
+                });
+                const state = new URL(intermediate.headers.get("location")!).searchParams.get("state")!;
+                const cookie = (intermediate.headers.get("set-cookie") ?? "").match(/fd_oauth_state=[^;]+/)?.[0] ?? "";
+                const callback = await fetch(
+                    `${baseURL}/login/google/callback?code=valid&state=${encodeURIComponent(state)}`,
+                    { headers: { Cookie: cookie }, redirect: "manual" },
+                );
+                const ticket = decodeURIComponent(
+                    new URL(callback.headers.get("location")!).hash.replace("#oauth-link=", ""),
+                );
+                const complete = await fetch(`${baseURL}/login/accounts/link/complete`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: testUser.token,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ticket }),
+                });
+                expect(complete.status).toBe(200);
+                const body = (await complete.json()) as {
+                    code: string;
+                    data: {
+                        kind: string;
+                        provider: string;
+                        ticket: string;
+                        accountToKeep: { identities: Array<{ provider: string; name: string }> };
+                        accountToMerge: { identities: Array<{ provider: string; name: string }> };
+                    };
+                };
+                expect(body.code).toBe("oauth_merge_required");
+                expect(body.data).toMatchObject({ kind: "merge_required", provider: "google" });
+                expect(body.data.accountToKeep).toEqual({
+                    identities: [{ provider: "twitch", name: "Test User login" }],
+                });
+                expect(body.data.accountToMerge).toEqual({
+                    identities: [
+                        { provider: "twitch", name: "Test User oauth-link-owner" },
+                        { provider: "google", name: "google user" },
+                    ],
+                });
+                expect(JSON.stringify(body.data)).not.toContain(providerAccountId);
+                expect(body.data).not.toHaveProperty("sourceUserId");
+                expect(body.data.ticket).not.toBe("");
+                expect(
+                    await database.oAuthAccount.findUniqueOrThrow({
+                        where: { provider_providerAccountId: { provider: "GOOGLE", providerAccountId } },
+                    }),
+                ).toMatchObject({ userId: otherUser.id });
+                expect(await database.user.findUnique({ where: { id: otherUser.id } })).not.toBeNull();
+            } finally {
+                restore();
+                await deleteTestUser(otherUser.id);
+            }
+        });
+
+        test("confirma merge transacional preservando dados, credenciais e preferências do usuário atual", async () => {
+            const target = await createTestUser("oauth-merge-target");
+            const sourceSessionId = crypto.randomUUID();
+            const sourceSessionToken = await session.createJwt(sourceSessionId);
+            const providerAccountId = `google-merge-${crypto.randomUUID()}`;
+            const sourceCreatedAt = new Date("2022-01-02T03:04:05.000Z");
+            const source = await database.user.create({
+                data: {
+                    name: "Absorbed User",
+                    profileImage: "https://example.com/absorbed.png",
+                    color: "#000001",
+                    role: "ADMIN",
+                    uploadCount: 7,
+                    sessions: [sourceSessionId],
+                    createdAt: sourceCreatedAt,
+                    oauthAccounts: {
+                        create: { provider: "GOOGLE", providerAccountId },
+                    },
+                    achievements: { connect: { id: "upload-1st" } },
+                },
+            });
+            const sourceApiSecret = `merge-secret-${crypto.randomUUID()}`;
+            const albumId = `merge-album-${crypto.randomUUID()}`;
+            const communityId = `merge-community-${crypto.randomUUID()}`;
+            await database.user.update({
+                where: { id: target.id },
+                data: {
+                    name: "Current User",
+                    profileImage: "https://example.com/current.png",
+                    color: "#abcdef",
+                    role: "USER",
+                    uploadCount: 3,
+                },
+            });
+            await database.apiKey.create({
+                data: { name: "absorbed key", secret: sourceApiSecret, userId: source.id },
+            });
+            const sourceUpload = await database.upload.create({
+                data: {
+                    name: `merge-${crypto.randomUUID()}.png`,
+                    size: 10,
+                    mimeType: "image/png",
+                    deleteCode: crypto.randomUUID(),
+                    deleteCodeVersion: "NEW",
+                    userId: source.id,
+                },
+            });
+            await database.album.create({ data: { id: albumId, name: "absorbed album", userId: source.id } });
+            await database.review.create({ data: { content: "current review", userId: target.id } });
+            await database.review.create({ data: { content: "absorbed review", userId: source.id } });
+            await database.muralCommunity.create({
+                data: {
+                    id: communityId,
+                    name: communityId,
+                    moderatorIds: [source.id],
+                    memberIds: [source.id],
+                    createdById: source.id,
+                    moderators: { connect: { id: source.id } },
+                    members: { connect: { id: source.id } },
+                },
+            });
+            const post = await database.muralPost.create({
+                data: {
+                    bareContent: "merge vote post",
+                    contentType: "IMAGE",
+                    contentOrigin: "FERIDINHA",
+                    communityId,
+                    userId: source.id,
+                    approvedById: source.id,
+                    upvotes: 0,
+                    votes: {
+                        create: [
+                            { userId: target.id, vote: "up" },
+                            { userId: source.id, vote: "down" },
+                        ],
+                    },
+                },
+            });
+
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const completion = await finishProviderLink("google", target.token);
+                const completionBody = (await completion.json()) as {
+                    code: string;
+                    data: { kind: string; ticket: string };
+                };
+                expect(completionBody.code).toBe("oauth_merge_required");
+                expect(await database.user.findUnique({ where: { id: source.id } })).not.toBeNull();
+
+                const merge = await fetch(`${baseURL}/login/accounts/merge/complete`, {
+                    method: "POST",
+                    headers: { Authorization: target.token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ ticket: completionBody.data.ticket }),
+                });
+                expect(merge.status).toBe(200);
+                expect(((await merge.json()) as { code: string }).code).toBe("oauth_users_merged");
+                expect(await database.user.findUnique({ where: { id: source.id } })).toBeNull();
+
+                const merged = await database.user.findUniqueOrThrow({
+                    where: { id: target.id },
+                    include: {
+                        oauthAccounts: true,
+                        achievements: true,
+                        review: true,
+                        moderatedCommunities: true,
+                        memberCommunities: true,
+                    },
+                });
+                expect(merged).toMatchObject({
+                    name: "Current User",
+                    profileImage: "https://example.com/current.png",
+                    color: "#abcdef",
+                    role: "ADMIN",
+                    uploadCount: 10,
+                    createdAt: sourceCreatedAt,
+                });
+                expect(merged.oauthAccounts.map((account) => account.provider).sort()).toEqual(["GOOGLE", "TWITCH"]);
+                expect(merged.oauthAccounts.find((account) => account.provider === "GOOGLE")?.displayName)
+                    .toBe("google user");
+                expect(merged.oauthAccounts.find((account) => account.provider === "GOOGLE")?.profileImage)
+                    .toBe("https://example.com/oauth-avatar.png");
+                expect(merged.achievements.map((achievement) => achievement.id)).toContain("upload-1st");
+                expect(merged.review?.content).toBe("current review");
+                expect(merged.moderatedCommunities.map((community) => community.id)).toContain(communityId);
+                expect(merged.memberCommunities.map((community) => community.id)).toContain(communityId);
+                expect(await database.upload.findUniqueOrThrow({ where: { name: sourceUpload.name } })).toMatchObject({
+                    userId: target.id,
+                });
+                expect(await database.album.findUniqueOrThrow({ where: { id: albumId } })).toMatchObject({
+                    userId: target.id,
+                });
+                expect(await database.muralPost.findUniqueOrThrow({ where: { id: post.id } })).toMatchObject({
+                    userId: target.id,
+                    approvedById: target.id,
+                    upvotes: 1,
+                });
+                expect(await database.muralPostVote.findMany({ where: { postId: post.id } })).toEqual([
+                    expect.objectContaining({ userId: target.id, vote: "up" }),
+                ]);
+                expect((await session.verify(sourceSessionToken)).id).toBe(target.id);
+
+                const apiKeyLogin = await fetch(`${baseURL}/login/validate`, { headers: { token: sourceApiSecret } });
+                expect(apiKeyLogin.status).toBe(200);
+                expect(((await apiKeyLogin.json()) as { data: { id: string } }).data.id).toBe(target.id);
+
+                const replay = await fetch(`${baseURL}/login/accounts/merge/complete`, {
+                    method: "POST",
+                    headers: { Authorization: target.token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ ticket: completionBody.data.ticket }),
+                });
+                expect(replay.status).toBe(400);
+                expect(((await replay.json()) as { code: string }).code).toBe("oauth_merge_ticket_invalid");
+            } finally {
+                restore();
+                await deleteTestUser(target.id);
+                if (await database.user.findUnique({ where: { id: source.id } })) await deleteTestUser(source.id);
+            }
+        });
+
+        test("aborta o merge inteiro quando há conflito de provedor", async () => {
+            const target = await createTestUser("oauth-merge-conflict-target");
+            const providerAccountId = `google-conflict-${crypto.randomUUID()}`;
+            const source = await database.user.create({
+                data: {
+                    name: "Conflict source",
+                    profileImage: "https://example.com/source.png",
+                    oauthAccounts: {
+                        create: [
+                            { provider: "GOOGLE", providerAccountId },
+                            { provider: "DISCORD", providerAccountId: `source-discord-${crypto.randomUUID()}` },
+                        ],
+                    },
+                },
+            });
+            await database.oAuthAccount.create({
+                data: { provider: "DISCORD", providerAccountId: `target-discord-${crypto.randomUUID()}`, userId: target.id },
+            });
+            const restore = mockProvider("google", providerAccountId);
+            try {
+                const completion = await finishProviderLink("google", target.token);
+                const completionBody = (await completion.json()) as { data: { ticket: string } };
+                const merge = await fetch(`${baseURL}/login/accounts/merge/complete`, {
+                    method: "POST",
+                    headers: { Authorization: target.token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ ticket: completionBody.data.ticket }),
+                });
+                expect(merge.status).toBe(409);
+                expect(((await merge.json()) as { code: string }).code).toBe("oauth_merge_provider_conflict");
+                expect(await database.user.findUnique({ where: { id: source.id } })).not.toBeNull();
+                expect(
+                    await database.oAuthAccount.findUniqueOrThrow({
+                        where: { provider_providerAccountId: { provider: "GOOGLE", providerAccountId } },
+                    }),
+                ).toMatchObject({ userId: source.id });
+            } finally {
+                restore();
+                await deleteTestUser(target.id);
+                await deleteTestUser(source.id);
+            }
+        });
+
+        test("impede outro usuário de confirmar um ticket de merge", async () => {
+            const target = await createTestUser("oauth-merge-owner");
+            const wrongUser = await createTestUser("oauth-merge-wrong-user");
+            const providerAccountId = `google-owner-${crypto.randomUUID()}`;
+            const source = await database.user.create({
+                data: {
+                    name: "Merge owner source",
+                    profileImage: "https://example.com/source.png",
+                    oauthAccounts: { create: { provider: "GOOGLE", providerAccountId } },
+                },
+            });
+            const ticket = await mergeConfirmationStore.create({
+                expectedUserId: target.id,
+                sourceUserId: source.id,
+                provider: "GOOGLE",
+                providerAccountId,
+                providerDisplayName: "Merge owner Google",
+                providerProfileImage: "https://example.com/merge-owner.png",
+            });
+
+            try {
+                const response = await fetch(`${baseURL}/login/accounts/merge/complete`, {
+                    method: "POST",
+                    headers: { Authorization: wrongUser.token, "Content-Type": "application/json" },
+                    body: JSON.stringify({ ticket }),
+                });
+                expect(response.status).toBe(403);
+                expect(((await response.json()) as { code: string }).code).toBe("oauth_merge_user_mismatch");
+                expect(await database.user.findUnique({ where: { id: source.id } })).not.toBeNull();
+            } finally {
+                await deleteTestUser(target.id);
+                await deleteTestUser(wrongUser.id);
+                await deleteTestUser(source.id);
+            }
+        });
+
+        test("serializa duas confirmações concorrentes e devolve sucesso idempotente", async () => {
+            const target = await createTestUser("oauth-merge-concurrent-target");
+            const providerAccountId = `google-concurrent-merge-${crypto.randomUUID()}`;
+            const source = await database.user.create({
+                data: {
+                    name: "Concurrent merge source",
+                    profileImage: "https://example.com/source.png",
+                    oauthAccounts: { create: { provider: "GOOGLE", providerAccountId } },
+                },
+            });
+            const ticketData = {
+                expectedUserId: target.id,
+                sourceUserId: source.id,
+                provider: "GOOGLE" as const,
+                providerAccountId,
+                providerDisplayName: "Concurrent Google",
+                providerProfileImage: "https://example.com/concurrent.png",
+            };
+            const tickets = await Promise.all([
+                mergeConfirmationStore.create(ticketData),
+                mergeConfirmationStore.create(ticketData),
+            ]);
+
+            try {
+                const responses = await Promise.all(
+                    tickets.map((ticket) =>
+                        fetch(`${baseURL}/login/accounts/merge/complete`, {
+                            method: "POST",
+                            headers: { Authorization: target.token, "Content-Type": "application/json" },
+                            body: JSON.stringify({ ticket }),
+                        }),
+                    ),
+                );
+                expect(responses.map((response) => response.status)).toEqual([200, 200]);
+                expect(
+                    await Promise.all(responses.map(async (response) => ((await response.json()) as { code: string }).code)),
+                ).toEqual(["oauth_users_merged", "oauth_users_merged"]);
+                expect(await database.user.findUnique({ where: { id: source.id } })).toBeNull();
+                expect(
+                    await database.oAuthAccount.findUniqueOrThrow({
+                        where: { provider_providerAccountId: { provider: "GOOGLE", providerAccountId } },
+                    }),
+                ).toMatchObject({ userId: target.id });
+            } finally {
+                await deleteTestUser(target.id);
+                if (await database.user.findUnique({ where: { id: source.id } })) await deleteTestUser(source.id);
             }
         });
     });

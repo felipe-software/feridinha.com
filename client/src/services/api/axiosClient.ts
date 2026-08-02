@@ -23,6 +23,7 @@ export type ApiResponse<T = undefined> =
           success: true
           data?: T
           message?: string
+          code?: string
       }
 
 axiosClient.interceptors.request.use((request) => {
