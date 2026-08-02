@@ -99,11 +99,31 @@ describe("automatic locale detection", () => {
             { name: "French", value: "fr-FR,fr;q=0.9", expected: "en" },
             { name: "Spanish", value: "es-ES,es;q=0.9", expected: "es" },
             { name: "Mexican Spanish", value: "es-MX,es;q=0.9", expected: "es" },
+            {
+                name: "quality values override header order",
+                value: "es;q=0,en;q=1",
+                expected: "en",
+            },
+            {
+                name: "highest-quality supported locale wins",
+                value: "en;q=0.5,es-MX;q=0.9,pt-BR;q=0.8",
+                expected: "es",
+            },
+            {
+                name: "equal quality preserves header order",
+                value: "es;q=0.8,en;q=0.8",
+                expected: "es",
+            },
             { name: "German", value: "de-DE,de;q=0.9", expected: "en" },
             { name: "Japanese", value: "ja-JP,ja;q=0.9", expected: "en" },
             {
-                name: "Portuguese is present but is not the primary language",
+                name: "unsupported languages do not hide a supported preference",
                 value: "fr-FR,pt-BR;q=0.9",
+                expected: "pt-BR",
+            },
+            {
+                name: "zero-quality supported languages are excluded",
+                value: "es;q=0,pt-BR;q=0,en;q=0.5",
                 expected: "en",
             },
             { name: "wildcard language", value: "*", expected: "en" },
