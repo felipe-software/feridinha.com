@@ -14,7 +14,7 @@ const forcedRateLimit = env.NODE_ENV === "test" ? 99999999 : null
 const rateLimit = {
     login: expressRateLimit({
         windowMs: 1 * 60 * 1000,
-        max: forcedRateLimit ?? 20,
+        max: forcedRateLimit ?? 40,
         ...headers,
         message: rateLimitMessage,
     }),
