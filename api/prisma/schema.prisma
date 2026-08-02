@@ -17,6 +17,7 @@ model Upload {
     name      String  @id @unique
     size      Int
     mimeType  String
+    description String?
     userAgent String?
     user      User?   @relation(fields: [userId], references: [id])
     userId    String?

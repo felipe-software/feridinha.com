@@ -284,6 +284,16 @@
     "previewUnavailableInline": "Preview não disponível.",
     "openLink": "Acesse o link.",
     "openLinkAbove": "Acesse o link acima.",
+    "albumTitle": "Título do álbum",
+    "titlePlaceholder": "Dê um título ao álbum",
+    "untitled": "Álbum sem título",
+    "edit": "Editar álbum",
+    "save": "Salvar alterações",
+    "cancel": "Cancelar",
+    "imageDescription": "Descrição da imagem",
+    "descriptionPlaceholder": "Adicione uma descrição para esta imagem...",
+    "saved": "Álbum atualizado com sucesso",
+    "saveError": "Não foi possível salvar as alterações",
     "createdBy": "Criado por <author>@{name}</author> {time}. {count, plural, one {# arquivo no total.} other {# arquivos no total.}} {views, plural, one {# visualização.} other {# visualizações.}}"
   },
   "Faq": {
