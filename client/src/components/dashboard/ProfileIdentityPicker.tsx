@@ -1,15 +1,16 @@
 "use client"
 
-import queryClient from "@/config/queryClient"
 import Tooltip from "@/components/Tooltip"
 import type { LinkedAuthProvider, OAuthProviderName } from "@/hooks/useUserDataStore"
-import apiService from "@/services/api"
+import { useSetPrimaryOAuthAccountMutation } from "@/hooks/mutations/useOAuthMutations"
+import { USER_DATA_QUERY_KEY } from "@/hooks/queries/useUserDataQuery"
 import { useTranslations } from "next-intl"
-import { useRef, useState } from "react"
+import { useRef } from "react"
 import { FaDiscord, FaGoogle, FaTwitch } from "react-icons/fa6"
 import { LuCheck, LuPencil } from "react-icons/lu"
 import { toast } from "react-toastify"
 import { ProfileMenu, ProfilePicker } from "./styles"
+import { useQueryClient } from "@tanstack/react-query"
 
 const providerVisuals = {
     twitch: { Icon: FaTwitch, color: "#9146ff" },
@@ -24,25 +25,26 @@ interface ProfileIdentityPickerProps {
 const ProfileIdentityPicker = ({ accounts }: ProfileIdentityPickerProps) => {
     const t = useTranslations("Dashboard")
     const tooltipRef = useRef<{ hide: () => void } | null>(null)
-    const [pendingProvider, setPendingProvider] = useState<OAuthProviderName | null>(null)
+    const queryClient = useQueryClient()
 
-    const selectProfile = async (account: LinkedAuthProvider) => {
-        if (account.isPrimary || pendingProvider) return
-        setPendingProvider(account.provider)
-        try {
-            const response = await apiService.setPrimaryOAuthAccount(account.provider)
+    const setPrimaryMutation = useSetPrimaryOAuthAccountMutation({
+        onSuccess: async (response) => {
             if (!response.success) {
                 toast.error(response.error || t("oauthPrimaryProfileError"))
                 return
             }
             tooltipRef.current?.hide()
             toast.success(t("oauthPrimaryProfileSuccess"))
-            await queryClient.invalidateQueries({ queryKey: ["userData"] })
-        } catch {
+            await queryClient.invalidateQueries({ queryKey: USER_DATA_QUERY_KEY })
+        },
+        onError: () => {
             toast.error(t("oauthPrimaryProfileError"))
-        } finally {
-            setPendingProvider(null)
-        }
+        },
+    })
+
+    const selectProfile = (account: LinkedAuthProvider) => {
+        if (account.isPrimary || setPrimaryMutation.isPending) return
+        setPrimaryMutation.mutate(account.provider)
     }
 
     const menu = (
@@ -56,8 +58,8 @@ const ProfileIdentityPicker = ({ accounts }: ProfileIdentityPickerProps) => {
                         <button
                             type="button"
                             key={account.provider}
-                            disabled={account.isPrimary || pendingProvider !== null}
-                            onClick={() => void selectProfile(account)}
+                            disabled={account.isPrimary || setPrimaryMutation.isPending}
+                            onClick={() => selectProfile(account)}
                         >
                             <span className="option-avatar">
                                 {/* Provider avatar hosts are dynamic and cannot use a fixed Next Image allowlist. */}

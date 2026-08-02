@@ -3,13 +3,18 @@
 import { Button } from "@/components/Button"
 import AccountMergeDialog from "@/components/dashboard/AccountMergeDialog"
 import { BaseBox } from "@/components/dashboard/styles"
-import queryClient from "@/config/queryClient"
 import type {
     LinkedAuthProvider,
     OAuthProviderName,
 } from "@/hooks/useUserDataStore"
-import apiService from "@/services/api"
 import type { OAuthLinkCompletion } from "@/services/api"
+import {
+    useCompleteOAuthLinkMutation,
+    useCompleteOAuthMergeMutation,
+    useStartOAuthLinkMutation,
+    useUnlinkOAuthAccountMutation,
+} from "@/hooks/mutations/useOAuthMutations"
+import { USER_DATA_QUERY_KEY } from "@/hooks/queries/useUserDataQuery"
 import {
     getOAuthFragmentValue,
     OAUTH_PROVIDERS,
@@ -19,6 +24,7 @@ import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "react-toastify"
 import styled from "styled-components"
+import { useQueryClient } from "@tanstack/react-query"
 
 const Container = styled(BaseBox)`
     width: 100%;
@@ -71,24 +77,87 @@ type MergeRequest = Extract<OAuthLinkCompletion, { kind: "merge_required" }>
 
 const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
     const t = useTranslations("Dashboard")
-    const [pendingProvider, setPendingProvider] =
-        useState<OAuthProviderName | null>(null)
     const [mergeRequest, setMergeRequest] = useState<MergeRequest | null>(null)
-    const [isMerging, setIsMerging] = useState(false)
     const completionStarted = useRef(false)
+    const queryClient = useQueryClient()
     const linked = new Set(linkedAccounts.map((account) => account.provider))
 
-    const refreshUser = async () => {
-        await queryClient.invalidateQueries({ queryKey: ["userData"] })
-    }
+    const completeLinkMutation = useCompleteOAuthLinkMutation({
+        onSuccess: async (response) => {
+            if (!response.success || !response.data) {
+                toast.error(response.success ? t("oauthLinkError") : response.error)
+                return
+            }
 
-    const refreshMergedAccount = async () => {
-        await Promise.all([
-            queryClient.invalidateQueries({ queryKey: ["userData"] }),
-            queryClient.invalidateQueries({ queryKey: ["my-albums"] }),
-            queryClient.invalidateQueries({ queryKey: ["api-keys"] }),
-        ])
-    }
+            if (response.data.kind === "linked") {
+                toast.success(t("oauthLinkSuccess"))
+                await queryClient.invalidateQueries({ queryKey: USER_DATA_QUERY_KEY })
+                return
+            }
+            setMergeRequest(response.data)
+        },
+        onError: () => {
+            toast.error(t("oauthLinkError"))
+        },
+    })
+
+    const completeMergeMutation = useCompleteOAuthMergeMutation({
+        onSuccess: async (response) => {
+            if (!response.success) {
+                toast.error(response.error || t("oauthLinkError"))
+                setMergeRequest(null)
+                return
+            }
+            setMergeRequest(null)
+            toast.success(t("oauthMergeSuccess"))
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: USER_DATA_QUERY_KEY }),
+                queryClient.invalidateQueries({ queryKey: ["my-albums"] }),
+                queryClient.invalidateQueries({ queryKey: ["api-keys"] }),
+            ])
+        },
+        onError: async () => {
+            setMergeRequest(null)
+            toast.error(t("oauthLinkError"))
+            await queryClient.invalidateQueries({ queryKey: USER_DATA_QUERY_KEY })
+        },
+    })
+
+    const startLinkMutation = useStartOAuthLinkMutation({
+        onSuccess: (response) => {
+            if (response.success && response.data) {
+                window.location.assign(response.data.redirectUrl)
+                return
+            }
+            toast.error(response.success ? t("oauthLinkError") : response.error)
+        },
+        onError: () => {
+            toast.error(t("oauthLinkError"))
+        },
+    })
+
+    const unlinkMutation = useUnlinkOAuthAccountMutation({
+        onSuccess: async (response) => {
+            if (!response.success) {
+                toast.error(response.error)
+                return
+            }
+            toast.success(t("oauthUnlinkSuccess"))
+            await queryClient.invalidateQueries({ queryKey: USER_DATA_QUERY_KEY })
+        },
+        onError: () => {
+            toast.error(t("oauthLinkError"))
+        },
+    })
+
+    const completeLink = completeLinkMutation.mutate
+    const pendingProvider = startLinkMutation.isPending
+        ? startLinkMutation.variables
+        : unlinkMutation.isPending
+          ? unlinkMutation.variables
+          : null
+    const isProviderMutationPending =
+        startLinkMutation.isPending || unlinkMutation.isPending
 
     useEffect(() => {
         if (completionStarted.current) return
@@ -105,87 +174,31 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
             `${window.location.pathname}${window.location.search}`,
         )
 
-        void (async () => {
-            try {
-                const response = await apiService.completeOAuthLink(ticket)
-                if (!response.success || !response.data) {
-                    toast.error(response.success ? t("oauthLinkError") : response.error)
-                    return
-                }
-
-                if (response.data.kind === "linked") {
-                    toast.success(t("oauthLinkSuccess"))
-                    await refreshUser()
-                    return
-                }
-                setMergeRequest(response.data)
-            } catch {
-                toast.error(t("oauthLinkError"))
-            }
-        })()
-    }, [t])
+        completeLink(ticket)
+    }, [completeLink])
 
     const cancelMerge = () => {
-        if (isMerging) return
+        if (completeMergeMutation.isPending) return
         setMergeRequest(null)
         toast.info(t("oauthMergeCancelled"))
     }
 
-    const confirmMerge = async () => {
-        if (!mergeRequest || isMerging) return
-        setIsMerging(true)
-        try {
-            const response = await apiService.completeOAuthMerge(mergeRequest.ticket)
-            if (!response.success) {
-                toast.error(response.error || t("oauthLinkError"))
-                setMergeRequest(null)
-                return
-            }
-            setMergeRequest(null)
-            toast.success(t("oauthMergeSuccess"))
-            await refreshMergedAccount()
-        } catch {
-            setMergeRequest(null)
-            toast.error(t("oauthLinkError"))
-            await refreshUser()
-        } finally {
-            setIsMerging(false)
-        }
+    const confirmMerge = () => {
+        if (!mergeRequest || completeMergeMutation.isPending) return
+        completeMergeMutation.mutate(mergeRequest.ticket)
     }
 
-    const connect = async (provider: OAuthProviderName) => {
-        setPendingProvider(provider)
-        try {
-            const response = await apiService.startOAuthLink(provider)
-            if (response.success && response.data) {
-                window.location.assign(response.data.redirectUrl)
-                return
-            }
-            toast.error(response.success ? t("oauthLinkError") : response.error)
-        } catch {
-            toast.error(t("oauthLinkError"))
-        }
-        setPendingProvider(null)
+    const connect = (provider: OAuthProviderName) => {
+        if (isProviderMutationPending) return
+        startLinkMutation.mutate(provider)
     }
 
-    const disconnect = async (provider: OAuthProviderName) => {
+    const disconnect = (provider: OAuthProviderName) => {
         if (!window.confirm(t("oauthUnlinkConfirm", { provider: t(`oauthProviders.${provider}`) }))) {
             return
         }
-        setPendingProvider(provider)
-        try {
-            const response = await apiService.unlinkOAuthAccount(provider)
-            if (response.success) {
-                toast.success(t("oauthUnlinkSuccess"))
-                await refreshUser()
-                return
-            }
-            toast.error(response.error)
-        } catch {
-            toast.error(t("oauthLinkError"))
-        } finally {
-            setPendingProvider(null)
-        }
+        if (isProviderMutationPending) return
+        unlinkMutation.mutate(provider)
     }
 
     return (
@@ -210,12 +223,12 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
                                 variant={isLinked ? "deselect" : "purple"}
                                 size="slim"
                                 isLoading={pendingProvider === provider}
-                                disabled={isLastProvider || pendingProvider !== null}
+                                disabled={isLastProvider || isProviderMutationPending}
                                 title={isLastProvider ? t("oauthLastProviderHint") : undefined}
                                 onClick={() =>
                                     isLinked
-                                        ? void disconnect(provider)
-                                        : void connect(provider)
+                                        ? disconnect(provider)
+                                        : connect(provider)
                                 }
                             >
                                 {t(isLinked ? "oauthDisconnect" : "oauthConnect")}
@@ -226,9 +239,9 @@ const LinkedAccountsBox = ({ linkedAccounts }: LinkedAccountsBoxProps) => {
             </Container>
             <AccountMergeDialog
                 request={mergeRequest}
-                isLoading={isMerging}
+                isLoading={completeMergeMutation.isPending}
                 onCancel={cancelMerge}
-                onConfirm={() => void confirmMerge()}
+                onConfirm={confirmMerge}
             />
         </>
     )
