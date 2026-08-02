@@ -1,5 +1,6 @@
 import logger from "@/config/logger";
 import constants from "@/constants";
+import database from "@/services/database";
 import fileUtils from "@/utils/file";
 import { tryP } from "@/utils/promises";
 import { DefaultExiftoolArgs, DefaultExifToolOptions, ExifTool } from "exiftool-vendored";
@@ -57,13 +58,17 @@ const generateUploadName = async (originalName: string): Promise<UploadNameResul
     }
     result += extension;
 
-    const fileWithPath = fileUtils.getUploadFilePath(result);
-    const doesFileAlreadyExists = await fileUtils.checkIfFileExists(fileWithPath);
-    if (doesFileAlreadyExists) {
+    const existingUpload = await database.upload.findUnique({
+        where: { name: result },
+        select: { name: true },
+    });
+    if (existingUpload) {
         logger.warn({ filename: result, iteration }, "Arquivo já existe");
         iteration += 1;
         return generateUploadName(originalName);
     }
+
+    const fileWithPath = fileUtils.getUploadFilePath(result);
     return { filename: result, filenameWithPath: fileWithPath };
 };
 
