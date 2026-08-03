@@ -46,10 +46,15 @@ const recoverConcurrentAccount = async (provider: OAuthProvider, profile: OAuthP
 
 export const findOrCreateOAuthUser = async (provider: OAuthProvider, profile: OAuthProfile) => {
     const existing = await findAccountUser(provider, profile.providerAccountId);
-    if (existing) return touchAccount(provider, profile);
+    if (existing) {
+        return {
+            user: await touchAccount(provider, profile),
+            isNewUser: false,
+        };
+    }
 
     try {
-        return await database.user.create({
+        const user = await database.user.create({
             data: {
                 name: profile.displayName,
                 profileImage: profile.profileImage,
@@ -66,7 +71,11 @@ export const findOrCreateOAuthUser = async (provider: OAuthProvider, profile: OA
                 },
             },
         });
+        return { user, isNewUser: true };
     } catch (error) {
-        return recoverConcurrentAccount(provider, profile, error);
+        return {
+            user: await recoverConcurrentAccount(provider, profile, error),
+            isNewUser: false,
+        };
     }
 };
