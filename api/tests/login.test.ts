@@ -12,6 +12,7 @@ import { ExternalServiceError } from "@/utils/httpErrors";
 import achievements from "@/handlers/achievements";
 import { getOAuthProvider, type OAuthProviderSlug } from "@/services/oauth";
 import { mergeConfirmationStore } from "@/services/oauth/state";
+import posthog from "@/services/posthog";
 
 let testUser: TestUser;
 const oauthUserIds: string[] = [];
@@ -385,6 +386,15 @@ describe("Login Routes", () => {
         test.each(["google", "discord"] as const)("cria e reutiliza usuário com %s", async (provider) => {
             const providerAccountId = `${provider}-${crypto.randomUUID()}`;
             const restore = mockProvider(provider, providerAccountId);
+            const originalCapture = posthog.capture;
+            const capturedEvents: Array<{
+                distinctId: string;
+                event: string;
+                properties?: Record<string, unknown>;
+            }> = [];
+            posthog.capture = (distinctId, event, properties) => {
+                capturedEvents.push({ distinctId, event, properties });
+            };
             try {
                 const first = await finishProviderCallback(provider);
                 expect(first.status).toBe(302);
@@ -401,6 +411,11 @@ describe("Login Routes", () => {
                 });
                 oauthUserIds.push(account.userId);
                 expect(account.user.name).toBe(`${provider} user`);
+                expect(capturedEvents).toEqual([{
+                    distinctId: account.userId,
+                    event: "user_signed_up",
+                    properties: { oauth_provider: provider },
+                }]);
 
                 const second = await finishProviderCallback(provider);
                 expect(second.status).toBe(302);
@@ -415,7 +430,20 @@ describe("Login Routes", () => {
                     },
                 });
                 expect(users).toBe(1);
+                expect(capturedEvents).toEqual([
+                    {
+                        distinctId: account.userId,
+                        event: "user_signed_up",
+                        properties: { oauth_provider: provider },
+                    },
+                    {
+                        distinctId: account.userId,
+                        event: "user_logged_in",
+                        properties: { oauth_provider: provider },
+                    },
+                ]);
             } finally {
+                posthog.capture = originalCapture;
                 restore();
             }
         });
