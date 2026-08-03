@@ -3,6 +3,7 @@ import achievements, { achievementsOrder } from "@/handlers/achievements";
 import session from "@/handlers/session";
 import { AUTHENTICATED_USER_INCLUDE } from "@/models/userModel";
 import database from "@/services/database";
+import posthog from "@/services/posthog";
 import { findOrCreateOAuthUser } from "@/services/oauth/accounts";
 import { mergeOAuthUsers, OAuthMergeError } from "@/services/oauth/merge";
 import {
@@ -194,9 +195,12 @@ const oauthCallback: RequestHandler = async (req, res) => {
             return res.redirect(clientRedirect("/dashboard", "oauth-link", completionTicket));
         }
 
-        const oauthUser = await findOrCreateOAuthUser(provider.adapter.provider, profile);
+        const { user: oauthUser, created } = await findOrCreateOAuthUser(provider.adapter.provider, profile);
         const appSession = await createApplicationSession(oauthUser.id);
         req.session = { user: appSession.user };
+        posthog.capture(appSession.user.id, created ? "account_created" : "login", {
+            auth_provider: provider.slug,
+        });
         res.cookie("Token", appSession.token, {
             httpOnly: false,
             sameSite: "lax",

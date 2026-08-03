@@ -10,8 +10,9 @@ import twitch from "@/services/twitch";
 import { createOAuthState, oauthStatesMatch } from "@/controllers/login";
 import { ExternalServiceError } from "@/utils/httpErrors";
 import achievements from "@/handlers/achievements";
-import { getOAuthProvider, type OAuthProviderSlug } from "@/services/oauth";
+import { getOAuthProvider, providerFromSlug, type OAuthProviderSlug } from "@/services/oauth";
 import { mergeConfirmationStore } from "@/services/oauth/state";
+import posthog from "@/services/posthog";
 
 let testUser: TestUser;
 const oauthUserIds: string[] = [];
@@ -382,43 +383,54 @@ describe("Login Routes", () => {
             });
         };
 
-        test.each(["google", "discord"] as const)("cria e reutiliza usuário com %s", async (provider) => {
-            const providerAccountId = `${provider}-${crypto.randomUUID()}`;
-            const restore = mockProvider(provider, providerAccountId);
-            try {
-                const first = await finishProviderCallback(provider);
-                expect(first.status).toBe(302);
-                expect(first.headers.get("set-cookie")).toContain("Token=");
+        test.each(["twitch", "google", "discord"] as const)(
+            "cria e reutiliza usuário com %s e registra os eventos de autenticação",
+            async (provider) => {
+                const providerAccountId = `${provider}-${crypto.randomUUID()}`;
+                const restore = mockProvider(provider, providerAccountId);
+                const capturedEvents: Parameters<typeof posthog.capture>[] = [];
+                const originalCapture = posthog.capture;
+                posthog.capture = (...args) => capturedEvents.push(args);
+                try {
+                    const first = await finishProviderCallback(provider);
+                    expect(first.status).toBe(302);
+                    expect(first.headers.get("set-cookie")).toContain("Token=");
 
-                const account = await database.oAuthAccount.findUniqueOrThrow({
-                    where: {
-                        provider_providerAccountId: {
-                            provider: provider.toUpperCase() as "GOOGLE" | "DISCORD",
-                            providerAccountId,
-                        },
-                    },
-                    include: { user: true },
-                });
-                oauthUserIds.push(account.userId);
-                expect(account.user.name).toBe(`${provider} user`);
-
-                const second = await finishProviderCallback(provider);
-                expect(second.status).toBe(302);
-                const users = await database.user.count({
-                    where: {
-                        oauthAccounts: {
-                            some: {
-                                provider: provider.toUpperCase() as "GOOGLE" | "DISCORD",
+                    const account = await database.oAuthAccount.findUniqueOrThrow({
+                        where: {
+                            provider_providerAccountId: {
+                                provider: providerFromSlug(provider),
                                 providerAccountId,
                             },
                         },
-                    },
-                });
-                expect(users).toBe(1);
-            } finally {
-                restore();
-            }
-        });
+                        include: { user: true },
+                    });
+                    oauthUserIds.push(account.userId);
+                    expect(account.user.name).toBe(`${provider} user`);
+
+                    const second = await finishProviderCallback(provider);
+                    expect(second.status).toBe(302);
+                    const users = await database.user.count({
+                        where: {
+                            oauthAccounts: {
+                                some: {
+                                    provider: providerFromSlug(provider),
+                                    providerAccountId,
+                                },
+                            },
+                        },
+                    });
+                    expect(users).toBe(1);
+                    expect(capturedEvents).toEqual([
+                        [account.userId, "account_created", { auth_provider: provider }],
+                        [account.userId, "login", { auth_provider: provider }],
+                    ]);
+                } finally {
+                    restore();
+                    posthog.capture = originalCapture;
+                }
+            },
+        );
 
         test("callback concorrente reutiliza a identidade sem criar usuário órfão", async () => {
             const providerAccountId = `google-concurrent-${crypto.randomUUID()}`;
