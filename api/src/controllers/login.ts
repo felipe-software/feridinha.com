@@ -29,6 +29,7 @@ import { Prisma } from "@prisma/client";
 import crypto from "crypto";
 import type { Request, RequestHandler, Response } from "express";
 import constants from "@/constants";
+import posthog from "@/services/posthog";
 
 export { createOAuthState, oauthStatesMatch };
 
@@ -194,9 +195,17 @@ const oauthCallback: RequestHandler = async (req, res) => {
             return res.redirect(clientRedirect("/dashboard", "oauth-link", completionTicket));
         }
 
-        const oauthUser = await findOrCreateOAuthUser(provider.adapter.provider, profile);
+        const { user: oauthUser, isNewUser } = await findOrCreateOAuthUser(
+            provider.adapter.provider,
+            profile,
+        );
         const appSession = await createApplicationSession(oauthUser.id);
         req.session = { user: appSession.user };
+        posthog.capture(
+            oauthUser.id,
+            isNewUser ? "user_signed_up" : "user_logged_in",
+            { oauth_provider: provider.slug },
+        );
         res.cookie("Token", appSession.token, {
             httpOnly: false,
             sameSite: "lax",
