@@ -7,6 +7,7 @@ const icons = new Set([
     "auto_awesome",
     "check_circle",
     "close",
+    "code",
     "contacts",
     "content_paste",
     "create_new_folder",

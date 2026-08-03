@@ -1,0 +1,114 @@
+{
+  "page": {
+    "pt-BR": {
+      "titlePrefix": "Devlogs:",
+      "title": "Novidades do feridinha.com"
+    },
+    "en": {
+      "titlePrefix": "Devlogs:",
+      "title": "Development notes for feridinha.com"
+    }
+  },
+  "entries": [
+    {
+      "date": "2026-07-31",
+      "items": {
+        "pt-BR": [
+          "Adicionada uma página de devlogs para reunir as novidades do site.",
+          "Adicionado um aviso na navbar quando existe uma atualização ainda não lida."
+        ],
+        "en": [
+          "Added a devlogs page to keep the site's updates in one place.",
+          "Added a navbar indicator for unread updates."
+        ]
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-24",
+      "items": {
+        "pt-BR": [
+          "Adicionadas URLs específicas por idioma, com o prefixo /en nas páginas em inglês.",
+          "Melhorados o carregamento de álbuns e a compatibilidade com links do Instagram."
+        ],
+        "en": [
+          "Added language-specific URLs, with the /en prefix on English pages.",
+          "Improved album loading and Instagram link compatibility."
+        ]
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-23",
+      "items": {
+        "pt-BR": [
+          "Corrigidos problemas na colagem e no processamento de links em celulares."
+        ],
+        "en": [
+          "Fixed link pasting and processing on mobile devices."
+        ]
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-20",
+      "items": {
+        "pt-BR": [
+          "Adicionada a importação direta de mídia por links do TikTok, Instagram, Reddit e X/Twitter.",
+          "Melhorada a responsividade da página inicial em celulares."
+        ],
+        "en": [
+          "Added direct media imports from TikTok, Instagram, Reddit and X/Twitter links.",
+          "Improved the home page layout on mobile devices."
+        ]
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
+    },
+    {
+      "date": "2026-07-18",
+      "items": {
+        "pt-BR": [
+          "Corrigidas as permissões de acesso aos álbuns.",
+          "Melhorada a confiabilidade das métricas de uso com bloqueadores de conteúdo.",
+          "Publicados os termos de uso em português e inglês."
+        ],
+        "en": [
+          "Fixed album access permissions.",
+          "Improved usage metrics reliability with content blockers enabled.",
+          "Published the terms of service in Portuguese and English."
+        ]
+      },
+      "authors": [
+        {
+          "name": "felipe-software",
+          "avatarUrl": "https://github.com/felipe-software.png?size=48",
+          "profileUrl": "https://github.com/felipe-software"
+        }
+      ]
+    }
+  ]
+}

@@ -52,6 +52,20 @@ const expectedPages: Array<{
         canonical: "https://feridinha.com/en/faq",
     },
     {
+        page: "devlogs",
+        locale: "pt-BR",
+        title: "Devlogs | Feridinha",
+        description: "Acompanhe as novidades e notas de desenvolvimento do Feridinha.",
+        canonical: "https://feridinha.com/devlogs",
+    },
+    {
+        page: "devlogs",
+        locale: "en",
+        title: "Devlogs | Feridinha",
+        description: "Follow Feridinha updates and development notes.",
+        canonical: "https://feridinha.com/en/devlogs",
+    },
+    {
         page: "tutorial",
         locale: "pt-BR",
         title: "Upload com Chatterino e ShareX | Feridinha",
@@ -121,10 +135,12 @@ describe("crawler policy and public URL inventory", () => {
         expect(muralMetadata.robots).toEqual(NO_INDEX_ROBOTS)
     })
 
-    test("sitemap contains only the eight intended public URLs", () => {
+    test("sitemap contains only the ten intended public URLs", () => {
         expect(sitemap().map(({ url }) => url)).toEqual([
             "https://feridinha.com/",
             "https://feridinha.com/en",
+            "https://feridinha.com/devlogs",
+            "https://feridinha.com/en/devlogs",
             "https://feridinha.com/faq",
             "https://feridinha.com/en/faq",
             "https://feridinha.com/tutorial",

@@ -16,15 +16,22 @@ import { AnimatePresence, motion } from "motion/react"
 import { useLocale, useTranslations } from "next-intl"
 import { memo, useEffect, useState } from "react"
 import styled from "styled-components"
+import {
+    DEVLOG_LAST_SEEN_STORAGE_KEY,
+    LATEST_DEVLOG_DATE,
+    hasUnreadDevlogs,
+} from "@/content/devlogs"
 
 const LinkBase = ({
     path,
     children,
     aProps,
+    indicator,
 }: {
     path: string
     children: string
     aProps?: React.AnchorHTMLAttributes<HTMLAnchorElement>
+    indicator?: React.ReactNode
 }) => {
     const router = useRouter()
     const pathname = usePathname()
@@ -41,6 +48,7 @@ const LinkBase = ({
             {...aProps}
         >
             {children}
+            {indicator}
             {isActive && (
                 <motion.span className={"underline_active"} layoutId="underline_active" transition={{}}></motion.span>
             )}
@@ -48,20 +56,73 @@ const LinkBase = ({
     )
 }
 
+const useHasUnreadDevlogs = () => {
+    const pathname = usePathname()
+    const [hasUnread, setHasUnread] = useState(false)
+
+    useEffect(() => {
+        const syncUnreadState = () => {
+            try {
+                const lastSeenDate = localStorage.getItem(
+                    DEVLOG_LAST_SEEN_STORAGE_KEY,
+                )
+                const isDevlogsPage =
+                    pathname === "/devlogs" || pathname.startsWith("/devlogs/")
+
+                if (lastSeenDate === null || isDevlogsPage) {
+                    localStorage.setItem(
+                        DEVLOG_LAST_SEEN_STORAGE_KEY,
+                        LATEST_DEVLOG_DATE,
+                    )
+                    setHasUnread(false)
+                    return
+                }
+
+                setHasUnread(hasUnreadDevlogs(lastSeenDate))
+            } catch {
+                setHasUnread(false)
+            }
+        }
+
+        syncUnreadState()
+        window.addEventListener("storage", syncUnreadState)
+        return () => window.removeEventListener("storage", syncUnreadState)
+    }, [pathname])
+
+    return hasUnread
+}
+
 function NavLinks({
     userData,
     isLoading,
     isMuralAvailable,
+    hasUnreadDevlogs,
 }: {
     userData?: UserData
     isLoading?: boolean
     isMuralAvailable?: boolean
+    hasUnreadDevlogs: boolean
 }) {
     const t = useTranslations("Nav")
 
     return (
         <>
             {isMuralAvailable && <LinkBase path="/mural">{t("mural")}</LinkBase>}
+            <LinkBase
+                path="/devlogs"
+                aProps={{
+                    "aria-label": hasUnreadDevlogs
+                        ? t("devlogsUnread")
+                        : t("devlogs"),
+                }}
+                indicator={
+                    hasUnreadDevlogs ? (
+                        <span className="devlog-unread" aria-hidden="true" />
+                    ) : undefined
+                }
+            >
+                {t("devlogs")}
+            </LinkBase>
             <LinkBase path="/">{t("upload")}</LinkBase>
             <LinkBase path="/tutorial">{t("tutorial")}</LinkBase>
             <LinkBase path="/faq">{t("faq")}</LinkBase>
@@ -113,6 +174,7 @@ function NavBar_({
     const t = useTranslations("Nav")
 
     const user = useUserData()
+    const hasUnreadDevlogs = useHasUnreadDevlogs()
 
     const handleMenu = () => {
         setMenuActive(!isMenuActive)
@@ -188,7 +250,12 @@ function NavBar_({
             )}
             {!isMobile && (
                 <div className={"links"}>
-                    <NavLinks userData={user.data} isLoading={user.isLoading} isMuralAvailable={isMuralAvailable} />
+                    <NavLinks
+                        userData={user.data}
+                        isLoading={user.isLoading}
+                        isMuralAvailable={isMuralAvailable}
+                        hasUnreadDevlogs={hasUnreadDevlogs}
+                    />
                 </div>
             )}
             <AnimatePresence initial={false} mode="wait" onExitComplete={() => null}>
@@ -203,7 +270,11 @@ function NavBar_({
                 {isMobile && isMenuActive && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} key={2}>
                         <div className={"menu"} id="mobile-navigation">
-                            <NavLinks userData={user.data} isMuralAvailable={isMuralAvailable} />
+                            <NavLinks
+                                userData={user.data}
+                                isMuralAvailable={isMuralAvailable}
+                                hasUnreadDevlogs={hasUnreadDevlogs}
+                            />
                         </div>
                     </motion.div>
                 )}

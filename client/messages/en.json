@@ -23,6 +23,8 @@
   },
   "Nav": {
     "mural": "Wall",
+    "devlogs": "Devlogs",
+    "devlogsUnread": "Devlogs, unread updates available",
     "upload": "Upload",
     "tutorial": "Integrations",
     "faq": "FAQ",

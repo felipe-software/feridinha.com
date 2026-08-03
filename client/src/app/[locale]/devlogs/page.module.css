@@ -1,0 +1,145 @@
+.page {
+    width: 100%;
+    min-height: calc(100dvh - var(--navbar-height));
+    padding: 1rem;
+    padding-top: 5rem;
+    color: var(--foreground);
+    background: var(--base);
+}
+
+.content {
+    width: 100%;
+    max-width: 50rem;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 2rem;
+    text-align: center;
+}
+
+.header h1 {
+    color: var(--foreground);
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.header h1 span {
+    color: var(--dracula-red);
+    text-shadow:
+        #ff55555b 0 0 10px,
+        #ff55553a 0 0 50px;
+}
+
+.header :global(.material-icon) {
+    color: var(--dracula-red);
+    font-size: 4rem;
+    text-shadow:
+        #ff55557f 0 0 10px,
+        #ff555552 0 0 50px;
+    font-variation-settings: "FILL" 1, "wght" 600, "GRAD" 0, "opsz" 20;
+}
+
+.entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.entry {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius-m);
+    background-color: var(--base-dark);
+}
+
+.meta {
+    display: flex;
+    flex: 0 0 10rem;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.date {
+    color: var(--dracula-red);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.95rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+    line-height: 1.2;
+}
+
+.items {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding-left: 1.15rem;
+    color: #e1e1e6;
+    font-size: 1.05rem;
+    line-height: 1.7;
+}
+
+.items li::marker {
+    color: var(--dracula-red);
+}
+
+.authors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.authors a {
+    display: flex;
+    height: fit-content;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0;
+    border-radius: var(--border-radius-s);
+    color: var(--foreground);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    will-change: tranform;
+}
+
+.authors a:hover {
+    transform: scale(1.03);
+}
+
+.authors a:focus-visible {
+
+    outline-offset: 0.2rem;
+}
+
+.authors img {
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+@media (max-width: 640px) {
+    .entry {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1.25rem;
+    }
+
+    .meta {
+        flex-basis: auto;
+        gap: 0.5rem;
+    }
+
+    .items {
+        font-size: 1rem;
+    }
+
+}
